@@ -1,7 +1,7 @@
 package com.example.notesapp.data.repository
 
 import com.example.notesapp.data.database.dao.NotesDao
-import com.example.notesapp.data.database.entitis.Notes
+import com.example.notesapp.data.database.entitys.Notes
 import kotlinx.coroutines.flow.Flow
 
 class NotesRepository(

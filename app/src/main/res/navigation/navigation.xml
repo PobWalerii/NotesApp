@@ -4,17 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
     app:startDestination="@id/listNotesFragment">
+
     <fragment
         android:id="@+id/listNotesFragment"
-        android:name="com.example.notesserviceimitation.ui.listnotes.ListNotesFragment"
-        android:label="ListNotesFragment" >
+        android:name="com.example.notesapp.ui.listnotes.ListNotesFragment"
+        android:label="fragment_list_notes"
+        tools:layout="@layout/fragment_list_notes" >
         <action
             android:id="@+id/action_listNotesFragment_to_editNotesFragment"
             app:destination="@id/editNotesFragment" />
+        <action
+            android:id="@+id/action_listNotesFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/editNotesFragment"
         android:name="com.example.notesapp.ui.editnotes.EditNotesFragment"
         android:label="fragment_edit_notes"
-        tools:layout="@layout/fragment_edit_notes" />
+        tools:layout="@layout/fragment_edit_notes" >
+        <argument
+            android:name="idNote"
+            app:argType="long" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.notesapp.ui.settings.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>

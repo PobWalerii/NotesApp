@@ -1,19 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
-        <import type="android.view.View"/>
+        <import type="android.view.View" />
         <variable
-            name="emptyList"
+            name="visibleInfoText"
+            type="Boolean" />
+        <variable
+            name="visibleProgress"
+            type="Boolean" />
+        <variable
+            name="typeProgress"
             type="Boolean" />
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="@color/gray"
-        tools:context=".ui.listnotes.ListNotesFragment">
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".ui.listnotes.ListNotesFragment">
+
+    <ProgressBar
+        android:id="@+id/progressBarHorizontal"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/progress_margin"
+        android:layout_marginEnd="@dimen/progress_margin"
+        android:indeterminate="true" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/item_margin"
+        android:layout_marginEnd="@dimen/item_margin"
+        android:clipToPadding="false"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/progressBarRound"
+        style="?android:attr/progressBarStyle"
+        android:layout_gravity="center"
+        android:layout_width="@dimen/progress_size"
+        android:layout_height="@dimen/progress_size" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:src="@android:drawable/ic_input_add"
+        android:focusable="true"
+        tools:ignore="ContentDescription" />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

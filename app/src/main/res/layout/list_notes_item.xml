@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout>
+    <data>
+        <variable
+            name="note"
+            type="com.example.notesapp.data.database.entitys.Notes" />
+        <variable
+            name="defaultHeader"
+            type="String" />
+        <variable
+            name="isSingleLine"
+            type="Boolean" />
+        <variable
+            name="currentId"
+            type="Long" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin"
+        app:cardCornerRadius="@dimen/item_card_corner">
+
+        <LinearLayout
+            android:id="@+id/layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@{(note.id==currentId) ? @color/light_gray : @color/white}">
+
+            <TextView
+                android:id="@+id/textHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/text_item_margin_horizontal"
+                android:layout_marginTop="@dimen/text_item_margin_vertical"
+                android:layout_marginEnd="@dimen/text_item_margin_horizontal"
+                android:singleLine="@{isSingleLine ? true : false}"
+                android:textColor="@color/brown"
+                android:textSize="@dimen/item_header_text_size"
+                android:textStyle="bold"
+                android:text="111"
+                android:tag="text"/>
+<!--android:text="@{note.noteName.isEmpty() ? defaultHeader : note.noteName}"-->
+
+            <!--
+            <TextView
+                android:id="@+id/textSpecification"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/text_item_margin_horizontal"
+                android:layout_marginTop="@dimen/text_item_margin_vertical"
+                android:layout_marginEnd="@dimen/text_item_margin_horizontal"
+                android:singleLine="@{isSingleLine ? true : false}"
+                android:textSize="@dimen/item_spicification_text_size"
+                android:text="111"
+                android:tag="text"/>
+            android:text="@{note.noteSpecification}"-->
+
+           <!-- <TextView
+                android:id="@+id/textDateChange"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/text_item_margin_horizontal"
+                android:layout_marginTop="@dimen/text_item_margin_vertical"
+                android:layout_marginEnd="@dimen/text_item_margin_horizontal"
+                android:layout_marginBottom="@dimen/text_item_margin_vertical"
+                android:textSize="@dimen/item_spicification_text_size"
+                android:textStyle="italic"
+                android:text="111"
+                android:tag="text"/>
+            app:dateToString="@{note.noteDate}"-->
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>
