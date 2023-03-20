@@ -3,9 +3,9 @@ import com.example.notesapp.data.database.entitys.Notes
 
 interface ApiService  {
 
-    //fun getAllNote(): List<Notes>
+    fun getAllNote(): List<Notes>
     suspend fun addNote(note: Notes)
-    //fun editNote(note: Notes)
-    //fun deleteNote(note: Notes)
+    fun editNote(note: Notes)
+    suspend fun deleteNote(note: Notes)
 
 }

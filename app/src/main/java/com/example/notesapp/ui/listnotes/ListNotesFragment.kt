@@ -19,6 +19,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.RequestToDelete.requestToDelete
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -26,10 +27,10 @@ import kotlinx.coroutines.launch
 class ListNotesFragment : Fragment() {
 
     private var _binding: FragmentListNotesBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = requireNotNull(_binding)
     private lateinit var adapter: NotesListAdapter
     private lateinit var recyclerView: RecyclerView
-    //private lateinit var itemTouchHelper: ItemTouchHelper
+    private lateinit var itemTouchHelper: ItemTouchHelper
 
     private lateinit var defaultHeader: String
     private var defaultSpecificationLine: Boolean = true
@@ -64,20 +65,19 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
                 adapter.setList(it)
-                Toast.makeText(context,"${it}",Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun setupAdapter() {
-        adapter = NotesListAdapter() //defaultSpecificationLine, defaultHeader)
+        adapter = NotesListAdapter(defaultSpecificationLine, defaultHeader)
         adapter.setHasStableIds(true)
     }
 
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        //itemTouchHelper =
+        itemTouchHelper =
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
                 override fun onMove(
                     recycler: RecyclerView,
@@ -89,11 +89,16 @@ class ListNotesFragment : Fragment() {
                     deleteNote(holder.adapterPosition)
                 }
             })
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     private fun deleteNote(position: Int) {
-        //val noteItem = adapter.getItemFromPosition(position)
-        //viewModel.deleteNote(noteItem)
+        if(requestToDelete(requireContext())) {
+            val noteItem = adapter.getItemFromPosition(position)
+            viewModel.deleteNote(noteItem)
+        } else {
+            adapter.notifyItemChanged(position)
+        }
     }
 
     private fun setupActionBar() {
@@ -123,7 +128,7 @@ class ListNotesFragment : Fragment() {
     private fun setupButtonAddListener() {
         binding.floatingActionButton.setOnClickListener {
             if ( defaultAddIfClick ) {
-                viewModel.addNote(defaultHeader)
+                viewModel.addNote()
             } else {
                 findNavController().navigate(
                     ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(
@@ -133,6 +138,7 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
+
 
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)

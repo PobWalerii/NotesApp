@@ -9,10 +9,11 @@ import com.example.notesapp.R
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
 
-class NotesListAdapter():
-    RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
-    private val isSingleLine: Boolean = true
-    private val defaultHeader: String = "llllllllll"
+class NotesListAdapter(
+    private val isSingleLine: Boolean,
+    private val defaultHeader: String
+): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
+
     private var listener: OnItemClickListener? = null
     private var listNotes: List<Notes> = emptyList()
     private var currentId: Long = 0L
@@ -25,6 +26,8 @@ class NotesListAdapter():
             binding.isSingleLine = isSingleLine
             binding.defaultHeader = defaultHeader
         }
+        fun getBinding(): ListNotesItemBinding = binding
+
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -32,7 +35,7 @@ class NotesListAdapter():
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.list_notes_item, parent, false)
         val holder = ViewHolder(view)
-        val binding = ListNotesItemBinding.bind(view)
+        val binding = holder.getBinding()
 
         binding.container.setOnClickListener {
             val position = holder.adapterPosition

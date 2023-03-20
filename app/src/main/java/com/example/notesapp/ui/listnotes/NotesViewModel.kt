@@ -18,14 +18,16 @@ class NotesViewModel @Inject constructor(
 ): ViewModel() {
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
     fun deleteNote(note: Notes) {
-        //apiService.deleteNote(note)
+        viewModelScope.launch {
+            apiService.deleteNote(note)
+        }
     }
 
 
-    fun addNote(defaultHeader: String) {
+    fun addNote() {
         viewModelScope.launch {
             apiService.addNote(
-                Notes(0, defaultHeader, "", Date().time)
+                Notes(0, "", "", Date().time)
             )
         }
     }

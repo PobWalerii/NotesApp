@@ -15,12 +15,9 @@
             name="typeProgress"
             type="Boolean" />
     </data>
-
-
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray"
     tools:context=".ui.listnotes.ListNotesFragment">
 
     <ProgressBar
@@ -28,9 +25,17 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/progress_margin"
-        android:layout_marginEnd="@dimen/progress_margin"
-        android:indeterminate="true" />
+        android:indeterminate="true"
+        android:elevation="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
@@ -41,16 +46,18 @@
         android:clipToPadding="false"
         android:paddingTop="@dimen/list_padding_top"
         android:paddingBottom="@dimen/list_padding_bottom"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
-
-    </androidx.recyclerview.widget.RecyclerView>
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     <ProgressBar
         android:id="@+id/progressBarRound"
         style="?android:attr/progressBarStyle"
         android:layout_gravity="center"
         android:layout_width="@dimen/progress_size"
-        android:layout_height="@dimen/progress_size" />
+        android:layout_height="@dimen/progress_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
@@ -61,9 +68,11 @@
         android:clickable="true"
         android:src="@android:drawable/ic_input_add"
         android:focusable="true"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

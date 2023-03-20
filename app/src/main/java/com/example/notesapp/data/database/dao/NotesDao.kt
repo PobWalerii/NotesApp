@@ -15,6 +15,7 @@ interface NotesDao {
 
 
 
+
     @Query("SELECT * FROM Notes ORDER BY noteDate DESC")
     suspend fun getAllNotes(): List<Notes>
 
@@ -23,6 +24,10 @@ interface NotesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: Notes): Long
+    @Delete
+    suspend fun deleteNote(note: Notes)
+
+
 
     @Query("DELETE FROM Notes")
     suspend fun deleteAll()

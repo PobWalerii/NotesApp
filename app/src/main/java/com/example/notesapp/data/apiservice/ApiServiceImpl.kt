@@ -9,21 +9,21 @@ class ApiServiceImpl @Inject constructor(
 ): ApiService {
 
 
-    //override fun getAllNote(): List<Notes> {
-    //    TODO("Not yet implemented")
-    //}
+    override fun getAllNote(): List<Notes> {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun addNote(note: Notes) {
         notesDao.insertNote(note)
     }
 
-    //override fun editNote(note: Notes) {
-    //    TODO("Not yet implemented")
-    //}
+    override fun editNote(note: Notes) {
+        TODO("Not yet implemented")
+    }
 
-    //override fun deleteNote(note: Notes) {
-    //    TODO("Not yet implemented")
-    //}
+    override suspend fun deleteNote(note: Notes) {
+        notesDao.deleteNote(note)
+    }
 
 
 }
