@@ -2,6 +2,7 @@ package com.example.notesapp.ui.listnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -26,8 +27,8 @@ class ListNotesFragment : Fragment() {
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = _binding!!
-    //private lateinit var adapter: NotesListAdapter
-    //private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: NotesListAdapter
+    private lateinit var recyclerView: RecyclerView
     //private lateinit var itemTouchHelper: ItemTouchHelper
 
     private lateinit var defaultHeader: String
@@ -39,7 +40,7 @@ class ListNotesFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadSettings()
-        //setupAdapter()
+        setupAdapter()
     }
 
     override fun onCreateView(
@@ -53,7 +54,7 @@ class ListNotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
-        //setupRecycler()
+        setupRecycler()
         loadData()
 
         setupButtonAddListener()
@@ -62,19 +63,20 @@ class ListNotesFragment : Fragment() {
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
-                //adapter.setList(it)
+                adapter.setList(it)
+                Toast.makeText(context,"${it}",Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun setupAdapter() {
-        //adapter = NotesListAdapter(defaultSpecificationLine, defaultHeader)
-        //adapter.setHasStableIds(true)
+        adapter = NotesListAdapter() //defaultSpecificationLine, defaultHeader)
+        adapter.setHasStableIds(true)
     }
 
     private fun setupRecycler() {
-        //recyclerView = binding.recycler
-        //recyclerView.adapter = adapter
+        recyclerView = binding.recycler
+        recyclerView.adapter = adapter
         //itemTouchHelper =
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
                 override fun onMove(

@@ -18,7 +18,7 @@ class NotesViewModel @Inject constructor(
 ): ViewModel() {
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
     fun deleteNote(note: Notes) {
-        apiService.deleteNote(note)
+        //apiService.deleteNote(note)
     }
 
 

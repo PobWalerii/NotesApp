@@ -9,9 +9,10 @@ import com.example.notesapp.R
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
 
-class NotesListAdapter(private val isSingleLine: Boolean, private val defaultHeader: String):
+class NotesListAdapter():
     RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
-
+    private val isSingleLine: Boolean = true
+    private val defaultHeader: String = "llllllllll"
     private var listener: OnItemClickListener? = null
     private var listNotes: List<Notes> = emptyList()
     private var currentId: Long = 0L
