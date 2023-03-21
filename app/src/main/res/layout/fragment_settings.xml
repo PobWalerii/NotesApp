@@ -30,11 +30,39 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/settings_text_size"
+                android:textColor="@color/black"
+                android:text="Заголовок по умолчанию:"/>
+
+            <EditText
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:textSize="@dimen/settings_text_size"
+                android:textColor="@color/blue"
+                android:ems="10"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:inputType="textPersonName"
+                android:text="@{defaultHeader}"/>
+
+
+
+
+<!--
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/settings_margin"
             android:hint="Заголовок по умолчанию">
+
+
+
+
+
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/header"
@@ -44,7 +72,7 @@
                 android:background="@color/light_gray"
                 android:text="@{defaultHeader}" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>-->
 
 
 

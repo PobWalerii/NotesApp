@@ -42,7 +42,6 @@ class ListNotesFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadSettings()
         setupAdapter()
     }
 
@@ -57,6 +56,8 @@ class ListNotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
+        loadSettings()
+        setSettingsInAdapter()
         setupRecycler()
         loadData()
         loadRequestToDelete()
@@ -73,8 +74,12 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = NotesListAdapter(true, defaultHeader)  //
+        adapter = NotesListAdapter()
         adapter.setHasStableIds(true)
+    }
+
+    private fun setSettingsInAdapter() {
+        adapter.setSettings(defaultSpecificationLine, defaultHeader)
     }
 
     private fun setupRecycler() {
@@ -129,6 +134,7 @@ class ListNotesFragment : Fragment() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
             override fun onPrepareMenu(menu: Menu) {
                 menu.findItem(R.id.save).isVisible = false
+                menu.findItem(R.id.delete).isVisible = false
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.appbar_menu, menu)

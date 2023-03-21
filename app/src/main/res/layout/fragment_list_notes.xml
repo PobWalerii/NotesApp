@@ -9,10 +9,10 @@
             name="visibleInfoText"
             type="Boolean" />
         <variable
-            name="visibleProgress"
+            name="visibleProgressHorizontal"
             type="Boolean" />
         <variable
-            name="typeProgress"
+            name="visibleProgressRound"
             type="Boolean" />
     </data>
 <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:elevation="1dp"
+        app:visibility="@{visibleProgressHorizontal ? View.VISIBLE : View.GONE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -54,6 +55,7 @@
         android:layout_gravity="center"
         android:layout_width="@dimen/progress_size"
         android:layout_height="@dimen/progress_size"
+        app:visibility="@{visibleProgressRound ? View.VISIBLE : View.GONE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

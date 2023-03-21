@@ -8,15 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
+import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class NotesListAdapter(
-    private val isSingleLine: Boolean,
-    private val defaultHeader: String
-): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
+class NotesListAdapter(): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
+
+    private var isSingleLine: Boolean = DEFAULT_SPECIFICATION_LINE
+    private var defaultHeader: String =  DEFAULT_HEADER
 
     private var listener: OnItemClickListener? = null
     private var listNotes: List<Notes> = emptyList()
@@ -79,6 +81,11 @@ class NotesListAdapter(
     fun setList(list: List<Notes>) {
         listNotes = list
         notifyDataSetChanged()
+    }
+
+    fun setSettings(isLine: Boolean, header: String) {
+        isSingleLine = isLine
+        defaultHeader = header
     }
 
 }

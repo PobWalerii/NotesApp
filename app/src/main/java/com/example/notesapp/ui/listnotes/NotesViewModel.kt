@@ -17,13 +17,12 @@ class NotesViewModel @Inject constructor(
     private val apiService: ApiService
 ): ViewModel() {
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
+
     fun deleteNote(note: Notes) {
         viewModelScope.launch {
             apiService.deleteNote(note)
         }
     }
-
-
     fun addNote() {
         viewModelScope.launch {
             apiService.addNote(
