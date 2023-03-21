@@ -1,6 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.settings.SettingsFragment"/>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="defaultHeader"
+            type="String" />
+        <variable
+            name="specificationLine"
+            type="Boolean" />
+        <variable
+            name="defaultAddIfClick"
+            type="Boolean" />
+        <variable
+            name="deleteIfSwiped"
+            type="Boolean" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray"
+        android:padding="@dimen/settings_margin"
+        tools:context=".ui.settings.SettingsFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/settings_margin"
+            android:hint="Заголовок по умолчанию">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:background="@color/light_gray"
+                android:text="@{defaultHeader}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="Отображение текста сообщения в одну линию"
+                android:checked="@{specificationLine}"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="При нажатии клавиши + создается пустое сообщение, в противном случае выполняется переход в форму ввода нового сообщения"
+                android:checked="@{defaultAddIfClick}"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="При просмотре списка разрешить удаление сообщения смахиванием, в противном случае удаление возможно только в форме редактирования"
+                android:checked="@{deleteIfSwiped}"/>
+
+        </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </layout>

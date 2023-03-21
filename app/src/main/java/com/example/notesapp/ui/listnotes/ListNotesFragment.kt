@@ -1,8 +1,8 @@
 package com.example.notesapp.ui.listnotes
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -17,9 +17,10 @@ import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
+import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.RequestToDelete.requestToDelete
+import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -35,6 +36,7 @@ class ListNotesFragment : Fragment() {
     private lateinit var defaultHeader: String
     private var defaultSpecificationLine: Boolean = true
     private var defaultAddIfClick: Boolean = true
+    private var deleteIfSwiped: Boolean = true
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -57,8 +59,9 @@ class ListNotesFragment : Fragment() {
         setupActionBar()
         setupRecycler()
         loadData()
-
+        loadRequestToDelete()
         setupButtonAddListener()
+        setupItemClickListener()
     }
 
     private fun loadData() {
@@ -70,34 +73,50 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = NotesListAdapter(defaultSpecificationLine, defaultHeader)
+        adapter = NotesListAdapter(true, defaultHeader)  //
         adapter.setHasStableIds(true)
     }
 
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        itemTouchHelper =
-            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-                override fun onMove(
-                    recycler: RecyclerView,
-                    holder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder,
-                ) = false
+        if(deleteIfSwiped) {
+            itemTouchHelper =
+                ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                    override fun onMove(
+                        recycler: RecyclerView,
+                        holder: RecyclerView.ViewHolder,
+                        target: RecyclerView.ViewHolder,
+                    ) = false
 
-                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                    deleteNote(holder.adapterPosition)
-                }
-            })
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+                    override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
+                        deleteNoteRequest(holder.adapterPosition)
+                    }
+                })
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        }
     }
 
-    private fun deleteNote(position: Int) {
-        if(requestToDelete(requireContext())) {
-            val noteItem = adapter.getItemFromPosition(position)
-            viewModel.deleteNote(noteItem)
-        } else {
-            adapter.notifyItemChanged(position)
+    @SuppressLint("NotifyDataSetChanged")
+    private fun deleteNoteRequest(position: Int) {
+        val note = adapter.getItemFromPosition(position)
+        adapter.setCurrentId(note.id)
+        adapter.notifyDataSetChanged()
+        RequestToDelete.requestToDelete(requireContext(), position)
+    }
+
+    private fun loadRequestToDelete() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            RequestToDelete.isRequestToDeleteOkFlow.collect { position ->
+                if(position!=0) {
+                    if (position < 0) {
+                        adapter.notifyItemChanged(-position)
+                    } else {
+                        val note = adapter.getItemFromPosition(position)
+                        viewModel.deleteNote(note)
+                    }
+                }
+            }
         }
     }
 
@@ -139,12 +158,25 @@ class ListNotesFragment : Fragment() {
         }
     }
 
+    private fun setupItemClickListener() {
+        adapter.setOnItemClickListener(object : NotesListAdapter.OnItemClickListener {
+            override fun onItemClick(currentId: Long) {
+                findNavController().navigate(
+                    ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(
+                        currentId
+                    )
+                )
+            }
+        })
+    }
+
 
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
         defaultHeader = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
-        defaultSpecificationLine = sPref.getBoolean("defaultHeader", DEFAULT_SPECIFICATION_LINE)
-        defaultAddIfClick = sPref.getBoolean("defaultHeader", DEFAULT_ADD_IF_CLICK)
+        defaultSpecificationLine = sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
+        defaultAddIfClick = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
+        deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
     }
 
     override fun onDestroyView() {

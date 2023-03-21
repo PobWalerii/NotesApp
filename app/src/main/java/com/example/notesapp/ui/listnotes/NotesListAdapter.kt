@@ -1,6 +1,8 @@
 package com.example.notesapp.ui.listnotes
 
 import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class NotesListAdapter(
     private val isSingleLine: Boolean,
@@ -64,6 +68,12 @@ class NotesListAdapter(
     override fun getItemId(position: Int): Long = listNotes[position].id
 
     fun getItemFromPosition(position: Int): Notes = listNotes[position]
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setCurrentId(curId: Long) {
+        currentId = curId
+        notifyDataSetChanged()
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     fun setList(list: List<Notes>) {
