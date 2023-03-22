@@ -26,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class ListNotesFragment : Fragment() {
@@ -78,10 +79,11 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun observeInsertNote() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        //lifecycleScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             viewModel.insertedIdFlow.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    Toast.makeText(context,"$it",Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context,"Получаем $it",Toast.LENGTH_LONG).show()
                 }
                 if(it!=0L) {
                     adapter.setCurrentId(it)

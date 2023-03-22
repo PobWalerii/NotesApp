@@ -11,6 +11,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants
@@ -19,7 +20,9 @@ import com.example.notesapp.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class EditNotesFragment : Fragment() {
@@ -69,6 +72,7 @@ class EditNotesFragment : Fragment() {
 
     private fun loadData() {
         viewModel.currentId = args.idNote
+        viewModel.setStartFlowParameters()
         if (args.idNote != 0L) {
             lifecycle.coroutineScope.launch {
                 viewModel.getNoteById(args.idNote).collect { list ->
@@ -132,7 +136,6 @@ class EditNotesFragment : Fragment() {
 
     private fun deleteNote() {
 
-
     }
 
     private fun saveNote() {
@@ -140,14 +143,24 @@ class EditNotesFragment : Fragment() {
             binding.titleNoteText.text.toString(),
             binding.textNoteText.text.toString()
         )
-        (activity as MainActivity).onSupportNavigateUp()
+        observeEditNote()
     }
 
-    private fun setVisibleSaveButton(visible: Boolean) {
-        appbarMenu.findItem(R.id.save).isVisible = visible
+    private fun observeEditNote() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isNoteEditedFlow.collect {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context,"isNoteEditedFlow $it",Toast.LENGTH_LONG).show()
+                }
+                if(it) {
+                    (activity as MainActivity).onSupportNavigateUp()
+                }
+            }
+        }
     }
 
-    override fun onDestroyView() {
+
+     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }

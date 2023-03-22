@@ -6,6 +6,7 @@ import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 import javax.inject.Inject
 
@@ -23,6 +24,8 @@ class EditViewModel  @Inject constructor(
 
     var dateChangetStrategy: Boolean = true
 
+    val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
+
     fun getNoteById(idNote: Long): Flow<List<Notes>> =
         notesRepository.getNoteById(idNote)
 
@@ -39,4 +42,9 @@ class EditViewModel  @Inject constructor(
         )
         notesRepository.addNote(note)
     }
+
+    fun setStartFlowParameters() {
+        notesRepository.setStartFlowParameters()
+    }
+
 }

@@ -36,9 +36,10 @@ object DatabaseModule {
     @Provides
     fun provideNotesRepository(
             notesDao: NotesDao,
-            apiService: ApiService
+            apiService: ApiService,
+            @ApplicationContext applicationContext: Context
         ): NotesRepository {
-            return NotesRepository(notesDao,apiService)
+            return NotesRepository(notesDao,apiService,applicationContext)
         }
 
 }
