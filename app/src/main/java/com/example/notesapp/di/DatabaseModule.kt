@@ -3,6 +3,7 @@ package com.example.notesapp.di
 import android.content.Context
 import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
+import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.AppDatabase
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.repository.NotesRepository
@@ -34,9 +35,10 @@ object DatabaseModule {
 
     @Provides
     fun provideNotesRepository(
-            notesDao: NotesDao
+            notesDao: NotesDao,
+            apiService: ApiService
         ): NotesRepository {
-            return NotesRepository(notesDao)
+            return NotesRepository(notesDao,apiService)
         }
 
 }

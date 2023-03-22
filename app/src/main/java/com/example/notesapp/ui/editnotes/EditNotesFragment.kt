@@ -2,6 +2,8 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -11,10 +13,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.databinding.FragmentEditNotesBinding
-import com.example.notesapp.ui.listnotes.NotesViewModel
 import com.example.notesapp.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -44,6 +48,7 @@ class EditNotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
         loadData()
+        loadSettings()
         setListenersDataChanged()
     }
 
@@ -62,20 +67,34 @@ class EditNotesFragment : Fragment() {
             viewModel.currentNoteSpecification != binding.textNoteText.text.toString()
     }
 
-
     private fun loadData() {
-        lifecycle.coroutineScope.launch {
-            val note = viewModel.getNoteById(args.idNote)
-            if( note == null ) {
-                (activity as MainActivity).onSupportNavigateUp()
-            } else {
-                viewModel.currentNoteName = note.noteName
-                viewModel.currentNoteSpecification = note.noteSpecification
-                viewModel.currentNoteDate = note.noteDate
-                binding.noteName = note.noteName
-                binding.noteSpecification = note.noteSpecification
+        viewModel.currentId = args.idNote
+        if (args.idNote != 0L) {
+            lifecycle.coroutineScope.launch {
+                viewModel.getNoteById(args.idNote).collect { list ->
+                    val note = list.firstOrNull()
+                    if (note != null) {
+                        viewModel.currentNote = note
+                        viewModel.currentNoteName = note.noteName
+                        viewModel.currentNoteSpecification = note.noteSpecification
+                        viewModel.currentNoteDate = note.noteDate
+                        setDataForEdit()
+                    }
+                }
             }
         }
+    }
+
+    private fun setDataForEdit() {
+        binding.noteName = viewModel.currentNoteName
+        binding.noteSpecification = viewModel.currentNoteSpecification
+    }
+
+    private fun loadSettings() {
+        val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
+        viewModel.dateChangetStrategy = sPref.getBoolean("dateChanget",
+            KeyConstants.DATE_CHANGE_WHEN_CONTENT
+        )
     }
 
     private fun setupActionBar() {
@@ -95,10 +114,33 @@ class EditNotesFragment : Fragment() {
                 menuInflater.inflate(R.menu.appbar_menu, menu)
             }
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                if(menuItem.itemId == android.R.id.home) (activity as MainActivity).onSupportNavigateUp()
+                when(menuItem.itemId) {
+                    android.R.id.home -> {
+                        (activity as MainActivity).onSupportNavigateUp()
+                    }
+                    R.id.delete -> {
+                        deleteNote()
+                    }
+                    R.id.save -> {
+                        saveNote()
+                    }
+                }
                 return true
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun deleteNote() {
+
+
+    }
+
+    private fun saveNote() {
+        viewModel.saveNote(
+            binding.titleNoteText.text.toString(),
+            binding.textNoteText.text.toString()
+        )
+        (activity as MainActivity).onSupportNavigateUp()
     }
 
     private fun setVisibleSaveButton(visible: Boolean) {

@@ -12,7 +12,7 @@
     <string name="title_delete">Delete</string>
     <string name="text_delete">Are you sure you want to remove the current note from the list?</string>
 
-    <string name="settings_is_saved">settings saved</string>
+    <string name="settings_is_saved">Settings Saved</string>
 
     <string name="note_title_hint">Title</string>
     <string name="note_text_hint">Content</string>

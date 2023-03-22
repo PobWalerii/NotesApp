@@ -16,6 +16,9 @@
         <variable
             name="deleteIfSwiped"
             type="Boolean" />
+        <variable
+            name="dateChanget"
+            type="Boolean" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -47,34 +50,8 @@
                 android:ems="10"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:inputType="textPersonName"
-                android:text="@{defaultHeader}"/>
-
-
-
-
-<!--
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/settings_margin"
-            android:hint="Заголовок по умолчанию">
-
-
-
-
-
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:background="@color/light_gray"
-                android:text="@{defaultHeader}" />
-
-        </com.google.android.material.textfield.TextInputLayout>-->
-
-
+                android:text="@{defaultHeader}"
+                android:importantForAutofill="no" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch1"
@@ -102,6 +79,15 @@
                 android:textSize="@dimen/settings_text_size"
                 android:text="При просмотре списка разрешить удаление сообщения смахиванием, в противном случае удаление возможно только в форме редактирования"
                 android:checked="@{deleteIfSwiped}"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="При редактировании сообщения дата сообщения переписывается при изменении содержимого, в противном случае дата не меняется"
+                android:checked="@{dateChanget}"/>
 
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

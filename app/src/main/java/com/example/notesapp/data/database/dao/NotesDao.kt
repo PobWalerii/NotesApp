@@ -11,7 +11,20 @@ interface NotesDao {
     fun loadDataBase(): Flow<List<Notes>>
 
     @Query("SELECT * FROM Notes WHERE id = :curId")
-    suspend fun getNoteById(curId: Long): List<Notes>
+    fun getNoteById(curId: Long): Flow<List<Notes>>
+
+
+
+/////////////////////////////////////
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNote(note: Notes): Long
+
+    @Delete
+    suspend fun deleteNote(note: Notes)
+
+
+
+
 
 
 
@@ -22,10 +35,8 @@ interface NotesDao {
     @Query("SELECT * FROM Notes")
     suspend fun getNotes(): List<Notes>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNote(note: Notes): Long
-    @Delete
-    suspend fun deleteNote(note: Notes)
+
+
 
 
 

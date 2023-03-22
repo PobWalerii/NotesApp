@@ -6,4 +6,5 @@ object KeyConstants {
     const val DEFAULT_SPECIFICATION_LINE = true
     const val DEFAULT_ADD_IF_CLICK = true
     const val DELETE_IF_SWIPED = true
+    const val DATE_CHANGE_WHEN_CONTENT = true
 }

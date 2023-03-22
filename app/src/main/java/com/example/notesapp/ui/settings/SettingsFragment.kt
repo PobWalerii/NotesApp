@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
@@ -96,6 +97,11 @@ class SettingsFragment : Fragment() {
             binding.deleteIfSwiped = this
             viewModel.deleteIfSwiped = this
         }
+        sPref.getBoolean("dateChanget", DATE_CHANGE_WHEN_CONTENT).apply {
+            binding.dateChanget = this
+            viewModel.dateChanget = this
+
+        }
 
     }
 
@@ -112,6 +118,9 @@ class SettingsFragment : Fragment() {
         binding.switch3.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
         }
+        binding.switch4.setOnCheckedChangeListener { _, _ ->
+            definitionOfChange()
+        }
     }
 
     private fun definitionOfChange() {
@@ -119,7 +128,9 @@ class SettingsFragment : Fragment() {
             viewModel.defaultHeader != binding.header.text.toString() ||
             viewModel.specificationLine != binding.switch1.isChecked ||
             viewModel.defaultAddIfClick != binding.switch2.isChecked ||
-            viewModel.deleteIfSwiped != binding.switch3.isChecked
+            viewModel.deleteIfSwiped != binding.switch3.isChecked ||
+            viewModel.dateChanget != binding.switch4.isChecked
+
     }
 
     private fun saveSettings() {
@@ -129,6 +140,7 @@ class SettingsFragment : Fragment() {
         ed.putBoolean("specificationLine", binding.switch1.isChecked)
         ed.putBoolean("defaultAddIfClick", binding.switch2.isChecked)
         ed.putBoolean("deleteIfSwiped", binding.switch3.isChecked)
+        ed.putBoolean("dateChanget", binding.switch4.isChecked)
         ed.apply()
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
         appbarMenu.findItem(R.id.save).isVisible = false

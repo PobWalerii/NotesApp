@@ -3,6 +3,7 @@ package com.example.notesapp.ui.listnotes
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -22,6 +23,8 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -63,12 +66,26 @@ class ListNotesFragment : Fragment() {
         loadRequestToDelete()
         setupButtonAddListener()
         setupItemClickListener()
+        observeInsertNote()
     }
 
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
                 adapter.setList(it)
+            }
+        }
+    }
+
+    private fun observeInsertNote() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.insertedIdFlow.collect {
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(context,"$it",Toast.LENGTH_LONG).show()
+                }
+                if(it!=0L) {
+                    adapter.setCurrentId(it)
+                }
             }
         }
     }

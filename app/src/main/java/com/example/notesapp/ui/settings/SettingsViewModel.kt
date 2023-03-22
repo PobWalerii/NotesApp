@@ -7,7 +7,7 @@ class SettingsViewModel: ViewModel() {
     var specificationLine: Boolean = true
     var defaultAddIfClick: Boolean = true
     var deleteIfSwiped: Boolean = true
-
+    var dateChanget: Boolean = true
 
 
 }
