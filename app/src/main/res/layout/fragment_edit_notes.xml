@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="noteName"
             type="String" />
@@ -53,6 +52,6 @@
                 android:text="@{noteSpecification}" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
     </LinearLayout>
+
 </layout>

@@ -12,10 +12,16 @@
         tools:layout="@layout/fragment_list_notes" >
         <action
             android:id="@+id/action_listNotesFragment_to_editNotesFragment"
-            app:destination="@id/editNotesFragment" />
+            app:destination="@id/editNotesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_null"
+            app:popExitAnim="@anim/slide_out_right"/>
         <action
             android:id="@+id/action_listNotesFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/slide_in_end"
+            app:exitAnim="@anim/slide_out_null"
+            app:popExitAnim="@anim/slide_out_end"/>
     </fragment>
     <fragment
         android:id="@+id/editNotesFragment"

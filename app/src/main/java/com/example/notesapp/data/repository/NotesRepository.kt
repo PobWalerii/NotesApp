@@ -1,7 +1,6 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
-import android.widget.Toast
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
@@ -16,38 +15,37 @@ class NotesRepository(
     private val applicationContext: Context
 ) {
 
-    private val insertedId = MutableStateFlow(0L)
-    val insertedIdFlow: StateFlow<Long> = insertedId.asStateFlow()
+    private var insertedOrEditedId: Long = 0L
 
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
 
-    private val isNoteDeleted = MutableStateFlow(false)
-    val isNoteDeletedFlow: StateFlow<Boolean> = isNoteDeleted.asStateFlow()
-
     private val serviceError = MutableStateFlow("")
     val serviceErrorFlow: StateFlow<String> = serviceError.asStateFlow()
 
+    fun setInsertedOrEditedIdNull() {
+        insertedOrEditedId = 0L
+    }
+    fun getInsertedOrEditedIdValue(): Long = insertedOrEditedId
+
     fun setStartFlowParameters() {
-        insertedId.value = 0L
         isNoteEdited.value = false
+        serviceError.value = ""
     }
 
     fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
 
-    fun getNoteById(noteId: Long): Flow<List<Notes>> =
-        notesDao.getNoteById(noteId)
+    fun getNoteById(noteId: Long): Flow<Notes?> =
+        flow {
+            emit(notesDao.getNoteById(noteId).firstOrNull())
+        }
 
     fun addNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 val resultId: Long = apiService.addNote(note)
-                CoroutineScope(Dispatchers.Main).launch {
-                    Toast.makeText(applicationContext, "Отправляем $resultId", Toast.LENGTH_LONG)
-                        .show()
-                    insertedId.value = resultId
-                    isNoteEdited.value = true
-                }
+                insertedOrEditedId = resultId
+                isNoteEdited.value = true
             } catch (e: Exception) {
                 serviceError.value = e.message.toString()
             }
@@ -55,12 +53,15 @@ class NotesRepository(
     }
 
     fun deleteNote(note: Notes) {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 apiService.deleteNote(note)
-                isNoteDeleted.value = true
+                isNoteEdited.value = true
+                //isNoteDeleted.value = true
             } catch (e: Exception) {
                 serviceError.value = e.message.toString()
             }
+        }
     }
 
 }

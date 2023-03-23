@@ -16,4 +16,6 @@
 
     <string name="note_title_hint">Title</string>
     <string name="note_text_hint">Content</string>
+
+    <string name="empty_list_notes">Notes List Is Empty</string>
 </resources>

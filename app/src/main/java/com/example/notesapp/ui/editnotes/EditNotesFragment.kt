@@ -2,7 +2,6 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuHost
@@ -17,12 +16,9 @@ import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class EditNotesFragment : Fragment() {
@@ -36,9 +32,6 @@ class EditNotesFragment : Fragment() {
 
     lateinit var appbarMenu: Menu
 
-     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -53,6 +46,7 @@ class EditNotesFragment : Fragment() {
         loadData()
         loadSettings()
         setListenersDataChanged()
+        loadRequestToDelete()
     }
 
     private fun setListenersDataChanged() {
@@ -75,8 +69,7 @@ class EditNotesFragment : Fragment() {
         viewModel.setStartFlowParameters()
         if (args.idNote != 0L) {
             lifecycle.coroutineScope.launch {
-                viewModel.getNoteById(args.idNote).collect { list ->
-                    val note = list.firstOrNull()
+                viewModel.getNoteById(args.idNote).collect { note ->
                     if (note != null) {
                         viewModel.currentNote = note
                         viewModel.currentNoteName = note.noteName
@@ -123,7 +116,7 @@ class EditNotesFragment : Fragment() {
                         (activity as MainActivity).onSupportNavigateUp()
                     }
                     R.id.delete -> {
-                        deleteNote()
+                        RequestToDelete.requestToDelete(requireContext(), -100)
                     }
                     R.id.save -> {
                         saveNote()
@@ -134,8 +127,15 @@ class EditNotesFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun deleteNote() {
-
+    private fun loadRequestToDelete() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            RequestToDelete.isRequestToDeleteOkFlow.collect { position ->
+                if(position==-100) {
+                    viewModel.deleteNote()
+                    observeEditNote()
+                }
+            }
+        }
     }
 
     private fun saveNote() {
@@ -149,16 +149,12 @@ class EditNotesFragment : Fragment() {
     private fun observeEditNote() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isNoteEditedFlow.collect {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context,"isNoteEditedFlow $it",Toast.LENGTH_LONG).show()
-                }
                 if(it) {
                     (activity as MainActivity).onSupportNavigateUp()
                 }
             }
         }
     }
-
 
      override fun onDestroyView() {
         super.onDestroyView()

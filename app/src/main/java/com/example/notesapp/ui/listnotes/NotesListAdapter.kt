@@ -1,8 +1,6 @@
 package com.example.notesapp.ui.listnotes
 
 import android.annotation.SuppressLint
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,10 +10,9 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
-class NotesListAdapter(): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
+@SuppressLint("NotifyDataSetChanged")
+class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
 
     private var isSingleLine: Boolean = DEFAULT_SPECIFICATION_LINE
     private var defaultHeader: String =  DEFAULT_HEADER
@@ -33,10 +30,8 @@ class NotesListAdapter(): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
             binding.defaultHeader = defaultHeader
         }
         fun getBinding(): ListNotesItemBinding = binding
-
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.list_notes_item, parent, false)
@@ -71,13 +66,12 @@ class NotesListAdapter(): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
 
     fun getItemFromPosition(position: Int): Notes = listNotes[position]
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun setCurrentId(curId: Long) {
+    fun setCurrentId(curId: Long): Int {
         currentId = curId
         notifyDataSetChanged()
+        return listNotes.indexOfFirst { it.id == currentId }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setList(list: List<Notes>) {
         listNotes = list
         notifyDataSetChanged()
@@ -86,6 +80,10 @@ class NotesListAdapter(): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
     fun setSettings(isLine: Boolean, header: String) {
         isSingleLine = isLine
         defaultHeader = header
+    }
+
+    fun refresh() {
+        notifyDataSetChanged()
     }
 
 }

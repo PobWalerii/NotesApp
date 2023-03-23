@@ -1,7 +1,6 @@
 package com.example.notesapp.ui.editnotes
 
 import androidx.lifecycle.ViewModel
-import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +24,9 @@ class EditViewModel  @Inject constructor(
     var dateChangetStrategy: Boolean = true
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
+    val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
 
-    fun getNoteById(idNote: Long): Flow<List<Notes>> =
+    fun getNoteById(idNote: Long): Flow<Notes?> =
         notesRepository.getNoteById(idNote)
 
     fun saveNote(title: String, content: String) {
@@ -41,6 +41,12 @@ class EditViewModel  @Inject constructor(
             }
         )
         notesRepository.addNote(note)
+    }
+
+    fun deleteNote() {
+        currentNote?.let {note ->
+            notesRepository.deleteNote(note)
+        }
     }
 
     fun setStartFlowParameters() {

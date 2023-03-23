@@ -29,10 +29,6 @@ class SettingsFragment : Fragment() {
 
     lateinit var appbarMenu: Menu
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -52,9 +48,6 @@ class SettingsFragment : Fragment() {
         val actionBar = (activity as MainActivity).supportActionBar
         actionBar?.title = getString(R.string.app_name) + ". " + getString(R.string.settings)
         actionBar?.setDisplayHomeAsUpEnabled(true)
-        //requireActivity().onBackPressedDispatcher.addCallback(this) {
-        //    (activity as MainActivity).onSupportNavigateUp()
-        //}
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
             override fun onPrepareMenu(menu: Menu) {
                 appbarMenu = menu
@@ -100,9 +93,7 @@ class SettingsFragment : Fragment() {
         sPref.getBoolean("dateChanget", DATE_CHANGE_WHEN_CONTENT).apply {
             binding.dateChanget = this
             viewModel.dateChanget = this
-
         }
-
     }
 
     private fun setListenersSettingsChanged() {
@@ -130,7 +121,6 @@ class SettingsFragment : Fragment() {
             viewModel.defaultAddIfClick != binding.switch2.isChecked ||
             viewModel.deleteIfSwiped != binding.switch3.isChecked ||
             viewModel.dateChanget != binding.switch4.isChecked
-
     }
 
     private fun saveSettings() {

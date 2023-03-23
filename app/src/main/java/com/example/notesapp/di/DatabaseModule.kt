@@ -32,7 +32,7 @@ object DatabaseModule {
     fun provideNotesDao(database: AppDatabase): NotesDao {
         return database.notesDao()
     }
-
+    @Singleton
     @Provides
     fun provideNotesRepository(
             notesDao: NotesDao,

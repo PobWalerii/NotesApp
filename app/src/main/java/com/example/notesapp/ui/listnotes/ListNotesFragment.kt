@@ -1,9 +1,9 @@
 package com.example.notesapp.ui.listnotes
 
-import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -21,18 +21,17 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class ListNotesFragment : Fragment() {
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
+
     private lateinit var adapter: NotesListAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
@@ -41,6 +40,8 @@ class ListNotesFragment : Fragment() {
     private var defaultSpecificationLine: Boolean = true
     private var defaultAddIfClick: Boolean = true
     private var deleteIfSwiped: Boolean = true
+
+    private lateinit var receiver: DateChangedBroadcastReceiver
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -67,26 +68,21 @@ class ListNotesFragment : Fragment() {
         loadRequestToDelete()
         setupButtonAddListener()
         setupItemClickListener()
-        observeInsertNote()
     }
 
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
+                binding.visibleInfoText = it.isEmpty()
                 adapter.setList(it)
-            }
-        }
-    }
-
-    private fun observeInsertNote() {
-        //lifecycleScope.launch {
-        CoroutineScope(Dispatchers.Default).launch {
-            viewModel.insertedIdFlow.collect {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context,"Получаем $it",Toast.LENGTH_LONG).show()
-                }
-                if(it!=0L) {
-                    adapter.setCurrentId(it)
+                viewModel.getInsertedOrEditedIdValue().let { id ->
+                    if( id!=0L ) {
+                        val position = adapter.setCurrentId(id)
+                        if(position != -1) {
+                            recyclerView.layoutManager?.scrollToPosition(position)
+                        }
+                        viewModel.setInsertedOrEditedIdNull()
+                    }
                 }
             }
         }
@@ -121,11 +117,9 @@ class ListNotesFragment : Fragment() {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun deleteNoteRequest(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
-        adapter.notifyDataSetChanged()
         RequestToDelete.requestToDelete(requireContext(), position)
     }
 
@@ -195,7 +189,6 @@ class ListNotesFragment : Fragment() {
         })
     }
 
-
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
         defaultHeader = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
@@ -204,8 +197,35 @@ class ListNotesFragment : Fragment() {
         deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        broadcastDateRegister()
+    }
+
+    private fun broadcastDateRegister() {
+        receiver= DateChangedBroadcastReceiver()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_DATE_CHANGED)
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        //filter.addAction(Intent.ACTION_TIME_TICK)
+        activity?.registerReceiver(receiver, filter)
+        obserweDateChanged()
+    }
+
+    private fun obserweDateChanged() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            receiver.isDateChangedFlow.collect { isDateChanged ->
+                if(isDateChanged) {
+                    adapter.refresh()
+                }
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        activity?.unregisterReceiver(receiver)
         _binding = null
     }
 

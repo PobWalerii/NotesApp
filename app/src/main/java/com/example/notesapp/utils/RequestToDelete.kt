@@ -14,6 +14,7 @@ class RequestToDelete {
         val isRequestToDeleteOkFlow: StateFlow<Int> = isRequestToDeleteOk.asStateFlow()
 
         fun requestToDelete(context: Context, position: Int) {
+            isRequestToDeleteOk.value = 0
             val dialog = MaterialAlertDialogBuilder(context)
                 .setTitle(R.string.title_delete)
                 .setIcon(R.drawable.warning)

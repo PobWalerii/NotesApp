@@ -1,11 +1,11 @@
-package com.example.notesapp.data.database.dao
+package com.example.notesapp.data.apiservice.database
 
 import androidx.room.*
 import com.example.notesapp.data.database.entitys.Notes
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface NotesDao {
+interface RemoteDao {
 
     @Query("SELECT * FROM Notes ORDER BY noteDate DESC")
     fun loadDataBase(): Flow<List<Notes>>
