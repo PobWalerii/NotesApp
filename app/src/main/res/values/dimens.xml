@@ -20,4 +20,7 @@
     <dimen name="text_edit_margin">5dp</dimen>
 
     <dimen name="info_text_size">18sp</dimen>
+
+    <dimen name="snackbar_icon_padding">10dp</dimen>
+
 </resources>

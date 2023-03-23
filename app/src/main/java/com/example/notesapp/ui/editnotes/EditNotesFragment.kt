@@ -2,6 +2,7 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuHost
@@ -16,12 +17,17 @@ import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class EditNotesFragment : Fragment() {
+
+    @Inject
+    lateinit var connectReceiver: ConnectReceiver
 
     private var _binding: FragmentEditNotesBinding? = null
     private val binding get() = _binding!!
@@ -116,7 +122,11 @@ class EditNotesFragment : Fragment() {
                         (activity as MainActivity).onSupportNavigateUp()
                     }
                     R.id.delete -> {
-                        RequestToDelete.requestToDelete(requireContext(), -100)
+                        if(connectReceiver.isConnectStatusFlow.value) {
+                            RequestToDelete.requestToDelete(requireContext(), -100)
+                        } else {
+                            showMessageNoConnect()
+                        }
                     }
                     R.id.save -> {
                         saveNote()
@@ -131,19 +141,31 @@ class EditNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             RequestToDelete.isRequestToDeleteOkFlow.collect { position ->
                 if(position==-100) {
-                    viewModel.deleteNote()
-                    observeEditNote()
+                    if(connectReceiver.isConnectStatusFlow.value) {
+                        viewModel.deleteNote()
+                        observeEditNote()
+                    } else {
+                        showMessageNoConnect()
+                    }
                 }
             }
         }
     }
 
     private fun saveNote() {
-        viewModel.saveNote(
-            binding.titleNoteText.text.toString(),
-            binding.textNoteText.text.toString()
-        )
-        observeEditNote()
+        if(connectReceiver.isConnectStatusFlow.value) {
+            viewModel.saveNote(
+                binding.titleNoteText.text.toString(),
+                binding.textNoteText.text.toString()
+            )
+            observeEditNote()
+        } else {
+            showMessageNoConnect()
+        }
+    }
+
+    private fun showMessageNoConnect() {
+        Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
     }
 
     private fun observeEditNote() {

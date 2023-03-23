@@ -34,6 +34,7 @@
             app:visibility="@{visibleProgressHorizontal ? View.VISIBLE : View.GONE}" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/coordinator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/gray">

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -21,13 +23,21 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.utils.RequestToDelete
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListNotesFragment : Fragment() {
+
+    @Inject
+    lateinit var connectReceiver: ConnectReceiver
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -68,6 +78,24 @@ class ListNotesFragment : Fragment() {
         loadRequestToDelete()
         setupButtonAddListener()
         setupItemClickListener()
+        observeConnectStatus()
+    }
+
+    private fun observeConnectStatus() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            connectReceiver.isConnectStatusFlow.collect { isConnect ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    binding.visibleProgressHorizontal = isConnect
+                    binding.floatingActionButton.isEnabled = isConnect
+                    if (isConnect == true) {
+                        itemTouchHelper.attachToRecyclerView(recyclerView)
+                    } else {
+                        showSnackbar()
+                        itemTouchHelper.attachToRecyclerView(null)
+                    }
+                }
+            }
+        }
     }
 
     private fun loadData() {
@@ -113,7 +141,6 @@ class ListNotesFragment : Fragment() {
                         deleteNoteRequest(holder.adapterPosition)
                     }
                 })
-            itemTouchHelper.attachToRecyclerView(recyclerView)
         }
     }
 
@@ -131,7 +158,11 @@ class ListNotesFragment : Fragment() {
                         adapter.notifyItemChanged(-position)
                     } else {
                         val note = adapter.getItemFromPosition(position)
-                        viewModel.deleteNote(note)
+                        if(connectReceiver.isConnectStatusFlow.value) {
+                            viewModel.deleteNote(note)
+                        } else {
+                            adapter.notifyItemChanged(position)
+                        }
                     }
                 }
             }
@@ -221,6 +252,26 @@ class ListNotesFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun showSnackbar() {
+        val snackbar = Snackbar.make(
+            binding.coordinator,
+            R.string.txt_no_internet,
+            Snackbar.LENGTH_LONG
+        )
+        val snackbarView = snackbar.view
+        val textView: TextView =
+            snackbarView.findViewById(com.google.android.material.R.id.snackbar_text)
+        textView.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.warning,
+            0,
+            0,
+            0
+        );
+        textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding));
+        //snackbar.setAction("OK") { snackbar.dismiss() }
+        snackbar.show()
     }
 
     override fun onDestroyView() {
