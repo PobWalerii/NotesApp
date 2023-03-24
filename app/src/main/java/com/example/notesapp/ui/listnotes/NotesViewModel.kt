@@ -15,6 +15,7 @@ class NotesViewModel @Inject constructor(
 ): ViewModel() {
 
     var firstDataLoad = false
+    var isStartApp = true
 
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
@@ -22,7 +23,7 @@ class NotesViewModel @Inject constructor(
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
 
     fun loadRemoutData() {
-        notesRepository.loadRemoutData()
+        notesRepository.loadRemoutData(isStartApp)
     }
 
     fun deleteNote(note: Notes) {

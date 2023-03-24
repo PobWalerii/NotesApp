@@ -137,10 +137,10 @@ class ListNotesFragment : Fragment() {
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
-                adapter.setList(it)
                 binding.visibleInfoText = it.isEmpty()
-                viewModel.firstDataLoad = it.isEmpty()
-                if(it.isEmpty()) {
+                adapter.setList(it)
+                if(viewModel.isStartApp) {
+                    viewModel.firstDataLoad = it.isEmpty()
                     viewModel.loadRemoutData()
                 } else {
                     viewModel.getInsertedOrEditedIdValue().let { id ->
@@ -311,7 +311,7 @@ class ListNotesFragment : Fragment() {
             0,
             0
         )
-        //textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding))
+        textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding))
         //snackbar.setAction("OK") { snackbar.dismiss() }
         snackbar.show()
     }

@@ -2,6 +2,7 @@ package com.example.notesapp.data.repository
 
 import android.content.Context
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
@@ -19,6 +20,7 @@ class NotesRepository(
 ) {
 
     private var insertedOrEditedId: Long = 0L
+    private var fixedTimeLoadedDate: Long = 0L
 
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
@@ -46,12 +48,20 @@ class NotesRepository(
             emit(notesDao.getNoteById(noteId).firstOrNull())
         }
 
-    fun loadRemoutData() {
-        isLoaded.value = true
-
-
-
-        isLoaded.value = false
+    fun loadRemoutData(start: Boolean = false) {
+        CoroutineScope(Dispatchers.Default).launch {
+            isLoaded.value = true
+            try {
+                apiService.getAllNote(if(start) TIME_DELAY_START else 0L).apply {
+                    fixedTimeLoadedDate = this.timeBase
+                    val list: List<Notes> = this.fullList
+                    notesDao.updateDatabase(list)
+                }
+            } catch (e: Exception) {
+                serviceError.value = e.message.toString()
+            }
+            isLoaded.value = false
+        }
     }
 
     fun addNote(note: Notes) {
