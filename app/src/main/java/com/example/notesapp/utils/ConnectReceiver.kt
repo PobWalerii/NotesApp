@@ -16,6 +16,9 @@ class ConnectReceiver(
     private val isConnectStatus = MutableStateFlow(false)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
+    private var showTextOk = false
+    private var showTextLost = true
+
     private var networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             isConnectStatus.value = true
@@ -38,6 +41,18 @@ class ConnectReceiver(
 
     private fun changeNetwork() {
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        showTextOk = true
+        showTextLost = true
     }
+
+    fun getShowTextOk(): Boolean = showTextOk
+    fun setShowTextOk() {
+        showTextOk = false
+    }
+    fun getShowTextLost(): Boolean = showTextLost
+    fun setShowTextLost() {
+        showTextLost = false
+    }
+
 
 }

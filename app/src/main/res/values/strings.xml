@@ -18,6 +18,7 @@
     <string name="note_text_hint">Content</string>
 
     <string name="empty_list_notes">Notes List Is Empty</string>
-    <string name="txt_no_internet">There is no internet. It needs a connection to work.</string>
+    <string name="text_no_internet">There is no internet. It needs a connection to work.</string>
+    <string name="text_internet_ok">Internet connection restored</string>
     <string name="operation_not_possible">Operation is not possible if there is no internet connection</string>
 </resources>

@@ -8,6 +8,5 @@ class SettingsViewModel: ViewModel() {
     var defaultAddIfClick: Boolean = true
     var deleteIfSwiped: Boolean = true
     var dateChanget: Boolean = true
-
-
+    var showMessageInternetOk: Boolean = false
 }

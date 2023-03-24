@@ -18,6 +18,9 @@
         <variable
             name="dateChanget"
             type="Boolean" />
+        <variable
+            name="showMessageInternetOk"
+            type="Boolean" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -88,6 +91,15 @@
                 android:textSize="@dimen/settings_text_size"
                 android:text="При редактировании сообщения дата сообщения переписывается при изменении содержимого, в противном случае дата не меняется"
                 android:checked="@{dateChanget}"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="Следует ли отображать сообщение о восстановлении интернет-соединения после его потери"
+                android:checked="@{showMessageInternetOk}"/>
 
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

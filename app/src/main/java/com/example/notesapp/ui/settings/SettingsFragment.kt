@@ -17,6 +17,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
+import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentSettingsBinding
 import com.example.notesapp.ui.main.MainActivity
 
@@ -94,6 +95,11 @@ class SettingsFragment : Fragment() {
             binding.dateChanget = this
             viewModel.dateChanget = this
         }
+        sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK).apply {
+            binding.showMessageInternetOk = this
+            viewModel.showMessageInternetOk = this
+        }
+
     }
 
     private fun setListenersSettingsChanged() {
@@ -112,6 +118,9 @@ class SettingsFragment : Fragment() {
         binding.switch4.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
         }
+        binding.switch5.setOnCheckedChangeListener { _, _ ->
+            definitionOfChange()
+        }
     }
 
     private fun definitionOfChange() {
@@ -120,7 +129,8 @@ class SettingsFragment : Fragment() {
             viewModel.specificationLine != binding.switch1.isChecked ||
             viewModel.defaultAddIfClick != binding.switch2.isChecked ||
             viewModel.deleteIfSwiped != binding.switch3.isChecked ||
-            viewModel.dateChanget != binding.switch4.isChecked
+            viewModel.dateChanget != binding.switch4.isChecked ||
+            viewModel.showMessageInternetOk != binding.switch5.isChecked
     }
 
     private fun saveSettings() {
@@ -131,6 +141,7 @@ class SettingsFragment : Fragment() {
         ed.putBoolean("defaultAddIfClick", binding.switch2.isChecked)
         ed.putBoolean("deleteIfSwiped", binding.switch3.isChecked)
         ed.putBoolean("dateChanget", binding.switch4.isChecked)
+        ed.putBoolean("showMessageInternetOk", binding.switch5.isChecked)
         ed.apply()
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
         appbarMenu.findItem(R.id.save).isVisible = false

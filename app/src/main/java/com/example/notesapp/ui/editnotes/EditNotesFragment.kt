@@ -15,11 +15,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants
+import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
+import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.RequestToDelete
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,7 +40,9 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    lateinit var appbarMenu: Menu
+    private lateinit var appbarMenu: Menu
+
+    private var showMessageInternetOk = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +59,38 @@ class EditNotesFragment : Fragment() {
         loadSettings()
         setListenersDataChanged()
         loadRequestToDelete()
+        observeConnectStatus()
+        observeErrorMessages()
+    }
+
+    private fun observeConnectStatus() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            connectReceiver.isConnectStatusFlow.collect { isConnect ->
+                if(isConnect) {
+                    if(connectReceiver.getShowTextOk() && showMessageInternetOk) {
+                        connectReceiver.setShowTextOk()
+                        Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    if(connectReceiver.getShowTextLost()) {
+                        connectReceiver.setShowTextLost()
+                        Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeErrorMessages() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.serviceErrorFlow.collect { message ->
+                if(message.isNotEmpty()) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun setListenersDataChanged() {
@@ -96,7 +134,10 @@ class EditNotesFragment : Fragment() {
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
         viewModel.dateChangetStrategy = sPref.getBoolean("dateChanget",
-            KeyConstants.DATE_CHANGE_WHEN_CONTENT
+            DATE_CHANGE_WHEN_CONTENT
+        )
+        showMessageInternetOk = sPref.getBoolean("showMessageInternetOk",
+            SHOW_MESSAGE_INTERNET_OK
         )
     }
 

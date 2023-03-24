@@ -21,6 +21,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
+import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConnectReceiver
@@ -50,6 +51,7 @@ class ListNotesFragment : Fragment() {
     private var defaultSpecificationLine: Boolean = true
     private var defaultAddIfClick: Boolean = true
     private var deleteIfSwiped: Boolean = true
+    private var showMessageInternetOk: Boolean = false
 
     private lateinit var receiver: DateChangedBroadcastReceiver
 
@@ -79,6 +81,20 @@ class ListNotesFragment : Fragment() {
         setupButtonAddListener()
         setupItemClickListener()
         observeConnectStatus()
+        observeErrorMessages()
+        observeLoadStatus()
+    }
+
+    private fun observeLoadStatus() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoadedFlow.collect {
+                if(viewModel.firstDataLoad) {
+                    binding.visibleProgressRound = it
+                } else {
+                    binding.visibleProgressHorizontal = it
+                }
+            }
+        }
     }
 
     private fun observeConnectStatus() {
@@ -87,11 +103,31 @@ class ListNotesFragment : Fragment() {
                 CoroutineScope(Dispatchers.Main).launch {
                     binding.visibleProgressHorizontal = isConnect
                     binding.floatingActionButton.isEnabled = isConnect
-                    if (isConnect == true) {
+                    if (isConnect) {
+                        if(connectReceiver.getShowTextOk() && showMessageInternetOk) {
+                            connectReceiver.setShowTextOk()
+                            Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG)
+                                .show()
+                        }
                         itemTouchHelper.attachToRecyclerView(recyclerView)
                     } else {
-                        showSnackbar()
+                        if(connectReceiver.getShowTextLost()) {
+                            connectReceiver.setShowTextLost()
+                            showSnackbar()
+                        }
                         itemTouchHelper.attachToRecyclerView(null)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeErrorMessages() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.serviceErrorFlow.collect { message ->
+                if(message.isNotEmpty()) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -101,15 +137,20 @@ class ListNotesFragment : Fragment() {
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadDatabase().collect {
-                binding.visibleInfoText = it.isEmpty()
                 adapter.setList(it)
-                viewModel.getInsertedOrEditedIdValue().let { id ->
-                    if( id!=0L ) {
-                        val position = adapter.setCurrentId(id)
-                        if(position != -1) {
-                            recyclerView.layoutManager?.scrollToPosition(position)
+                binding.visibleInfoText = it.isEmpty()
+                viewModel.firstDataLoad = it.isEmpty()
+                if(it.isEmpty()) {
+                    viewModel.loadRemoutData()
+                } else {
+                    viewModel.getInsertedOrEditedIdValue().let { id ->
+                        if (id != 0L) {
+                            val position = adapter.setCurrentId(id)
+                            if (position != -1) {
+                                recyclerView.layoutManager?.scrollToPosition(position)
+                            }
+                            viewModel.setInsertedOrEditedIdNull()
                         }
-                        viewModel.setInsertedOrEditedIdNull()
                     }
                 }
             }
@@ -226,6 +267,7 @@ class ListNotesFragment : Fragment() {
         defaultSpecificationLine = sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
         defaultAddIfClick = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
         deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
+        showMessageInternetOk = sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
     }
 
 
@@ -257,7 +299,7 @@ class ListNotesFragment : Fragment() {
     private fun showSnackbar() {
         val snackbar = Snackbar.make(
             binding.coordinator,
-            R.string.txt_no_internet,
+            R.string.text_no_internet,
             Snackbar.LENGTH_LONG
         )
         val snackbarView = snackbar.view
@@ -268,8 +310,8 @@ class ListNotesFragment : Fragment() {
             0,
             0,
             0
-        );
-        textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding));
+        )
+        //textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding))
         //snackbar.setAction("OK") { snackbar.dismiss() }
         snackbar.show()
     }
