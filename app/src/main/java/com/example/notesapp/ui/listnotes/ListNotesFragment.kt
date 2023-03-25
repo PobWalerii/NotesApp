@@ -26,6 +26,7 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
+import com.example.notesapp.utils.RemoteService
 import com.example.notesapp.utils.RequestToDelete
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -101,7 +102,7 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    binding.visibleProgressHorizontal = isConnect
+                    //binding.visibleProgressHorizontal = isConnect
                     binding.floatingActionButton.isEnabled = isConnect
                     if (isConnect) {
                         if(connectReceiver.getShowTextOk() && showMessageInternetOk) {
@@ -140,8 +141,16 @@ class ListNotesFragment : Fragment() {
                 binding.visibleInfoText = it.isEmpty()
                 adapter.setList(it)
                 if(viewModel.isStartApp) {
-                    viewModel.firstDataLoad = it.isEmpty()
-                    viewModel.loadRemoutData()
+                    if(viewModel.getInitialDataUpload()) {
+                        viewModel.isStartApp = false
+                        viewModel.firstDataLoad = false
+                        binding.visibleProgressRound = false
+                        val serviceIntent = Intent(context, RemoteService::class.java)
+                        context?.startService(serviceIntent)
+                    } else {
+                        viewModel.firstDataLoad = it.isEmpty()
+                        viewModel.loadRemoutData()
+                    }
                 } else {
                     viewModel.getInsertedOrEditedIdValue().let { id ->
                         if (id != 0L) {
@@ -320,6 +329,12 @@ class ListNotesFragment : Fragment() {
         super.onDestroyView()
         activity?.unregisterReceiver(receiver)
         _binding = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val serviceIntent = Intent(context, RemoteService::class.java)
+        context?.stopService(serviceIntent)
     }
 
 }

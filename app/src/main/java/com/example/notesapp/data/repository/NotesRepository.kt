@@ -21,6 +21,7 @@ class NotesRepository(
 
     private var insertedOrEditedId: Long = 0L
     private var fixedTimeLoadedDate: Long = 0L
+    private var successfulInitialDataUpload = false
 
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
@@ -31,6 +32,7 @@ class NotesRepository(
     private val isLoaded = MutableStateFlow(false)
     val isLoadedFlow: StateFlow<Boolean> = isLoaded.asStateFlow()
 
+    fun timeLoadedBase(): Long = fixedTimeLoadedDate
     fun setInsertedOrEditedIdNull() {
         insertedOrEditedId = 0L
     }
@@ -54,6 +56,7 @@ class NotesRepository(
             try {
                 apiService.getAllNote(if(start) TIME_DELAY_START else 0L).apply {
                     fixedTimeLoadedDate = this.timeBase
+                    successfulInitialDataUpload = true
                     val list: List<Notes> = this.fullList
                     notesDao.updateDatabase(list)
                 }
@@ -63,6 +66,8 @@ class NotesRepository(
             isLoaded.value = false
         }
     }
+
+    fun getInitialDataUpload(): Boolean = successfulInitialDataUpload
 
     fun addNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {

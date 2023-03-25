@@ -7,7 +7,6 @@ import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.apiservice.ApiServiceImpl
 import com.example.notesapp.data.apiservice.database.RemoteDao
 import com.example.notesapp.data.apiservice.database.RemoteDatabase
-import com.example.notesapp.data.database.dao.NotesDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,7 +16,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object ApiModule {
 
     @Singleton
     @Provides
@@ -36,8 +35,8 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideApiService(notesDao: NotesDao, remoteDao: RemoteDao): ApiService {
-        return ApiServiceImpl(notesDao, remoteDao)
+    fun provideApiService(remoteDao: RemoteDao): ApiService {
+        return ApiServiceImpl(remoteDao)
     }
 
 }

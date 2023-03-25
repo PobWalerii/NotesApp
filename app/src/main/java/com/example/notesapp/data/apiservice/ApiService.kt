@@ -6,4 +6,5 @@ interface ApiService  {
     suspend fun getAllNote(delayTime: Long): NoteResponse
     suspend fun addNote(note: Notes): Long
     suspend fun deleteNote(note: Notes)
+    fun getChangeBaseTime(): Long
 }

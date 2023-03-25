@@ -20,6 +20,8 @@ class NotesViewModel @Inject constructor(
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
 
+    fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
+
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
 
     fun loadRemoutData() {

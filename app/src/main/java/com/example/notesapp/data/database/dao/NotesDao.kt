@@ -19,6 +19,7 @@ interface NotesDao {
     @Query("DELETE FROM Notes")
     suspend fun deleteAll()
 
+    @Transaction
     suspend fun updateDatabase(list: List<Notes>) {
         deleteAll()
         list.map {
