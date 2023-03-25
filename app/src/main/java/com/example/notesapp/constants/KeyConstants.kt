@@ -3,8 +3,9 @@ package com.example.notesapp.constants
 object KeyConstants {
     const val DATABASE_NAME = "data-notes"
     const val REMOTE_DATABASE_NAME = "remote-data-notes"
-    const val TIME_DELAY_START: Long = 5000
-    const val TIME_DELAY_QUERY: Long = 1000
+    const val TIME_DELAY_START: Int = 5
+    const val TIME_DELAY_QUERY: Int = 1
+    const val INTERVAL_REQUESTS: Int = 1
     const val DEFAULT_HEADER = "Note"
     const val DEFAULT_SPECIFICATION_LINE = true
     const val DEFAULT_ADD_IF_CLICK = true

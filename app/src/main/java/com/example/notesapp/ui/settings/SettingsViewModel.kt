@@ -9,4 +9,7 @@ class SettingsViewModel: ViewModel() {
     var deleteIfSwiped: Boolean = true
     var dateChanget: Boolean = true
     var showMessageInternetOk: Boolean = false
+    var startDelayValue: Int = 0
+    var queryDelayValue: Int = 0
+    var requestIntervalValue: Int = 0
 }

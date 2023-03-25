@@ -1,5 +1,5 @@
 package com.example.notesapp.data.apiservice
-import com.example.notesapp.data.apiservice.model.NoteResponse
+import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
 
 interface ApiService  {

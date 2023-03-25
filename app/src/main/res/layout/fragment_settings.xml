@@ -21,9 +21,18 @@
         <variable
             name="showMessageInternetOk"
             type="Boolean" />
+        <variable
+            name="startDelayValue"
+            type="Integer" />
+        <variable
+            name="queryDelayValue"
+            type="Integer" />
+        <variable
+            name="requestIntervalValue"
+            type="Integer" />
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/gray"
@@ -32,7 +41,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
@@ -40,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/settings_text_size"
                 android:textColor="@color/black"
-                android:text="Заголовок по умолчанию:"/>
+                android:text="Заголовок сообщения по умолчанию:"/>
 
             <EditText
                 android:id="@+id/header"
@@ -56,13 +65,95 @@
                 android:importantForAutofill="no"
                 tools:ignore="LabelFor" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:text="Задержка запроса к уданенной базе в секундах при запуске приложения:"/>
+
+                <EditText
+                    android:id="@+id/startDelay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:layout_weight="9"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/blue"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="@{startDelayValue.toString()}"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:text="Задержка запроса к уданенной базе в секундах при обновлении данных:"/>
+
+                <EditText
+                    android:id="@+id/queryDelay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:layout_weight="9"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/blue"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="@{queryDelayValue.toString()}"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:text="Интервал запроса в секундах о наличии изменений в удаленной базе данных:"/>
+
+                <EditText
+                    android:id="@+id/requestInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:layout_weight="9"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/blue"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="@{requestIntervalValue.toString()}"/>
+            </LinearLayout>
+
+
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Отображение текста сообщения в одну линию"
+                android:text="Отображение текста сообщения в одну линию при просмотре списка"
                 android:checked="@{specificationLine}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -71,7 +162,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="При нажатии клавиши + создается пустое сообщение, в противном случае выполняется переход в форму ввода нового сообщения"
+                android:text="При нажатии клавиши + создается пустое сообщение, в противном случае будет выполняться переход в форму ввода нового сообщения"
                 android:checked="@{defaultAddIfClick}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -80,7 +171,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="При просмотре списка разрешить удаление сообщения смахиванием, в противном случае удаление возможно только в форме редактирования"
+                android:text="Pазрешить удаление сообщения смахиванием при просмотре списка"
                 android:checked="@{deleteIfSwiped}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -89,7 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="При редактировании сообщения дата сообщения переписывается при изменении содержимого, в противном случае дата не меняется"
+                android:text="Изменять дату сообщения при редактировании текста сообщения"
                 android:checked="@{dateChanget}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -98,10 +189,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Следует ли отображать сообщение о восстановлении интернет-соединения после его потери"
+                android:text="Отображать сообщение о восстановлении интернет-соединения"
                 android:checked="@{showMessageInternetOk}"/>
 
+
+
+
         </LinearLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </ScrollView>
 
     </layout>

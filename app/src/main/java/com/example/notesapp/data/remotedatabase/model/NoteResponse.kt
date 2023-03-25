@@ -1,4 +1,4 @@
-package com.example.notesapp.data.apiservice.model
+package com.example.notesapp.data.remotedatabase.model
 
 import com.example.notesapp.data.database.entitys.Notes
 

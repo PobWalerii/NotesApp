@@ -17,7 +17,10 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
+import com.example.notesapp.constants.KeyConstants.INTERVAL_REQUESTS
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
+import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
+import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
 import com.example.notesapp.ui.main.MainActivity
 
@@ -98,6 +101,18 @@ class SettingsFragment : Fragment() {
         sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK).apply {
             binding.showMessageInternetOk = this
             viewModel.showMessageInternetOk = this
+        }
+        sPref.getInt("startDelayValue", TIME_DELAY_START).apply {
+            binding.startDelayValue = this
+            viewModel.startDelayValue = this
+        }
+        sPref.getInt("queryDelayValue", TIME_DELAY_QUERY).apply {
+            binding.queryDelayValue = this
+            viewModel.queryDelayValue = this
+        }
+        sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS).apply {
+            binding.requestIntervalValue = this
+            viewModel.requestIntervalValue = this
         }
 
     }

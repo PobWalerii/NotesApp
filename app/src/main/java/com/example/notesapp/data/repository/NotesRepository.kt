@@ -2,6 +2,7 @@ package com.example.notesapp.data.repository
 
 import android.content.Context
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
@@ -54,7 +55,7 @@ class NotesRepository(
         CoroutineScope(Dispatchers.Default).launch {
             isLoaded.value = true
             try {
-                apiService.getAllNote(if(start) TIME_DELAY_START else 0L).apply {
+                apiService.getAllNote(((if(start) TIME_DELAY_START else TIME_DELAY_QUERY)*1000).toLong()).apply {
                     fixedTimeLoadedDate = this.timeBase
                     successfulInitialDataUpload = true
                     val list: List<Notes> = this.fullList

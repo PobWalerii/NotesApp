@@ -26,7 +26,7 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
-import com.example.notesapp.utils.RemoteService
+import com.example.notesapp.data.backgroundservice.RemoteService
 import com.example.notesapp.utils.RequestToDelete
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -114,7 +114,7 @@ class ListNotesFragment : Fragment() {
                     } else {
                         if(connectReceiver.getShowTextLost()) {
                             connectReceiver.setShowTextLost()
-                            showSnackbar()
+                            showSnack()
                         }
                         itemTouchHelper.attachToRecyclerView(null)
                     }
@@ -290,12 +290,11 @@ class ListNotesFragment : Fragment() {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_DATE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        //filter.addAction(Intent.ACTION_TIME_TICK)
         activity?.registerReceiver(receiver, filter)
-        obserweDateChanged()
+        observeDateChanged()
     }
 
-    private fun obserweDateChanged() {
+    private fun observeDateChanged() {
         viewLifecycleOwner.lifecycleScope.launch {
             receiver.isDateChangedFlow.collect { isDateChanged ->
                 if(isDateChanged) {
@@ -305,24 +304,23 @@ class ListNotesFragment : Fragment() {
         }
     }
 
-    private fun showSnackbar() {
-        val snackbar = Snackbar.make(
+    private fun showSnack() {
+        val snack = Snackbar.make(
             binding.coordinator,
             R.string.text_no_internet,
             Snackbar.LENGTH_LONG
         )
-        val snackbarView = snackbar.view
+        val snackView = snack.view
         val textView: TextView =
-            snackbarView.findViewById(com.google.android.material.R.id.snackbar_text)
+            snackView.findViewById(com.google.android.material.R.id.snackbar_text)
         textView.setCompoundDrawablesWithIntrinsicBounds(
             R.drawable.warning,
             0,
             0,
             0
         )
-        textView.setCompoundDrawablePadding(getResources().getDimensionPixelOffset(R.dimen.snackbar_icon_padding))
-        //snackbar.setAction("OK") { snackbar.dismiss() }
-        snackbar.show()
+        textView.compoundDrawablePadding = resources.getDimensionPixelOffset(R.dimen.snackbar_icon_padding)
+        snack.show()
     }
 
     override fun onDestroyView() {

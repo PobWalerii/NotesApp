@@ -1,7 +1,7 @@
 package com.example.notesapp.data.apiservice
 
-import com.example.notesapp.data.apiservice.database.RemoteDao
-import com.example.notesapp.data.apiservice.model.NoteResponse
+import com.example.notesapp.data.remotedatabase.database.RemoteDao
+import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
 import kotlinx.coroutines.*
 import java.util.*
