@@ -2,7 +2,6 @@ package com.example.notesapp.data.apiservice
 
 import com.example.notesapp.data.apiservice.database.RemoteDao
 import com.example.notesapp.data.apiservice.model.NoteResponse
-import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
 import kotlinx.coroutines.*
 import java.util.*
@@ -12,8 +11,8 @@ class ApiServiceImpl @Inject constructor(
     private val remoteDao: RemoteDao
 ): ApiService {
 
-    var timeLoadBase: Long = 0L
-    var listNotes: List<Notes> = emptyList()
+    private var timeLoadBase: Long = 0L
+    private var listNotes: List<Notes> = emptyList()
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
