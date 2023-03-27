@@ -21,7 +21,7 @@ class EditViewModel  @Inject constructor(
     var currentNoteSpecification: String = ""
     var currentNoteDate: Long = 0L
 
-    var dateChangetStrategy: Boolean = true
+    var dateChangedStrategy: Boolean = true
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
@@ -34,7 +34,7 @@ class EditViewModel  @Inject constructor(
             currentId,
             title,
             content,
-            if ((dateChangetStrategy && content!=currentNoteSpecification) || currentId==0L) {
+            if ((dateChangedStrategy && content!=currentNoteSpecification) || currentId==0L) {
                 Date().time
             } else {
                 currentNoteDate

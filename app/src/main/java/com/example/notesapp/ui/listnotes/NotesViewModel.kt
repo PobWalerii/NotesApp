@@ -19,13 +19,28 @@ class NotesViewModel @Inject constructor(
 
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
+    val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
+    fun refreshRepoSettings(startDelay: Int, queryDelay: Int, requestInterval: Int) {
+        notesRepository.refreshDelaySettings(startDelay, queryDelay, requestInterval)
+    }
 
     fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
 
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
 
-    fun loadRemoutData() {
-        notesRepository.loadRemoutData(isStartApp)
+    fun loadRemoteData() {
+        notesRepository.loadRemoteData(isStartApp)
+    }
+
+    fun stopLoadRemoteData() {
+        notesRepository.stopLoadRemoteData()
+    }
+    fun restartLoadRemoteData() {
+        notesRepository.restartLoadRemoteData(isStartApp)
+    }
+
+    fun setIsLoadCanceled() {
+        notesRepository.setIsLoadCanceled()
     }
 
     fun deleteNote(note: Notes) {

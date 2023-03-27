@@ -16,7 +16,7 @@
             name="deleteIfSwiped"
             type="Boolean" />
         <variable
-            name="dateChanget"
+            name="dateChanged"
             type="Boolean" />
         <variable
             name="showMessageInternetOk"
@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/settings_text_size"
                 android:textColor="@color/black"
-                android:text="Заголовок сообщения по умолчанию:"/>
+                android:text="@string/text1"/>
 
             <EditText
                 android:id="@+id/header"
@@ -77,19 +77,20 @@
                     android:textSize="@dimen/settings_text_size"
                     android:textColor="@color/black"
                     android:layout_weight="1"
-                    android:text="Задержка запроса к уданенной базе в секундах при запуске приложения:"/>
+                    android:text="@string/text2"/>
 
                 <EditText
                     android:id="@+id/startDelay"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionDone"
                     android:layout_weight="9"
-                    android:textSize="@dimen/settings_text_size"
-                    android:textColor="@color/blue"
                     android:ems="10"
+                    android:imeOptions="actionDone"
+                    android:text="@{startDelayValue.toString()}"
+                    android:textColor="@color/blue"
+                    android:textSize="@dimen/settings_text_size"
                     android:inputType="number"
-                    android:text="@{startDelayValue.toString()}"/>
+                    tools:ignore="Autofill" />
             </LinearLayout>
 
             <LinearLayout
@@ -104,7 +105,7 @@
                     android:textSize="@dimen/settings_text_size"
                     android:textColor="@color/black"
                     android:layout_weight="1"
-                    android:text="Задержка запроса к уданенной базе в секундах при обновлении данных:"/>
+                    android:text="@string/text3"/>
 
                 <EditText
                     android:id="@+id/queryDelay"
@@ -116,7 +117,8 @@
                     android:textColor="@color/blue"
                     android:ems="10"
                     android:inputType="number"
-                    android:text="@{queryDelayValue.toString()}"/>
+                    android:text="@{queryDelayValue.toString()}"
+                    tools:ignore="Autofill" />
             </LinearLayout>
 
             <LinearLayout
@@ -131,7 +133,7 @@
                     android:textSize="@dimen/settings_text_size"
                     android:textColor="@color/black"
                     android:layout_weight="1"
-                    android:text="Интервал запроса в секундах о наличии изменений в удаленной базе данных:"/>
+                    android:text="@string/text4"/>
 
                 <EditText
                     android:id="@+id/requestInterval"
@@ -143,7 +145,8 @@
                     android:textColor="@color/blue"
                     android:ems="10"
                     android:inputType="number"
-                    android:text="@{requestIntervalValue.toString()}"/>
+                    android:text="@{requestIntervalValue.toString()}"
+                    tools:ignore="Autofill" />
             </LinearLayout>
 
 
@@ -153,7 +156,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Отображение текста сообщения в одну линию при просмотре списка"
+                android:text="@string/text5"
                 android:checked="@{specificationLine}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -162,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="При нажатии клавиши + создается пустое сообщение, в противном случае будет выполняться переход в форму ввода нового сообщения"
+                android:text="@string/text6"
                 android:checked="@{defaultAddIfClick}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -171,7 +174,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Pазрешить удаление сообщения смахиванием при просмотре списка"
+                android:text="@string/text7"
                 android:checked="@{deleteIfSwiped}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -180,8 +183,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Изменять дату сообщения при редактировании текста сообщения"
-                android:checked="@{dateChanget}"/>
+                android:text="@string/text8"
+                android:checked="@{dateChanged}"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch5"
@@ -189,13 +192,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/settings_margin"
                 android:textSize="@dimen/settings_text_size"
-                android:text="Отображать сообщение о восстановлении интернет-соединения"
+                android:text="@string/text9"
                 android:checked="@{showMessageInternetOk}"/>
 
-
-
-
         </LinearLayout>
+
     </ScrollView>
 
     </layout>

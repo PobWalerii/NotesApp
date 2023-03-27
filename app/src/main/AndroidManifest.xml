@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".data.backgroundservice.RemoteService"
+            android:name=".utils.RemoteService"
             android:enabled="true"
             android:exported="false" />
     </application>

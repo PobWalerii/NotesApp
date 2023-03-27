@@ -21,4 +21,17 @@
     <string name="text_no_internet">There is no internet. It needs a connection to work.</string>
     <string name="text_internet_ok">Internet connection restored</string>
     <string name="operation_not_possible">Operation is not possible if there is no internet connection</string>
+    <string name="interrupted_start_load">Initial loading of information interrupted</string>
+    <string name="interrupted_update_load">The remote database was changed, but the update of the information was interrupted</string>
+
+    <string name="text1">Заголовок сообщения по умолчанию:</string>
+    <string name="text2">Задержка запроса к уданенной базе в секундах при запуске приложения:</string>
+    <string name="text3">Задержка запроса к уданенной базе в секундах при обновлении данных:</string>
+    <string name="text4">Частота в секундах запросов о наличии изменений в удаленной базе данных:</string>
+    <string name="text5">Отображение текста сообщения в одну линию при просмотре списка</string>
+    <string name="text6">При нажатии клавиши + создается пустое сообщение, в противном случае будет выполняться переход в форму ввода нового сообщения</string>
+    <string name="text7">Pазрешить удаление сообщения смахиванием при просмотре списка</string>
+    <string name="text8">Изменять дату сообщения при редактировании текста сообщения</string>
+    <string name="text9">Отображать сообщение о восстановлении интернет-соединения</string>
+
 </resources>

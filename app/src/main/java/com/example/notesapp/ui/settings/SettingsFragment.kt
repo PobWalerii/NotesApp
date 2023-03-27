@@ -43,9 +43,9 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupActionBar()
         loadSettings()
         setListenersSettingsChanged()
+        setupActionBar()
     }
 
     private fun setupActionBar() {
@@ -55,9 +55,9 @@ class SettingsFragment : Fragment() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
             override fun onPrepareMenu(menu: Menu) {
                 appbarMenu = menu
-                menu.findItem(R.id.save).isVisible = false
                 menu.findItem(R.id.settings).isVisible = false
                 menu.findItem(R.id.delete).isVisible = false
+                definitionOfChange()
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.appbar_menu, menu)
@@ -94,9 +94,9 @@ class SettingsFragment : Fragment() {
             binding.deleteIfSwiped = this
             viewModel.deleteIfSwiped = this
         }
-        sPref.getBoolean("dateChanget", DATE_CHANGE_WHEN_CONTENT).apply {
-            binding.dateChanget = this
-            viewModel.dateChanget = this
+        sPref.getBoolean("dateChanged", DATE_CHANGE_WHEN_CONTENT).apply {
+            binding.dateChanged = this
+            viewModel.dateChanged = this
         }
         sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK).apply {
             binding.showMessageInternetOk = this
@@ -114,7 +114,6 @@ class SettingsFragment : Fragment() {
             binding.requestIntervalValue = this
             viewModel.requestIntervalValue = this
         }
-
     }
 
     private fun setListenersSettingsChanged() {
@@ -136,15 +135,27 @@ class SettingsFragment : Fragment() {
         binding.switch5.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
         }
+        binding.startDelay.addTextChangedListener {
+            definitionOfChange()
+        }
+        binding.queryDelay.addTextChangedListener {
+            definitionOfChange()
+        }
+        binding.requestInterval.addTextChangedListener {
+            definitionOfChange()
+        }
     }
 
     private fun definitionOfChange() {
         appbarMenu.findItem(R.id.save).isVisible =
             viewModel.defaultHeader != binding.header.text.toString() ||
+            viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
+            viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
+            viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
             viewModel.specificationLine != binding.switch1.isChecked ||
             viewModel.defaultAddIfClick != binding.switch2.isChecked ||
             viewModel.deleteIfSwiped != binding.switch3.isChecked ||
-            viewModel.dateChanget != binding.switch4.isChecked ||
+            viewModel.dateChanged != binding.switch4.isChecked ||
             viewModel.showMessageInternetOk != binding.switch5.isChecked
     }
 
@@ -155,8 +166,11 @@ class SettingsFragment : Fragment() {
         ed.putBoolean("specificationLine", binding.switch1.isChecked)
         ed.putBoolean("defaultAddIfClick", binding.switch2.isChecked)
         ed.putBoolean("deleteIfSwiped", binding.switch3.isChecked)
-        ed.putBoolean("dateChanget", binding.switch4.isChecked)
+        ed.putBoolean("dateChanged", binding.switch4.isChecked)
         ed.putBoolean("showMessageInternetOk", binding.switch5.isChecked)
+        ed.putInt("startDelayValue", binding.startDelay.text.toString().toInt())
+        ed.putInt("queryDelayValue", binding.queryDelay.text.toString().toInt())
+        ed.putInt("requestIntervalValue", binding.requestInterval.text.toString().toInt())
         ed.apply()
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
         appbarMenu.findItem(R.id.save).isVisible = false
@@ -167,6 +181,5 @@ class SettingsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
 
 }
