@@ -3,13 +3,11 @@ package com.example.notesapp.ui.main
 import android.animation.ObjectAnimator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
-import androidx.navigation.ui.navigateUp
 import com.example.notesapp.R
 import dagger.hilt.android.AndroidEntryPoint
 
