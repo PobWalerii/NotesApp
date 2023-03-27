@@ -79,6 +79,7 @@ class NotesRepository(
 
     fun loadRemoteData(start: Boolean = false) {
         isLoadCanceled = false
+        serviceError.value =""
         job = CoroutineScope(Dispatchers.Default).launch {
                 isLoaded.value = true
                 try {

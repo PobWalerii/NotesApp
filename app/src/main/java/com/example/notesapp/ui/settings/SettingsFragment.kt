@@ -23,6 +23,7 @@ import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 
 class SettingsFragment : Fragment() {
 
@@ -160,17 +161,26 @@ class SettingsFragment : Fragment() {
     }
 
     private fun saveSettings() {
+        hideKeyboardFromView(requireActivity(), requireView())
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
         val ed: SharedPreferences.Editor = sPref.edit()
-        ed.putString("defaultHeader", binding.header.text.toString())
+        binding.header.text.toString().apply {
+            ed.putString("defaultHeader", this.ifEmpty { DEFAULT_HEADER })
+        }
         ed.putBoolean("specificationLine", binding.switch1.isChecked)
         ed.putBoolean("defaultAddIfClick", binding.switch2.isChecked)
         ed.putBoolean("deleteIfSwiped", binding.switch3.isChecked)
         ed.putBoolean("dateChanged", binding.switch4.isChecked)
         ed.putBoolean("showMessageInternetOk", binding.switch5.isChecked)
-        ed.putInt("startDelayValue", binding.startDelay.text.toString().toInt())
-        ed.putInt("queryDelayValue", binding.queryDelay.text.toString().toInt())
-        ed.putInt("requestIntervalValue", binding.requestInterval.text.toString().toInt())
+        binding.startDelay.text.toString().apply {
+            ed.putInt("startDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_START)
+        }
+        binding.queryDelay.text.toString().apply {
+            ed.putInt("queryDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_QUERY)
+        }
+        binding.requestInterval.text.toString().apply {
+            ed.putInt("requestIntervalValue", if(this.isNotEmpty()) this.toInt() else INTERVAL_REQUESTS)
+        }
         ed.apply()
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
         appbarMenu.findItem(R.id.save).isVisible = false

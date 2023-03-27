@@ -78,6 +78,7 @@ class ListNotesFragment : Fragment() {
         setupRecycler()
         observeConnectStatus()
         loadData()
+        startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
         observeErrorMessages()
@@ -95,9 +96,7 @@ class ListNotesFragment : Fragment() {
                             viewModel.isStartApp = false
                             viewModel.firstDataLoad = false
                             binding.visibleProgressRound = false
-                            val serviceIntent = Intent(context, RemoteService::class.java)
-                            context?.startService(serviceIntent)
-                            observeRemoteDatabaseChanged()
+                            startRemoteService()
                         } else {
                             viewModel.firstDataLoad = it.isEmpty()
                             if(connectReceiver.isConnectStatusFlow.value) {
@@ -122,10 +121,23 @@ class ListNotesFragment : Fragment() {
         }
     }
 
+    private fun startRemoteService() {
+        if (!viewModel.isStartApp) {
+            val serviceIntent = Intent(context, RemoteService::class.java)
+            context?.startService(serviceIntent)
+            observeRemoteDatabaseChanged()
+        }
+    }
+
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadedFlow.collect {
-                if(viewModel.firstDataLoad) {
+                val actionBar = (activity as MainActivity).supportActionBar
+                actionBar?.title = getString(R.string.app_name) +
+                        if (it) {
+                            "  " + getString(R.string.text_load)
+                        } else ""
+                if (viewModel.firstDataLoad) {
                     binding.visibleProgressRound = it
                 } else {
                     binding.visibleProgressHorizontal = it
@@ -138,30 +150,34 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    binding.floatingActionButton.isEnabled = isConnect
-                    if (isConnect) {
-                        if(showMessageInternetOk) {
-                            if (connectReceiver.getShowTextOk()) {
-                                connectReceiver.setShowTextOk()
-                                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                        viewModel.restartLoadRemoteData()
-                        itemTouchHelper.attachToRecyclerView(recyclerView)
-                    } else {
-                        if(connectReceiver.getShowTextLost()) {
-                            connectReceiver.setShowTextLost()
-                            if(viewModel.isStartApp) {
-                                Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
-                            } else {
-                                showSnack()
-                            }
-                        }
-                        viewModel.stopLoadRemoteData()
-                        itemTouchHelper.attachToRecyclerView(null)
-                    }
+                    reactToConnectionStatusChange(isConnect)
                 }
             }
+        }
+    }
+
+    private fun reactToConnectionStatusChange(isConnect: Boolean) {
+        binding.floatingActionButton.isEnabled = isConnect
+        if (isConnect) {
+            if(showMessageInternetOk) {
+                if (connectReceiver.getShowTextOk()) {
+                    connectReceiver.setShowTextOk()
+                    Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
+                }
+            }
+            viewModel.restartLoadRemoteData()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        } else {
+            if(connectReceiver.getShowTextLost()) {
+                connectReceiver.setShowTextLost()
+                if(viewModel.isStartApp) {
+                    Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
+                } else {
+                    showSnack()
+                }
+            }
+            viewModel.stopLoadRemoteData()
+            itemTouchHelper.attachToRecyclerView(null)
         }
     }
 
@@ -229,6 +245,9 @@ class ListNotesFragment : Fragment() {
                 adapter.notifyItemChanged(position)
             }
             .create()
+        dialog.setOnCancelListener {
+            adapter.notifyItemChanged(position)
+        }
         dialog.show()
     }
 

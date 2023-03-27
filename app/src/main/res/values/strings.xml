@@ -5,6 +5,7 @@
     <string name="delete">Settings</string>
     <string name="add_note">Add Note</string>
     <string name="edit_note">Edit Note</string>
+    <string name="text_load">/load…</string>
 
     <!--dialog-->
     <string name="but_yes_txt">Yes</string>
