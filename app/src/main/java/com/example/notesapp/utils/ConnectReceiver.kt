@@ -19,15 +19,6 @@ class ConnectReceiver(
     private var showTextOk = false
     private var showTextLost = true
 
-    private var networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            isConnectStatus.value = true
-        }
-        override fun onLost(network: Network) {
-            isConnectStatus.value = false
-        }
-    }
-
     init {
         connectivityManager =
             applicationContext.getSystemService(
@@ -40,7 +31,14 @@ class ConnectReceiver(
     }
 
     private fun changeNetwork() {
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                isConnectStatus.value = true
+            }
+            override fun onLost(network: Network) {
+                isConnectStatus.value = false
+            }
+        })
         showTextOk = true
         showTextLost = true
     }

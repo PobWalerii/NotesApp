@@ -143,7 +143,7 @@ class NotesRepository(
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isRemoteConnect()) {
-                    apiService.deleteNote(note)
+                    apiService.deleteNote(note, operationDelayValue)
                     isNoteEdited.value = true
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)

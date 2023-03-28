@@ -1,6 +1,8 @@
 package com.example.notesapp.data.apiservice
 
 import android.content.Context
+import android.net.ConnectivityManager
+import com.example.notesapp.R
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
@@ -16,10 +18,7 @@ class ApiServiceImpl @Inject constructor(
     private var timeLoadBase: Long = 0L
     private var listNotes: List<Notes> = emptyList()
 
-
-    // будем разбираться: подключение ConnectivityManager нарушает анализ состояния интернет соединения
-
-    //private val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -62,19 +61,24 @@ class ApiServiceImpl @Inject constructor(
         NoteResponse(timeLoadBase, listNotes)
     }
 
-    override suspend fun deleteNote(note: Notes) {
-        remoteDao.deleteNote(note)
+    override suspend fun deleteNote(note: Notes, delayTime: Long) {
+        delay(delayTime)
+        if(isInetConnect()) {
+            remoteDao.deleteNote(note)
+        }  else {
+            throw Exception(applicationContext.getString(R.string.operation_failed))
+        }
     }
     override suspend fun addNote(note: Notes, delayTime: Long): Long {
-        //delay(delayTime)
-        //if(isInetConnect()) {
+        delay(delayTime)
+        if(isInetConnect()) {
             return remoteDao.insertNote(note)
-        //} else {
-        //    throw Exception(applicationContext.getString(R.string.operation_failed))
-        //}
+        } else {
+            throw Exception(applicationContext.getString(R.string.operation_failed))
+        }
     }
 
-    //private fun isInetConnect(): Boolean {
-    //    return connectivityManager.activeNetwork != null
-    //}
+    private fun isInetConnect(): Boolean {
+        return connectivityManager.activeNetwork != null
+    }
 }
