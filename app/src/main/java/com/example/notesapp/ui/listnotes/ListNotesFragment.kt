@@ -300,7 +300,8 @@ class ListNotesFragment : Fragment() {
         val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
         val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
         val requestIntervalValue = sPref.getInt("requestIntervalValue", KeyConstants.INTERVAL_REQUESTS)
-        viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue)
+        val operationDelayValue = sPref.getInt("operationDelayValue", KeyConstants.INTERVAL_REQUESTS)
+        viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
     }
 
     override fun onResume() {

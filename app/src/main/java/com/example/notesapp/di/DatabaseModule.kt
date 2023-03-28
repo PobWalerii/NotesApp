@@ -7,7 +7,6 @@ import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.AppDatabase
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.repository.NotesRepository
-import com.example.notesapp.utils.ConnectReceiver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,10 +37,9 @@ object DatabaseModule {
     fun provideNotesRepository(
             notesDao: NotesDao,
             apiService: ApiService,
-            connectReceiver: ConnectReceiver,
             @ApplicationContext applicationContext: Context
         ): NotesRepository {
-            return NotesRepository(notesDao,apiService,connectReceiver,applicationContext)
+            return NotesRepository(notesDao,apiService,applicationContext)
         }
 
 }

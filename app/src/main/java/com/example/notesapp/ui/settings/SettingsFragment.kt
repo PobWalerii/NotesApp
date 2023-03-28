@@ -19,6 +19,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.INTERVAL_REQUESTS
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
+import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
@@ -115,6 +116,10 @@ class SettingsFragment : Fragment() {
             binding.requestIntervalValue = this
             viewModel.requestIntervalValue = this
         }
+        sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION).apply {
+            binding.operationDelayValue = this
+            viewModel.operationDelayValue = this
+        }
     }
 
     private fun setListenersSettingsChanged() {
@@ -145,6 +150,9 @@ class SettingsFragment : Fragment() {
         binding.requestInterval.addTextChangedListener {
             definitionOfChange()
         }
+        binding.operationDelay.addTextChangedListener {
+            definitionOfChange()
+        }
     }
 
     private fun definitionOfChange() {
@@ -153,6 +161,7 @@ class SettingsFragment : Fragment() {
             viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
             viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
             viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
+            viewModel.operationDelayValue.toString() != binding.operationDelay.text.toString() ||
             viewModel.specificationLine != binding.switch1.isChecked ||
             viewModel.defaultAddIfClick != binding.switch2.isChecked ||
             viewModel.deleteIfSwiped != binding.switch3.isChecked ||
@@ -180,6 +189,9 @@ class SettingsFragment : Fragment() {
         }
         binding.requestInterval.text.toString().apply {
             ed.putInt("requestIntervalValue", if(this.isNotEmpty()) this.toInt() else INTERVAL_REQUESTS)
+        }
+        binding.operationDelay.text.toString().apply {
+            ed.putInt("operationDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_OPERATION)
         }
         ed.apply()
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()

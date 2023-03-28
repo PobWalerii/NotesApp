@@ -30,6 +30,9 @@
         <variable
             name="requestIntervalValue"
             type="Integer" />
+        <variable
+            name="operationDelayValue"
+            type="Integer" />
     </data>
 
     <ScrollView
@@ -146,6 +149,34 @@
                     android:ems="10"
                     android:inputType="number"
                     android:text="@{requestIntervalValue.toString()}"
+                    tools:ignore="Autofill,LabelFor" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:text="@string/text10"/>
+
+                <EditText
+                    android:id="@+id/operationDelay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:layout_weight="9"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/blue"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="@{operationDelayValue.toString()}"
                     tools:ignore="Autofill,LabelFor" />
             </LinearLayout>
 

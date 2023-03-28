@@ -12,4 +12,5 @@ class SettingsViewModel: ViewModel() {
     var startDelayValue: Int = 0
     var queryDelayValue: Int = 0
     var requestIntervalValue: Int = 0
+    var operationDelayValue: Int = 0
 }

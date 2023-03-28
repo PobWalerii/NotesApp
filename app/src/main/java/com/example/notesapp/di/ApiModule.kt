@@ -35,8 +35,11 @@ object ApiModule {
 
     @Singleton
     @Provides
-    fun provideApiService(remoteDao: RemoteDao): ApiService {
-        return ApiServiceImpl(remoteDao)
+    fun provideApiService(
+        remoteDao: RemoteDao,
+        @ApplicationContext applicationContext: Context
+    ): ApiService {
+        return ApiServiceImpl(remoteDao,applicationContext)
     }
 
 }

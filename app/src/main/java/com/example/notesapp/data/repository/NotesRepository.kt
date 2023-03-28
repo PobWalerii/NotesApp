@@ -1,20 +1,21 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
+import android.net.ConnectivityManager
 import com.example.notesapp.R
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.ConnectReceiver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class NotesRepository(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    private val connectReceiver: ConnectReceiver,
     private val applicationContext: Context
 ) {
+
+    private val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private var insertedOrEditedId: Long = 0L
     private var fixedTimeLoadedDate: Long = 0L
@@ -23,6 +24,7 @@ class NotesRepository(
     private var startDelayValue: Long = 0L
     private var queryDelayValue: Long = 0L
     private var requestIntervalValue: Long = 0L
+    private var operationDelayValue: Long = 0L
 
     private var job: Job? = null
 
@@ -40,10 +42,11 @@ class NotesRepository(
 
     private var isLoadCanceled = false
 
-    fun refreshDelaySettings(startDelay: Int, queryDelay: Int, requestInterval: Int) {
+    fun refreshDelaySettings(startDelay: Int, queryDelay: Int, requestInterval: Int, operationDelay: Int) {
         startDelayValue = (startDelay*1000).toLong()
         queryDelayValue = (queryDelay*1000).toLong()
         requestIntervalValue = (requestInterval*1000).toLong()
+        operationDelayValue = (operationDelay*1000).toLong()
     }
 
     fun setRemoteDatabaseChanged(timeRemote: Long) {
@@ -123,8 +126,8 @@ class NotesRepository(
     fun addNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                if(connectReceiver.isConnectStatusFlow.value) {
-                    val resultId: Long = apiService.addNote(note)
+                if(isRemoteConnect()) {
+                    val resultId: Long = apiService.addNote(note, operationDelayValue)
                     insertedOrEditedId = resultId
                     isNoteEdited.value = true
                 } else {
@@ -139,7 +142,7 @@ class NotesRepository(
     fun deleteNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                if(connectReceiver.isConnectStatusFlow.value) {
+                if(isRemoteConnect()) {
                     apiService.deleteNote(note)
                     isNoteEdited.value = true
                 } else {
@@ -149,6 +152,10 @@ class NotesRepository(
                 serviceError.value = e.message.toString()
             }
         }
+    }
+
+    private fun isRemoteConnect(): Boolean {
+        return connectivityManager.activeNetwork != null
     }
 
 }
