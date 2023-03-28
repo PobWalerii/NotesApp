@@ -1,8 +1,6 @@
 package com.example.notesapp.data.apiservice
 
 import android.content.Context
-import android.net.ConnectivityManager
-import com.example.notesapp.R
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
