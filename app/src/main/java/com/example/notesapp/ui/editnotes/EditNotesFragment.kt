@@ -22,8 +22,6 @@ import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,19 +63,16 @@ class EditNotesFragment : Fragment() {
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
-                if(isConnect) {
-                    if(showMessageInternetOk) {
-                        if (connectReceiver.getShowTextOk()) {
-                            connectReceiver.setShowTextOk()
-                            Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-                        }
+                if (isConnect) {
+                    if (showMessageInternetOk && !viewModel.lastConnectionStatus) {
+                        Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    if(connectReceiver.getShowTextLost()) {
-                        connectReceiver.setShowTextLost()
+                    if (viewModel.lastConnectionStatus) {
                         Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
                     }
                 }
+                viewModel.lastConnectionStatus = isConnect
             }
         }
     }
@@ -86,9 +81,8 @@ class EditNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.serviceErrorFlow.collect { message ->
                 if(message.isNotEmpty()) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                    }
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                    viewModel.clearServiceErrorMessage()
                 }
             }
         }

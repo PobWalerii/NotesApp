@@ -188,7 +188,7 @@ class SettingsFragment : Fragment() {
             ed.putInt("queryDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_QUERY)
         }
         binding.requestInterval.text.toString().apply {
-            ed.putInt("requestIntervalValue", if(this.isNotEmpty()) this.toInt() else INTERVAL_REQUESTS)
+            ed.putInt("requestIntervalValue", if(this.isNotEmpty() && this.toInt()>0) this.toInt() else INTERVAL_REQUESTS)
         }
         binding.operationDelay.text.toString().apply {
             ed.putInt("operationDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_OPERATION)

@@ -20,7 +20,7 @@ class EditViewModel  @Inject constructor(
     var currentNoteName: String = ""
     var currentNoteSpecification: String = ""
     var currentNoteDate: Long = 0L
-
+    var lastConnectionStatus: Boolean = true
     var dateChangedStrategy: Boolean = true
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
@@ -51,6 +51,10 @@ class EditViewModel  @Inject constructor(
 
     fun setStartFlowParameters() {
         notesRepository.setStartFlowParameters()
+    }
+
+    fun clearServiceErrorMessage() {
+        notesRepository.clearServiceErrorMessage()
     }
 
 }

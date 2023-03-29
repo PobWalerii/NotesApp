@@ -53,6 +53,8 @@ class ListNotesFragment : Fragment() {
     private var defaultAddIfClick: Boolean = true
     private var deleteIfSwiped: Boolean = true
     private var showMessageInternetOk: Boolean = false
+    private var showInfoLoad: Boolean = false
+    private var showInfoLoadIfStart: Boolean = false
 
     private lateinit var receiver: DateChangedBroadcastReceiver
 
@@ -132,11 +134,13 @@ class ListNotesFragment : Fragment() {
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadedFlow.collect {
-                val actionBar = (activity as MainActivity).supportActionBar
-                actionBar?.title = getString(R.string.app_name) +
-                        if (it) {
-                            "  " + getString(R.string.text_load)
-                        } else ""
+                if((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
+                    val actionBar = (activity as MainActivity).supportActionBar
+                    actionBar?.title = getString(R.string.app_name) +
+                            if (it) {
+                                "  " + getString(R.string.text_load)
+                            } else ""
+                }
                 if (viewModel.firstDataLoad) {
                     binding.visibleProgressRound = it
                 } else {
@@ -149,9 +153,7 @@ class ListNotesFragment : Fragment() {
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    reactToConnectionStatusChange(isConnect)
-                }
+                reactToConnectionStatusChange(isConnect)
             }
         }
     }
@@ -159,18 +161,14 @@ class ListNotesFragment : Fragment() {
     private fun reactToConnectionStatusChange(isConnect: Boolean) {
         binding.floatingActionButton.isEnabled = isConnect
         if (isConnect) {
-            if(showMessageInternetOk) {
-                if (connectReceiver.getShowTextOk()) {
-                    connectReceiver.setShowTextOk()
-                    Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-                }
+            if(showMessageInternetOk && !viewModel.lastConnectionStatus) {
+                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
             }
             viewModel.restartLoadRemoteData()
             itemTouchHelper.attachToRecyclerView(recyclerView)
         } else {
-            if(connectReceiver.getShowTextLost()) {
-                connectReceiver.setShowTextLost()
-                if(viewModel.isStartApp) {
+            if (viewModel.lastConnectionStatus) {
+                if (viewModel.isStartApp) {
                     Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
                 } else {
                     showSnack()
@@ -179,15 +177,15 @@ class ListNotesFragment : Fragment() {
             viewModel.stopLoadRemoteData()
             itemTouchHelper.attachToRecyclerView(null)
         }
+        viewModel.lastConnectionStatus = isConnect
     }
 
     private fun observeErrorMessages() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.serviceErrorFlow.collect { message ->
                 if(message.isNotEmpty()) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                    }
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                    viewModel.clearServiceErrorMessage()
                 }
             }
         }
@@ -302,6 +300,8 @@ class ListNotesFragment : Fragment() {
         val requestIntervalValue = sPref.getInt("requestIntervalValue", KeyConstants.INTERVAL_REQUESTS)
         val operationDelayValue = sPref.getInt("operationDelayValue", KeyConstants.INTERVAL_REQUESTS)
         viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
+        showInfoLoad = queryDelayValue > 0
+        showInfoLoadIfStart = startDelayValue > 0
     }
 
     override fun onResume() {

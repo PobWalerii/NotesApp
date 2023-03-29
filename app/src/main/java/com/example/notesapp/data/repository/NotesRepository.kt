@@ -158,4 +158,8 @@ class NotesRepository(
         return connectivityManager.activeNetwork != null
     }
 
+    fun clearServiceErrorMessage() {
+        serviceError.value = ""
+    }
+
 }

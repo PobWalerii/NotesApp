@@ -11,19 +11,13 @@ class ConnectReceiver(
     applicationContext: Context
 ) {
 
-    private var connectivityManager: ConnectivityManager
+    private val connectivityManager =
+        applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val isConnectStatus = MutableStateFlow(false)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
-    private var showTextOk = false
-    private var showTextLost = true
-
     init {
-        connectivityManager =
-            applicationContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE
-            ) as ConnectivityManager
         connectivityManager.addDefaultNetworkActiveListener {
             changeNetwork()
         }
@@ -39,18 +33,6 @@ class ConnectReceiver(
                 isConnectStatus.value = false
             }
         })
-        showTextOk = true
-        showTextLost = true
     }
-
-    fun getShowTextOk(): Boolean = showTextOk
-    fun setShowTextOk() {
-        showTextOk = false
-    }
-    fun getShowTextLost(): Boolean = showTextLost
-    fun setShowTextLost() {
-        showTextLost = false
-    }
-
 
 }
