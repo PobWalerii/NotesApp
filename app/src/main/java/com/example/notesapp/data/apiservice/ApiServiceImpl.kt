@@ -1,24 +1,23 @@
 package com.example.notesapp.data.apiservice
 
 import android.content.Context
-import android.net.ConnectivityManager
 import com.example.notesapp.R
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.utils.ConnectReceiver
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 
 class ApiServiceImpl @Inject constructor(
     private val remoteDao: RemoteDao,
+    private val connectReceiver: ConnectReceiver,
     private val applicationContext: Context
 ): ApiService {
 
     private var timeLoadBase: Long = 0L
     private var listNotes: List<Notes> = emptyList()
-
-    private val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -79,6 +78,6 @@ class ApiServiceImpl @Inject constructor(
     }
 
     private fun isInetConnect(): Boolean {
-        return connectivityManager.activeNetwork != null
+        return connectReceiver.isConnectStatusFlow.value
     }
 }

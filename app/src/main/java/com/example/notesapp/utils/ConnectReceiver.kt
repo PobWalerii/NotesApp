@@ -18,10 +18,11 @@ class ConnectReceiver(
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
     init {
+        isConnectStatus.value =connectivityManager.activeNetwork != null
+        
         connectivityManager.addDefaultNetworkActiveListener {
             changeNetwork()
         }
-        isConnectStatus.value =connectivityManager.activeNetwork != null
     }
 
     private fun changeNetwork() {

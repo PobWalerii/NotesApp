@@ -1,21 +1,20 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
-import android.net.ConnectivityManager
 import com.example.notesapp.R
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.utils.ConnectReceiver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class NotesRepository(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
+    private val connectReceiver: ConnectReceiver,
     private val applicationContext: Context
 ) {
-
-    private val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private var insertedOrEditedId: Long = 0L
     private var fixedTimeLoadedDate: Long = 0L
@@ -155,7 +154,7 @@ class NotesRepository(
     }
 
     private fun isRemoteConnect(): Boolean {
-        return connectivityManager.activeNetwork != null
+        return connectReceiver.isConnectStatusFlow.value
     }
 
     fun clearServiceErrorMessage() {

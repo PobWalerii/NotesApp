@@ -34,6 +34,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,6 +58,7 @@ class ListNotesFragment : Fragment() {
     private var showInfoLoadIfStart: Boolean = false
 
     private lateinit var receiver: DateChangedBroadcastReceiver
+    private var connect: Job? = null
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -153,7 +155,9 @@ class ListNotesFragment : Fragment() {
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
-                reactToConnectionStatusChange(isConnect)
+                CoroutineScope(Dispatchers.Main).launch {
+                    reactToConnectionStatusChange(isConnect)
+                }
             }
         }
     }
@@ -307,6 +311,7 @@ class ListNotesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         broadcastDateRegister()
+        observeConnectStatus()
     }
 
     private fun broadcastDateRegister() {
@@ -371,6 +376,7 @@ class ListNotesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         activity?.unregisterReceiver(receiver)
+        connect?.cancel()
         _binding = null
     }
 

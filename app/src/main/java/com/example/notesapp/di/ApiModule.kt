@@ -7,6 +7,7 @@ import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.apiservice.ApiServiceImpl
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.database.RemoteDatabase
+import com.example.notesapp.utils.ConnectReceiver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,9 +38,10 @@ object ApiModule {
     @Provides
     fun provideApiService(
         remoteDao: RemoteDao,
+        connectReceiver: ConnectReceiver,
         @ApplicationContext applicationContext: Context
     ): ApiService {
-        return ApiServiceImpl(remoteDao,applicationContext)
+        return ApiServiceImpl(remoteDao, connectReceiver, applicationContext)
     }
 
 }

@@ -16,6 +16,8 @@ class RemoteService: Service() {
     lateinit var notesRepository: NotesRepository
     @Inject
     lateinit var apiService: ApiService
+    @Inject
+    lateinit var connectReceiver: ConnectReceiver
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -23,8 +25,12 @@ class RemoteService: Service() {
         scope.launch {
             while (isActive) {
                 delay(notesRepository.getRequestInterval())
-                val remoteBaseTime = apiService.getChangeBaseTime()
-                notesRepository.setRemoteDatabaseChanged(remoteBaseTime)
+                if(connectReceiver.isConnectStatusFlow.value) {
+                    try {
+                        val remoteBaseTime = apiService.getChangeBaseTime()
+                        notesRepository.setRemoteDatabaseChanged(remoteBaseTime)
+                    } catch (_: Exception) {}
+                }
             }
         }
         return START_STICKY
