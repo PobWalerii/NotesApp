@@ -26,7 +26,7 @@ class ApiServiceImpl @Inject constructor(
     override val counterDelayFlow: StateFlow<Int> = counterDelay.asStateFlow()
 
     init {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             remoteDao.loadDataBase().apply {
                 if(this.isEmpty()) {
                     setStartData()
@@ -39,7 +39,7 @@ class ApiServiceImpl @Inject constructor(
     override fun getChangeBaseTime() = timeLoadBase
 
     private fun observeDataChange() {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             remoteDao.loadDataBaseFlow().collect {
                 listNotes = it
                 timeLoadBase = Date().time
@@ -54,7 +54,7 @@ class ApiServiceImpl @Inject constructor(
                 Notes(0,"Find Woman","Scientists Find Woman Who Sees 99 Million More Colors than Others.",1300000000000),
                 Notes(0,"Mental activity","Colors influence our moods and every type of mental activity.",1600000000000)
             )
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             startList.map {
                 remoteDao.insertNote(it)
             }

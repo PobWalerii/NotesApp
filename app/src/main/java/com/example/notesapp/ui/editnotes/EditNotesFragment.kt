@@ -18,6 +18,7 @@ import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.AnimateActionBar
 import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -150,8 +151,14 @@ class EditNotesFragment : Fragment() {
 
     private fun setupActionBar() {
         val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.app_name) + ". " +
-                if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
+        //actionBar?.title = getString(R.string.app_name) + ". " +
+        //        if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
+        AnimateActionBar.animateTitleChange(
+            actionBar,
+            requireContext(),
+            getString(R.string.app_name) + ". " +
+                    if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
+        )
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {

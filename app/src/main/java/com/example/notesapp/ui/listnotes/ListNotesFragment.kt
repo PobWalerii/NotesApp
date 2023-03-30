@@ -29,6 +29,7 @@ import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.utils.RemoteService
 import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.utils.AnimateActionBar.animateTitleChange
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -136,11 +137,13 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun showCount(seconds: Int) {
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.app_name) +
-                if (seconds > 0) {
-                    "  /$seconds"
-                } else ""
+        if (!viewModel.isLoadedFlow.value) {
+            val actionBar = (activity as MainActivity).supportActionBar
+            actionBar?.title = getString(R.string.app_name) +
+                    if (seconds > 0) {
+                        "  /$seconds"
+                    } else ""
+        }
     }
 
     private fun startRemoteService() {
@@ -220,11 +223,13 @@ class ListNotesFragment : Fragment() {
     private fun observeRemoteDatabaseChanged() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isRemoteDatabaseChangedFlow.collect { isChanged ->
-                if(isChanged) {
-                    if(connectReceiver.isConnectStatusFlow.value) {
-                        viewModel.loadRemoteData()
-                    } else {
-                        viewModel.setIsLoadCanceled()
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (isChanged) {
+                        if (connectReceiver.isConnectStatusFlow.value) {
+                            viewModel.loadRemoteData()
+                        } else {
+                            viewModel.setIsLoadCanceled()
+                        }
                     }
                 }
             }
@@ -378,7 +383,10 @@ class ListNotesFragment : Fragment() {
     private fun setupActionBar() {
 
         val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.app_name)
+
+        //actionBar?.title = getString(R.string.app_name)
+        animateTitleChange(actionBar, requireContext(), getString(R.string.app_name))
+
         actionBar?.setDisplayHomeAsUpEnabled(false)
 
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {

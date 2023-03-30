@@ -125,7 +125,7 @@ class NotesRepository(
     }
 
     fun addNote(note: Notes) {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 if(isRemoteConnect()) {
                     val resultId: Long = apiService.addNote(note, operationDelayValue)
@@ -141,7 +141,7 @@ class NotesRepository(
     }
 
     fun deleteNote(note: Notes) {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 if(isRemoteConnect()) {
                     apiService.deleteNote(note, operationDelayValue)
