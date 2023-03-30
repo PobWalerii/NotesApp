@@ -60,10 +60,8 @@ class EditNotesFragment : Fragment() {
         loadData()
         loadSettings()
         setListenersDataChanged()
-        observeConnectStatus()
         observeErrorMessages()
         setupActionBar()
-        observeCounterDelay()
     }
 
     private fun observeConnectStatus() {
@@ -223,8 +221,6 @@ class EditNotesFragment : Fragment() {
         }
     }
 
-
-
     private fun showMessageNoConnect() {
         Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
     }
@@ -237,6 +233,12 @@ class EditNotesFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        observeConnectStatus()
+        observeCounterDelay()
     }
 
     override fun onDestroyView() {
