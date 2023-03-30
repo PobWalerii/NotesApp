@@ -35,6 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,7 +59,8 @@ class ListNotesFragment : Fragment() {
     private var showInfoLoadIfStart: Boolean = false
 
     private lateinit var receiver: DateChangedBroadcastReceiver
-    private var connect: Job? = null
+
+    private var counter: Job? = null
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -80,7 +82,6 @@ class ListNotesFragment : Fragment() {
         setupActionBar()
         loadAndRefreshSettings()
         setupRecycler()
-        observeConnectStatus()
         loadData()
         startRemoteService()
         setupButtonAddListener()
@@ -125,6 +126,24 @@ class ListNotesFragment : Fragment() {
         }
     }
 
+    private fun observeCounterDelay() {
+        counter = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.counterDelayFlow.collect { seconds ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    showCount(seconds)
+                }
+            }
+        }
+    }
+
+    private fun showCount(seconds: Int) {
+        val actionBar = (activity as MainActivity).supportActionBar
+        actionBar?.title = getString(R.string.app_name) +
+                if (seconds > 0) {
+                    "  /$seconds"
+                } else ""
+    }
+
     private fun startRemoteService() {
         if (!viewModel.isStartApp) {
             val serviceIntent = Intent(context, RemoteService::class.java)
@@ -136,17 +155,19 @@ class ListNotesFragment : Fragment() {
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadedFlow.collect {
-                if((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                    val actionBar = (activity as MainActivity).supportActionBar
-                    actionBar?.title = getString(R.string.app_name) +
-                            if (it) {
-                                "  " + getString(R.string.text_load)
-                            } else ""
-                }
-                if (viewModel.firstDataLoad) {
-                    binding.visibleProgressRound = it
-                } else {
-                    binding.visibleProgressHorizontal = it
+                CoroutineScope(Dispatchers.Main).launch {
+                    if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
+                        val actionBar = (activity as MainActivity).supportActionBar
+                        actionBar?.title = getString(R.string.app_name) +
+                                if (it) {
+                                    "  " + getString(R.string.text_load)
+                                } else ""
+                    }
+                    if (viewModel.firstDataLoad) {
+                        binding.visibleProgressRound = it
+                    } else {
+                        binding.visibleProgressHorizontal = it
+                    }
                 }
             }
         }
@@ -302,7 +323,7 @@ class ListNotesFragment : Fragment() {
         val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
         val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
         val requestIntervalValue = sPref.getInt("requestIntervalValue", KeyConstants.INTERVAL_REQUESTS)
-        val operationDelayValue = sPref.getInt("operationDelayValue", KeyConstants.INTERVAL_REQUESTS)
+        val operationDelayValue = sPref.getInt("operationDelayValue", KeyConstants.TIME_DELAY_OPERATION)
         viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
@@ -312,6 +333,7 @@ class ListNotesFragment : Fragment() {
         super.onResume()
         broadcastDateRegister()
         observeConnectStatus()
+        observeCounterDelay()
     }
 
     private fun broadcastDateRegister() {
@@ -373,10 +395,15 @@ class ListNotesFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+    override fun onPause() {
+        super.onPause()
+        counter?.cancel()
+        showCount(0)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         activity?.unregisterReceiver(receiver)
-        connect?.cancel()
         _binding = null
     }
 

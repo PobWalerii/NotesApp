@@ -22,6 +22,9 @@ import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +42,8 @@ class EditNotesFragment : Fragment() {
     private val args: EditNotesFragmentArgs by navArgs()
 
     private lateinit var appbarMenu: Menu
+
+    private var counter: Job? = null
 
     private var showMessageInternetOk = false
 
@@ -58,6 +63,7 @@ class EditNotesFragment : Fragment() {
         observeConnectStatus()
         observeErrorMessages()
         setupActionBar()
+        observeCounterDelay()
     }
 
     private fun observeConnectStatus() {
@@ -170,6 +176,7 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun deleteNoteRequest() {
+        hideKeyboardFromView(requireContext(), requireView())
         if(connectReceiver.isConnectStatusFlow.value) {
             val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.title_delete)
@@ -187,7 +194,6 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun deleteNote() {
-        hideKeyboardFromView(requireContext(), requireView())
         if(connectReceiver.isConnectStatusFlow.value) {
             viewModel.deleteNote()
             observeEditNote()
@@ -209,6 +215,8 @@ class EditNotesFragment : Fragment() {
         }
     }
 
+
+
     private fun showMessageNoConnect() {
         Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
     }
@@ -227,6 +235,30 @@ class EditNotesFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    override fun onPause() {
+        super.onPause()
+        counter?.cancel()
+        showCount(0)
+    }
+
+    private fun observeCounterDelay() {
+        counter = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.counterDelayFlow.collect { seconds ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    showCount(seconds)
+                }
+            }
+        }
+    }
+
+    private fun showCount(seconds: Int) {
+        val actionBar = (activity as MainActivity).supportActionBar
+        actionBar?.title = getString(R.string.app_name) + ". " +
+                (if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)) +
+                (if (seconds > 0) "  /$seconds" else "")
+    }
+
 
 
 }

@@ -25,6 +25,7 @@ class EditViewModel  @Inject constructor(
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
+    val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
 
     fun getNoteById(idNote: Long): Flow<Notes?> =
         notesRepository.getNoteById(idNote)

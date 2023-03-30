@@ -7,6 +7,9 @@ import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.utils.ConnectReceiver
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import javax.inject.Inject
 
@@ -18,6 +21,9 @@ class ApiServiceImpl @Inject constructor(
 
     private var timeLoadBase: Long = 0L
     private var listNotes: List<Notes> = emptyList()
+
+    private val counterDelay = MutableStateFlow(0)
+    override val counterDelayFlow: StateFlow<Int> = counterDelay.asStateFlow()
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -60,20 +66,38 @@ class ApiServiceImpl @Inject constructor(
         NoteResponse(timeLoadBase, listNotes)
     }
 
-    override suspend fun deleteNote(note: Notes, delayTime: Long) {
-        delay(delayTime)
-        if(isInetConnect()) {
-            remoteDao.deleteNote(note)
-        }  else {
-            throw Exception(applicationContext.getString(R.string.operation_failed))
-        }
+    override suspend fun deleteNote(note: Notes, delayTime: Int) {
+            makeDelay(delayTime)
+            if (isInetConnect()) {
+                remoteDao.deleteNote(note)
+            } else {
+                throw Exception(applicationContext.getString(R.string.operation_failed))
+            }
     }
-    override suspend fun addNote(note: Notes, delayTime: Long): Long {
-        delay(delayTime)
-        if(isInetConnect()) {
-            return remoteDao.insertNote(note)
-        } else {
-            throw Exception(applicationContext.getString(R.string.operation_failed))
+    override suspend fun addNote(note: Notes, delayTime: Int): Long {
+            makeDelay(delayTime)
+            if (isInetConnect()) {
+                return remoteDao.insertNote(note)
+            } else {
+                throw Exception(applicationContext.getString(R.string.operation_failed))
+            }
+    }
+
+    suspend fun makeDelay(delayTime: Int) {
+        if( delayTime !=0 ) {
+            var i = delayTime - 1
+            while (i >= 0) {
+                if(delayTime>1) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        counterDelay.value = i + 1
+                    }
+                }
+                delay(1000)
+                i--
+            }
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            counterDelay.value = 0
         }
     }
 

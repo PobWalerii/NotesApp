@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
             android:padding="@dimen/text_edit_margin_top"
-            android:alpha="0.7"
+            android:alpha="0.5"
             app:tint="@color/gray"
             android:src="@drawable/splash"
             tools:ignore="ContentDescription" />

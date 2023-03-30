@@ -23,7 +23,7 @@ class NotesRepository(
     private var startDelayValue: Long = 0L
     private var queryDelayValue: Long = 0L
     private var requestIntervalValue: Long = 0L
-    private var operationDelayValue: Long = 0L
+    private var operationDelayValue: Int = 0
 
     private var job: Job? = null
 
@@ -39,13 +39,15 @@ class NotesRepository(
     private val isRemoteDatabaseChanged = MutableStateFlow(false)
     val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = isRemoteDatabaseChanged.asStateFlow()
 
+    val counterDelayFlow: StateFlow<Int> = apiService.counterDelayFlow
+
     private var isLoadCanceled = false
 
     fun refreshDelaySettings(startDelay: Int, queryDelay: Int, requestInterval: Int, operationDelay: Int) {
         startDelayValue = (startDelay*1000).toLong()
         queryDelayValue = (queryDelay*1000).toLong()
         requestIntervalValue = (requestInterval*1000).toLong()
-        operationDelayValue = (operationDelay*1000).toLong()
+        operationDelayValue = operationDelay
     }
 
     fun setRemoteDatabaseChanged(timeRemote: Long) {

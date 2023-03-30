@@ -21,6 +21,7 @@ class NotesViewModel @Inject constructor(
     val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
     val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
+    val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
 
     fun refreshRepoSettings(startDelay: Int, queryDelay: Int, requestInterval: Int, operationDelay: Int) {
         notesRepository.refreshDelaySettings(startDelay, queryDelay, requestInterval, operationDelay)
