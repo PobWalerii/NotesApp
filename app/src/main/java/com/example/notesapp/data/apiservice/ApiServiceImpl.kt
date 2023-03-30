@@ -83,7 +83,7 @@ class ApiServiceImpl @Inject constructor(
             }
     }
 
-    suspend fun makeDelay(delayTime: Int) {
+    private suspend fun makeDelay(delayTime: Int) {
         if( delayTime !=0 ) {
             var i = delayTime - 1
             while (i >= 0) {
