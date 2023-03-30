@@ -69,26 +69,34 @@ class EditNotesFragment : Fragment() {
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
-                if (isConnect) {
-                    if (showMessageInternetOk && !viewModel.lastConnectionStatus) {
-                        Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    if (viewModel.lastConnectionStatus) {
-                        Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
-                    }
+                CoroutineScope(Dispatchers.Main).launch {
+                    reactToConnectionStatusChange(isConnect)
                 }
-                viewModel.lastConnectionStatus = isConnect
             }
         }
+    }
+
+    private fun reactToConnectionStatusChange(isConnect: Boolean) {
+        if (isConnect) {
+            if (showMessageInternetOk && !viewModel.lastConnectionStatus) {
+                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
+            }
+        } else {
+            if (viewModel.lastConnectionStatus) {
+                Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
+            }
+        }
+        viewModel.lastConnectionStatus = isConnect
     }
 
     private fun observeErrorMessages() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.serviceErrorFlow.collect { message ->
-                if(message.isNotEmpty()) {
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                    viewModel.clearServiceErrorMessage()
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (message.isNotEmpty()) {
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        viewModel.clearServiceErrorMessage()
+                    }
                 }
             }
         }
