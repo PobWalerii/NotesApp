@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ConnectReceiver(
-    private val applicationContext: Context
+    applicationContext: Context
 ) {
 
-    val connectivityManager =
+    private val connectivityManager =
         applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val isConnectStatus = MutableStateFlow(true)
