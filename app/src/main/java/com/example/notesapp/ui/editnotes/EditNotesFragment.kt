@@ -18,9 +18,9 @@ import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.AnimateActionBar
 import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
+import com.example.notesapp.utils.SpanableTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -151,14 +151,8 @@ class EditNotesFragment : Fragment() {
 
     private fun setupActionBar() {
         val actionBar = (activity as MainActivity).supportActionBar
-        //actionBar?.title = getString(R.string.app_name) + ". " +
-        //        if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
-        AnimateActionBar.animateTitleChange(
-            actionBar,
-            requireContext(),
-            getString(R.string.app_name) + ". " +
-                    if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
-        )
+        actionBar?.title =
+            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
@@ -270,10 +264,14 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun showCount(seconds: Int) {
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.app_name) + ". " +
-                (if(args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)) +
-                (if (seconds > 0) "  /$seconds" else "")
+        SpanableTitle.setSpanableTitle(
+            (activity as MainActivity).supportActionBar,
+            requireContext(),
+            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note),
+            if (seconds > 0) {
+                getString(R.string.text_wait) + " $seconds"
+            } else ""
+        )
     }
 
 

@@ -7,6 +7,7 @@ import android.view.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -29,7 +30,8 @@ import com.example.notesapp.utils.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.utils.RemoteService
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.AnimateActionBar.animateTitleChange
+import com.example.notesapp.utils.SpanableTitle.setSpanableTitle
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,6 +84,7 @@ class ListNotesFragment : Fragment() {
         setupActionBar()
         loadAndRefreshSettings()
         setupRecycler()
+        observeConnectStatus()
         loadData()
         startRemoteService()
         setupButtonAddListener()
@@ -138,11 +141,14 @@ class ListNotesFragment : Fragment() {
 
     private fun showCount(seconds: Int) {
         if (!viewModel.isLoadedFlow.value) {
-            val actionBar = (activity as MainActivity).supportActionBar
-            actionBar?.title = getString(R.string.app_name) +
-                    if (seconds > 0) {
-                        "  /$seconds"
-                    } else ""
+            setSpanableTitle(
+                (activity as MainActivity).supportActionBar,
+                requireContext(),
+                getString(R.string.app_name),
+                if (seconds > 0) {
+                    getString(R.string.text_wait)+" $seconds"
+                } else ""
+            )
         }
     }
 
@@ -159,16 +165,23 @@ class ListNotesFragment : Fragment() {
             viewModel.isLoadedFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                        val actionBar = (activity as MainActivity).supportActionBar
-                        actionBar?.title = getString(R.string.app_name) +
-                                if (it) {
-                                    "  " + getString(R.string.text_load)
-                                } else ""
+                        setSpanableTitle(
+                            (activity as MainActivity).supportActionBar,
+                            requireContext(),
+                            getString(R.string.app_name),
+                            if (it) getString(R.string.text_load)  else ""
+                        )
                     }
                     if (viewModel.firstDataLoad) {
                         binding.visibleProgressRound = it
                     } else {
                         binding.visibleProgressHorizontal = it
+                    }
+                    if (!it) {
+                        val behavior =
+                            (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
+                                .behavior as HideBottomViewOnScrollBehavior
+                        behavior.slideUp(binding.floatingActionButton)
                     }
                 }
             }
@@ -338,7 +351,6 @@ class ListNotesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         broadcastDateRegister()
-        observeConnectStatus()
         observeCounterDelay()
     }
 
@@ -383,10 +395,7 @@ class ListNotesFragment : Fragment() {
     private fun setupActionBar() {
 
         val actionBar = (activity as MainActivity).supportActionBar
-
-        //actionBar?.title = getString(R.string.app_name)
-        animateTitleChange(actionBar, requireContext(), getString(R.string.app_name))
-
+        actionBar?.title = getString(R.string.app_name)
         actionBar?.setDisplayHomeAsUpEnabled(false)
 
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
