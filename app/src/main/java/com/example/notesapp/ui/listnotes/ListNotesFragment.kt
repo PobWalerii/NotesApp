@@ -192,7 +192,9 @@ class ListNotesFragment : Fragment() {
                 Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
             }
             viewModel.restartLoadRemoteData()
-            itemTouchHelper.attachToRecyclerView(recyclerView)
+            if(deleteIfSwiped) {
+                itemTouchHelper.attachToRecyclerView(recyclerView)
+            }
         } else {
             if (viewModel.lastConnectionStatus) {
                 if (viewModel.isStartApp) {
@@ -244,7 +246,7 @@ class ListNotesFragment : Fragment() {
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        if(deleteIfSwiped) {
+        //if(deleteIfSwiped) {
             itemTouchHelper =
                 ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
                     override fun onMove(
@@ -257,7 +259,7 @@ class ListNotesFragment : Fragment() {
                         deleteNoteRequest(holder.adapterPosition)
                     }
                 })
-        }
+        //}
     }
 
     private fun deleteNoteRequest(position: Int) {
@@ -333,6 +335,8 @@ class ListNotesFragment : Fragment() {
         viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
+
+
     }
 
     override fun onResume() {
