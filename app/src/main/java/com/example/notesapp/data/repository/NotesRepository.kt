@@ -82,32 +82,31 @@ class NotesRepository(
     fun getInitialDataUpload(): Boolean = successfulInitialDataUpload
 
     fun loadRemoteData(start: Boolean = false) {
-        isLoadCanceled = false
-        serviceError.value =""
         job = CoroutineScope(Dispatchers.Default).launch {
-                isLoaded.value = true
-                try {
-                    apiService.getAllNote(if (start) startDelayValue else queryDelayValue).apply {
-                        fixedTimeLoadedDate = this.timeBase
-                        isRemoteDatabaseChanged.value = false
-                        successfulInitialDataUpload = true
-                        val list: List<Notes> = this.fullList
-                        notesDao.updateDatabase(list)
-                    }
-                } catch (e: Exception) {
-                    if (e is CancellationException) {
-                        isLoadCanceled = true
-                        serviceError.value =
-                            if(start) {
-                                applicationContext.getString(R.string.interrupted_start_load)
-                            } else {
-                                applicationContext.getString(R.string.interrupted_update_load)
-                            }
-                    } else {
-                        serviceError.value = e.message.toString()
-                    }
+            isLoadCanceled = false
+            serviceError.value = ""
+            isLoaded.value = true
+            try {
+                apiService.getAllNote(if (start) startDelayValue else queryDelayValue).apply {
+                    fixedTimeLoadedDate = this.timeBase
+                    isRemoteDatabaseChanged.value = false
+                    successfulInitialDataUpload = true
+                    val list: List<Notes> = this.fullList
+                    notesDao.updateDatabase(list)
                 }
-            finally {
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    isLoadCanceled = true
+                    serviceError.value =
+                        if (start) {
+                            applicationContext.getString(R.string.interrupted_start_load)
+                        } else {
+                            applicationContext.getString(R.string.interrupted_update_load)
+                        }
+                } else {
+                    serviceError.value = e.message.toString()
+                }
+            } finally {
                 isLoaded.value = false
             }
         }
@@ -125,7 +124,7 @@ class NotesRepository(
     }
 
     fun addNote(note: Notes) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isRemoteConnect()) {
                     val resultId: Long = apiService.addNote(note, operationDelayValue)
@@ -141,7 +140,7 @@ class NotesRepository(
     }
 
     fun deleteNote(note: Notes) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isRemoteConnect()) {
                     apiService.deleteNote(note, operationDelayValue)

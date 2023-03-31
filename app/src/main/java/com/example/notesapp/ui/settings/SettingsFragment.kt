@@ -24,7 +24,6 @@ import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.AnimateActionBar
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 
 class SettingsFragment : Fragment() {
@@ -53,13 +52,9 @@ class SettingsFragment : Fragment() {
 
     private fun setupActionBar() {
         val actionBar = (activity as MainActivity).supportActionBar
-        AnimateActionBar.animateTitleChange(
-            actionBar,
-            requireContext(),
-            getString(R.string.app_name) + ". " + getString(R.string.settings)
-        )
-        //actionBar?.title = getString(R.string.app_name) + ". " + getString(R.string.settings)
+        actionBar?.title = getString(R.string.settings)
         actionBar?.setDisplayHomeAsUpEnabled(true)
+
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
             override fun onPrepareMenu(menu: Menu) {
                 appbarMenu = menu

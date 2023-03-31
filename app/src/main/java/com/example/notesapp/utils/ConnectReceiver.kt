@@ -14,26 +14,34 @@ class ConnectReceiver(
     private val connectivityManager =
         applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val isConnectStatus = MutableStateFlow(false)
+    private val isConnectStatus = MutableStateFlow(true)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
     init {
-        isConnectStatus.value =connectivityManager.activeNetwork != null
-        
         connectivityManager.addDefaultNetworkActiveListener {
             changeNetwork()
         }
+        initReceiver()
+    }
+
+    fun initReceiver() {
+        setStatus(connectivityManager.activeNetwork != null)
     }
 
     private fun changeNetwork() {
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+
             override fun onAvailable(network: Network) {
-                isConnectStatus.value = true
+                setStatus(true)
             }
             override fun onLost(network: Network) {
-                isConnectStatus.value = false
+                setStatus(false)
             }
         })
+    }
+
+    private fun setStatus(status: Boolean) {
+        isConnectStatus.value = status
     }
 
 }
