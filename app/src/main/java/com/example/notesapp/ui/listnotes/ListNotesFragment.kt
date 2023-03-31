@@ -246,20 +246,18 @@ class ListNotesFragment : Fragment() {
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        //if(deleteIfSwiped) {
-            itemTouchHelper =
-                ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-                    override fun onMove(
-                        recycler: RecyclerView,
-                        holder: RecyclerView.ViewHolder,
-                        target: RecyclerView.ViewHolder,
-                    ) = false
+        itemTouchHelper =
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recycler: RecyclerView,
+                    holder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder,
+                ) = false
 
-                    override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                        deleteNoteRequest(holder.adapterPosition)
-                    }
-                })
-        //}
+                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
+                    deleteNoteRequest(holder.adapterPosition)
+                }
+            })
     }
 
     private fun deleteNoteRequest(position: Int) {
@@ -335,8 +333,6 @@ class ListNotesFragment : Fragment() {
         viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
-
-
     }
 
     override fun onResume() {
