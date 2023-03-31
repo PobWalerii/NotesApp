@@ -82,9 +82,9 @@ class ListNotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
-        loadAndRefreshSettings()
         setupRecycler()
         observeConnectStatus()
+        loadAndRefreshSettings()
         loadData()
         startRemoteService()
         setupButtonAddListener()
@@ -205,7 +205,6 @@ class ListNotesFragment : Fragment() {
                 Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
             }
             viewModel.restartLoadRemoteData()
-            itemTouchHelper.attachToRecyclerView(recyclerView)
         } else {
             if (viewModel.lastConnectionStatus) {
                 if (viewModel.isStartApp) {
@@ -215,9 +214,9 @@ class ListNotesFragment : Fragment() {
                 }
             }
             viewModel.stopLoadRemoteData()
-            itemTouchHelper.attachToRecyclerView(null)
         }
         viewModel.lastConnectionStatus = isConnect
+        attachTouchHelper(isConnect)
     }
 
     private fun observeErrorMessages() {
@@ -257,20 +256,18 @@ class ListNotesFragment : Fragment() {
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        if(deleteIfSwiped) {
-            itemTouchHelper =
-                ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-                    override fun onMove(
-                        recycler: RecyclerView,
-                        holder: RecyclerView.ViewHolder,
-                        target: RecyclerView.ViewHolder,
-                    ) = false
+        itemTouchHelper =
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recycler: RecyclerView,
+                    holder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder,
+                ) = false
 
-                    override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                        deleteNoteRequest(holder.adapterPosition)
-                    }
-                })
-        }
+                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
+                    deleteNoteRequest(holder.adapterPosition)
+                }
+            })
     }
 
     private fun deleteNoteRequest(position: Int) {
@@ -348,8 +345,17 @@ class ListNotesFragment : Fragment() {
         showInfoLoadIfStart = startDelayValue > 0
     }
 
+    private fun attachTouchHelper(isConnect: Boolean) {
+        if(deleteIfSwiped && isConnect) {
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        } else {
+            itemTouchHelper.attachToRecyclerView(null)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+        connectReceiver.initReceiver()
         broadcastDateRegister()
         observeCounterDelay()
     }

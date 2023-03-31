@@ -21,6 +21,10 @@ class ConnectReceiver(
         connectivityManager.addDefaultNetworkActiveListener {
             changeNetwork()
         }
+        initReceiver()
+    }
+
+    fun initReceiver() {
         setStatus(connectivityManager.activeNetwork != null)
     }
 
