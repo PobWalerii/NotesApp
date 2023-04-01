@@ -8,11 +8,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,12 +22,11 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentListNotesBinding
-import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
-import com.example.notesapp.utils.RemoteService
+import com.example.notesapp.servicesandreceivers.RemoteService
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.SpanableTitle.setSpanableTitle
+import com.example.notesapp.utils.AppActionBar
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -65,6 +61,8 @@ class ListNotesFragment : Fragment() {
     private var counter: Job? = null
 
     private val viewModel by viewModels<NotesViewModel>()
+
+    private lateinit var actionBar: AppActionBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,22 +131,11 @@ class ListNotesFragment : Fragment() {
         counter = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.counterDelayFlow.collect { seconds ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    showCount(seconds)
+                    if (!viewModel.isLoadedFlow.value) {
+                        actionBar.setSpannableTitle(if (seconds > 0) {getString(R.string.text_wait)+" $seconds"} else "")
+                    }
                 }
             }
-        }
-    }
-
-    private fun showCount(seconds: Int) {
-        if (!viewModel.isLoadedFlow.value) {
-            setSpanableTitle(
-                (activity as MainActivity).supportActionBar,
-                requireContext(),
-                getString(R.string.app_name),
-                if (seconds > 0) {
-                    getString(R.string.text_wait)+" $seconds"
-                } else ""
-            )
         }
     }
 
@@ -165,10 +152,7 @@ class ListNotesFragment : Fragment() {
             viewModel.isLoadedFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                        setSpanableTitle(
-                            (activity as MainActivity).supportActionBar,
-                            requireContext(),
-                            getString(R.string.app_name),
+                        actionBar.setSpannableTitle(
                             if (it) getString(R.string.text_load)  else ""
                         )
                     }
@@ -399,30 +383,26 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setupActionBar() {
-
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.app_name)
-        actionBar?.setDisplayHomeAsUpEnabled(false)
-
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
-            override fun onPrepareMenu(menu: Menu) {
-                menu.findItem(R.id.save).isVisible = false
-                menu.findItem(R.id.delete).isVisible = false
+        actionBar = AppActionBar(
+            requireActivity(),
+            requireContext(),
+            R.string.app_name,
+            viewLifecycleOwner,
+            isHomeKey = false,
+            isSettings = true,
+        )
+        viewLifecycleOwner.lifecycleScope.launch {
+            actionBar.isItemMenuPressedFlow.collect {
+                if(it=="settings") {
+                    startSettingsFragment()
+                }
             }
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.appbar_menu, menu)
-            }
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                startSettingsFragment()
-                return true
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
     }
 
     override fun onPause() {
         super.onPause()
         counter?.cancel()
-        showCount(0)
     }
 
     override fun onDestroyView() {

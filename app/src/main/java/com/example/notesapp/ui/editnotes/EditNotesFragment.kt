@@ -5,11 +5,8 @@ import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -18,9 +15,9 @@ import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
-import com.example.notesapp.utils.SpanableTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -42,11 +39,11 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    private lateinit var appbarMenu: Menu
-
     private var counter: Job? = null
 
     private var showMessageInternetOk = false
+
+    private lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -111,9 +108,10 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        appbarMenu.findItem(R.id.save).isVisible =
+        actionBar.setButtonVisible("save",
             viewModel.currentNoteName != binding.titleNoteText.text.toString() ||
             viewModel.currentNoteSpecification != binding.textNoteText.text.toString()
+        )
     }
 
     private fun loadData() {
@@ -150,36 +148,24 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun setupActionBar() {
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title =
-            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
-        actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
-            override fun onPrepareMenu(menu: Menu) {
-                appbarMenu = menu
-                menu.findItem(R.id.settings).isVisible = false
-                menu.findItem(R.id.delete).isVisible = args.idNote != 0L
-                definitionOfChange()
-            }
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.appbar_menu, menu)
-            }
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when(menuItem.itemId) {
-                    android.R.id.home -> {
-                        (activity as MainActivity).onSupportNavigateUp()
-                    }
-                    R.id.delete -> {
-                        deleteNoteRequest()
-                    }
-                    R.id.save -> {
-                        saveNote()
-                    }
+        actionBar = AppActionBar(
+            requireActivity(),
+            requireContext(),
+            if (args.idNote == 0L) R.string.add_note else R.string.edit_note,
+            viewLifecycleOwner,
+            isDelete = args.idNote != 0L,
+        )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            actionBar.isItemMenuPressedFlow.collect {
+                if(it=="save") {
+                    saveNote()
+                } else if(it=="delete") {
+                    deleteNoteRequest()
                 }
-                return true
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
     }
 
     private fun deleteNoteRequest() {
@@ -264,10 +250,7 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun showCount(seconds: Int) {
-        SpanableTitle.setSpanableTitle(
-            (activity as MainActivity).supportActionBar,
-            requireContext(),
-            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note),
+        actionBar.setSpannableTitle(
             if (seconds > 0) {
                 getString(R.string.text_wait) + " $seconds"
             } else ""

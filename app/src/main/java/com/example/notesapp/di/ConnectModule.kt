@@ -1,7 +1,7 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
