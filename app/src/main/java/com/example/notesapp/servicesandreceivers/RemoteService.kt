@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.IBinder
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.repository.NotesRepository
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
