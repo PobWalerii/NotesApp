@@ -4,8 +4,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
@@ -25,11 +23,11 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.servicesandreceivers.RemoteService
-import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.utils.AppActionBar
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showConfirmationDeleteDialog
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showMessageNotPossible
+import com.example.notesapp.utils.ShowConnectStatus
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +40,8 @@ class ListNotesFragment : Fragment() {
 
     @Inject
     lateinit var connectReceiver: ConnectReceiver
+    @Inject
+    lateinit var showConnectStatus: ShowConnectStatus
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -52,7 +52,6 @@ class ListNotesFragment : Fragment() {
 
     private var defaultAddIfClick: Boolean = true
     private var deleteIfSwiped: Boolean = true
-    private var showMessageInternetOk: Boolean = false
     private var showInfoLoad: Boolean = false
     private var showInfoLoadIfStart: Boolean = false
 
@@ -81,13 +80,12 @@ class ListNotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
         setupRecycler()
-        observeConnectStatus()
         loadAndRefreshSettings()
+        observeConnectStatus()
         loadData()
         startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
-        observeErrorMessages()
         observeLoadStatus()
     }
 
@@ -181,39 +179,23 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
-
     private fun reactToConnectionStatusChange(isConnect: Boolean) {
+
         binding.floatingActionButton.isEnabled = isConnect
+
+        showConnectStatus.showStatus(
+            isConnect,
+            requireView(),
+            viewModel.isStartApp,
+        )
         if (isConnect) {
-            if(showMessageInternetOk && !viewModel.lastConnectionStatus) {
-                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-            }
             viewModel.restartLoadRemoteData()
         } else {
-            if (viewModel.lastConnectionStatus) {
-                if (viewModel.isStartApp) {
-                    Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
-                } else {
-                    showSnack()
-                }
-            }
             viewModel.stopLoadRemoteData()
         }
-        viewModel.lastConnectionStatus = isConnect
-        attachTouchHelper(isConnect)
-    }
-
-    private fun observeErrorMessages() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.serviceErrorFlow.collect { message ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (message.isNotEmpty()) {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        viewModel.clearServiceErrorMessage()
-                    }
-                }
-            }
-        }
+        itemTouchHelper.attachToRecyclerView(
+            if(deleteIfSwiped && isConnect) recyclerView else null
+        )
     }
 
     private fun observeRemoteDatabaseChanged() {
@@ -249,38 +231,29 @@ class ListNotesFragment : Fragment() {
                 ) = false
 
                 override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                    deleteNoteRequest(holder.adapterPosition)
+                    deleteNote(holder.adapterPosition)
                 }
             })
     }
 
-    private fun deleteNoteRequest(position: Int) {
+    private fun deleteNote(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.title_delete)
-            .setIcon(R.drawable.warning)
-            .setMessage(R.string.text_delete)
-            .setPositiveButton(R.string.but_yes_txt) { _, _ ->
-                deleteNote(position, note)
-            }
-            .setNegativeButton(R.string.but_no_txt) { _, _ ->
+
+        showConfirmationDeleteDialog(
+            requireContext(),
+            onConfirmed = {
+                if(connectReceiver.isConnectStatusFlow.value) {
+                    viewModel.deleteNote(note)
+                } else {
+                    showMessageNotPossible(requireContext())
+                    adapter.notifyItemChanged(position)
+                }
+            },
+            onCancelled = {
                 adapter.notifyItemChanged(position)
             }
-            .create()
-        dialog.setOnCancelListener {
-            adapter.notifyItemChanged(position)
-        }
-        dialog.show()
-    }
-
-    private fun deleteNote(position: Int, note: Notes) {
-        if(connectReceiver.isConnectStatusFlow.value) {
-            viewModel.deleteNote(note)
-        } else {
-            Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
-            adapter.notifyItemChanged(position)
-        }
+        )
     }
 
     private fun startSettingsFragment() {
@@ -318,7 +291,10 @@ class ListNotesFragment : Fragment() {
 
         defaultAddIfClick = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
         deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
-        showMessageInternetOk = sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+
+        showConnectStatus.setShowMessageInternetOk(
+            sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+        )
 
         val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
         val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
@@ -327,14 +303,6 @@ class ListNotesFragment : Fragment() {
         viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
-    }
-
-    private fun attachTouchHelper(isConnect: Boolean) {
-        if(deleteIfSwiped && isConnect) {
-            itemTouchHelper.attachToRecyclerView(recyclerView)
-        } else {
-            itemTouchHelper.attachToRecyclerView(null)
-        }
     }
 
     override fun onResume() {
@@ -361,25 +329,6 @@ class ListNotesFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun showSnack() {
-        val snack = Snackbar.make(
-            binding.coordinator,
-            R.string.text_no_internet,
-            Snackbar.LENGTH_LONG
-        )
-        val snackView = snack.view
-        val textView: TextView =
-            snackView.findViewById(com.google.android.material.R.id.snackbar_text)
-        textView.setCompoundDrawablesWithIntrinsicBounds(
-            R.drawable.warning,
-            0,
-            0,
-            0
-        )
-        textView.compoundDrawablePadding = resources.getDimensionPixelOffset(R.dimen.snackbar_icon_padding)
-        snack.show()
     }
 
     private fun setupActionBar() {

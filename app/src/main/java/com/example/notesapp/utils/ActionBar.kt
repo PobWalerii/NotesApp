@@ -32,6 +32,7 @@ class AppActionBar(
 
     private val isItemMenuPressed = MutableStateFlow("")
     val isItemMenuPressedFlow: StateFlow<String> = isItemMenuPressed.asStateFlow()
+
     lateinit var appbarMenu: Menu
     private val actionBar = (activity as MainActivity).supportActionBar
     private val title = context.getString(titleId)
@@ -75,6 +76,7 @@ class AppActionBar(
             (activity as MainActivity).onSupportNavigateUp()
         } else {
             isItemMenuPressed.value = item
+            isItemMenuPressed.value = ""
         }
     }
 

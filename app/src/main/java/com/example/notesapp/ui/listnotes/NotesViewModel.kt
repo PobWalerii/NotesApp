@@ -16,9 +16,7 @@ class NotesViewModel @Inject constructor(
 
     var firstDataLoad = false
     var isStartApp = true
-    var lastConnectionStatus = true
 
-    val serviceErrorFlow: StateFlow<String> = notesRepository.serviceErrorFlow
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
     val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
     val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
@@ -62,7 +60,4 @@ class NotesViewModel @Inject constructor(
 
     fun getInsertedOrEditedIdValue() = notesRepository.getInsertedOrEditedIdValue()
 
-    fun clearServiceErrorMessage() {
-        notesRepository.clearServiceErrorMessage()
-    }
 }
