@@ -5,7 +5,7 @@ import com.example.notesapp.R
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

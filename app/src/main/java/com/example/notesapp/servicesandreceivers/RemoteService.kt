@@ -1,4 +1,4 @@
-package com.example.notesapp.utils
+package com.example.notesapp.servicesandreceivers
 
 import android.app.Service
 import android.content.Intent

@@ -1,11 +1,12 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
+import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -81,10 +82,25 @@ class NotesRepository(
 
     fun getInitialDataUpload(): Boolean = successfulInitialDataUpload
 
+    private fun observeErrorMessages() {
+        CoroutineScope(Dispatchers.Default).launch {
+            serviceErrorFlow.collect { message ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (message.isNotEmpty()) {
+                        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+                        serviceError.value = ""
+                    }
+                }
+            }
+        }
+    }
+
     fun loadRemoteData(start: Boolean = false) {
+        if(start) {
+            observeErrorMessages()
+        }
         job = CoroutineScope(Dispatchers.Default).launch {
             isLoadCanceled = false
-            serviceError.value = ""
             isLoaded.value = true
             try {
                 apiService.getAllNote(if (start) startDelayValue else queryDelayValue).apply {
@@ -156,10 +172,6 @@ class NotesRepository(
 
     private fun isRemoteConnect(): Boolean {
         return connectReceiver.isConnectStatusFlow.value
-    }
-
-    fun clearServiceErrorMessage() {
-        serviceError.value = ""
     }
 
 }

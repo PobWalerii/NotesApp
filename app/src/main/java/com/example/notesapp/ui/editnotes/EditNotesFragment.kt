@@ -2,26 +2,23 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
-import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.utils.AppActionBar
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showConfirmationDeleteDialog
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showMessageNotPossible
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
-import com.example.notesapp.utils.SpanableTitle
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.notesapp.utils.ShowConnectStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +31,8 @@ class EditNotesFragment : Fragment() {
 
     @Inject
     lateinit var connectReceiver: ConnectReceiver
+    @Inject
+    lateinit var showConnectStatus: ShowConnectStatus
 
     private var _binding: FragmentEditNotesBinding? = null
     private val binding get() = _binding!!
@@ -42,11 +41,9 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    private lateinit var appbarMenu: Menu
-
     private var counter: Job? = null
 
-    private var showMessageInternetOk = false
+    private lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,7 +58,6 @@ class EditNotesFragment : Fragment() {
         loadData()
         loadSettings()
         setListenersDataChanged()
-        observeErrorMessages()
         setupActionBar()
     }
 
@@ -69,33 +65,7 @@ class EditNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    reactToConnectionStatusChange(isConnect)
-                }
-            }
-        }
-    }
-
-    private fun reactToConnectionStatusChange(isConnect: Boolean) {
-        if (isConnect) {
-            if (showMessageInternetOk && !viewModel.lastConnectionStatus) {
-                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-            }
-        } else {
-            if (viewModel.lastConnectionStatus) {
-                Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
-            }
-        }
-        viewModel.lastConnectionStatus = isConnect
-    }
-
-    private fun observeErrorMessages() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.serviceErrorFlow.collect { message ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (message.isNotEmpty()) {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        viewModel.clearServiceErrorMessage()
-                    }
+                    showConnectStatus.showStatus(isConnect)
                 }
             }
         }
@@ -111,9 +81,10 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        appbarMenu.findItem(R.id.save).isVisible =
+        actionBar.setButtonVisible("save",
             viewModel.currentNoteName != binding.titleNoteText.text.toString() ||
             viewModel.currentNoteSpecification != binding.textNoteText.text.toString()
+        )
     }
 
     private fun loadData() {
@@ -144,86 +115,60 @@ class EditNotesFragment : Fragment() {
         viewModel.dateChangedStrategy = sPref.getBoolean("dateChanged",
             DATE_CHANGE_WHEN_CONTENT
         )
-        showMessageInternetOk = sPref.getBoolean("showMessageInternetOk",
-            SHOW_MESSAGE_INTERNET_OK
-        )
     }
 
     private fun setupActionBar() {
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title =
-            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note)
-        actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
-            override fun onPrepareMenu(menu: Menu) {
-                appbarMenu = menu
-                menu.findItem(R.id.settings).isVisible = false
-                menu.findItem(R.id.delete).isVisible = args.idNote != 0L
-                definitionOfChange()
-            }
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.appbar_menu, menu)
-            }
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when(menuItem.itemId) {
-                    android.R.id.home -> {
-                        (activity as MainActivity).onSupportNavigateUp()
-                    }
-                    R.id.delete -> {
-                        deleteNoteRequest()
-                    }
-                    R.id.save -> {
+        actionBar = AppActionBar(
+            requireActivity(),
+            requireContext(),
+            if (args.idNote == 0L) R.string.add_note else R.string.edit_note,
+            viewLifecycleOwner,
+            isDelete = args.idNote != 0L,
+        )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            actionBar.isItemMenuPressedFlow.collect {
+                CoroutineScope(Dispatchers.Main).launch {
+                    hideKeyboardFromView(requireContext(), requireView())
+                    observeEditNote()
+                    if (it == "save") {
                         saveNote()
+                    } else if (it == "delete") {
+                        deleteNote()
                     }
                 }
-                return true
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
-
-    private fun deleteNoteRequest() {
-        hideKeyboardFromView(requireContext(), requireView())
-        if(connectReceiver.isConnectStatusFlow.value) {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.title_delete)
-                .setIcon(R.drawable.warning)
-                .setMessage(R.string.text_delete)
-                .setPositiveButton(R.string.but_yes_txt) { _, _ ->
-                    deleteNote()
-                }
-                .setNegativeButton(R.string.but_no_txt) { _, _ -> }
-                .create()
-            dialog.show()
-        } else {
-            showMessageNoConnect()
         }
     }
 
     private fun deleteNote() {
-        if(connectReceiver.isConnectStatusFlow.value) {
-            viewModel.deleteNote()
-            observeEditNote()
+        if (connectReceiver.isConnectStatusFlow.value) {
+            showConfirmationDeleteDialog(
+                requireContext(),
+                onConfirmed = {
+                    if (connectReceiver.isConnectStatusFlow.value) {
+                        viewModel.deleteNote()
+                    } else {
+                        showMessageNotPossible(requireContext())
+                    }
+                },
+                onCancelled = { }
+            )
         } else {
-            showMessageNoConnect()
+            showMessageNotPossible(requireContext())
         }
     }
 
     private fun saveNote() {
-        hideKeyboardFromView(requireContext(), requireView())
         if(connectReceiver.isConnectStatusFlow.value) {
             viewModel.saveNote(
                 binding.titleNoteText.text.toString(),
                 binding.textNoteText.text.toString()
             )
-            observeEditNote()
         } else {
-            showMessageNoConnect()
+            showMessageNotPossible(requireContext())
         }
-    }
-
-    private fun showMessageNoConnect() {
-        Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
     }
 
     private fun observeEditNote() {
@@ -264,10 +209,7 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun showCount(seconds: Int) {
-        SpanableTitle.setSpanableTitle(
-            (activity as MainActivity).supportActionBar,
-            requireContext(),
-            if (args.idNote == 0L) getString(R.string.add_note) else getString(R.string.edit_note),
+        actionBar.setSpannableTitle(
             if (seconds > 0) {
                 getString(R.string.text_wait) + " $seconds"
             } else ""

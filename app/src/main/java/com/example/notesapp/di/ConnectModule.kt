@@ -1,7 +1,8 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.utils.ShowConnectStatus
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,5 +21,14 @@ object ConnectModule {
     ): ConnectReceiver {
         return ConnectReceiver(applicationContext)
     }
+
+    @Singleton
+    @Provides
+    fun provideShowConnectStatus(
+        @ApplicationContext applicationContext: Context
+    ): ShowConnectStatus {
+        return ShowConnectStatus(applicationContext)
+    }
+
 
 }

@@ -5,12 +5,10 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
@@ -23,8 +21,10 @@ import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
-import com.example.notesapp.ui.main.MainActivity
+import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment() {
 
@@ -33,7 +33,7 @@ class SettingsFragment : Fragment() {
 
     private val viewModel by viewModels<SettingsViewModel>()
 
-    lateinit var appbarMenu: Menu
+    private lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,39 +48,33 @@ class SettingsFragment : Fragment() {
         loadSettings()
         setListenersSettingsChanged()
         setupActionBar()
+        setupActionBarMenuListener()
     }
 
     private fun setupActionBar() {
-        val actionBar = (activity as MainActivity).supportActionBar
-        actionBar?.title = getString(R.string.settings)
-        actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
-            override fun onPrepareMenu(menu: Menu) {
-                appbarMenu = menu
-                menu.findItem(R.id.settings).isVisible = false
-                menu.findItem(R.id.delete).isVisible = false
-                definitionOfChange()
-            }
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.appbar_menu, menu)
-            }
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when(menuItem.itemId) {
-                    android.R.id.home -> {
-                        (activity as MainActivity).onSupportNavigateUp()
-                    }
-                    R.id.save -> {
-                        saveSettings()
-                    }
+        actionBar = AppActionBar(
+            requireActivity(),
+            requireContext(),
+            R.string.settings,
+            viewLifecycleOwner,
+        )
+    }
+
+    private fun setupActionBarMenuListener() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            actionBar.isItemMenuPressedFlow.collect {
+                if(it=="save") {
+                    saveSettings()
                 }
-                return true
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
     }
 
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
+        viewModel.loadSettings(sPref)
+
         sPref.getString("defaultHeader", DEFAULT_HEADER).toString().apply {
             binding.defaultHeader = this
             viewModel.defaultHeader = this
@@ -129,18 +123,23 @@ class SettingsFragment : Fragment() {
         }
         binding.switch1.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch2.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch3.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch4.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch5.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.startDelay.addTextChangedListener {
             definitionOfChange()
@@ -157,18 +156,21 @@ class SettingsFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        appbarMenu.findItem(R.id.save).isVisible =
-            viewModel.defaultHeader != binding.header.text.toString() ||
-            viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
-            viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
-            viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
-            viewModel.operationDelayValue.toString() != binding.operationDelay.text.toString() ||
-            viewModel.specificationLine != binding.switch1.isChecked ||
-            viewModel.defaultAddIfClick != binding.switch2.isChecked ||
-            viewModel.deleteIfSwiped != binding.switch3.isChecked ||
-            viewModel.dateChanged != binding.switch4.isChecked ||
-            viewModel.showMessageInternetOk != binding.switch5.isChecked
+        val isChange = getIsChange()
+        actionBar.setButtonVisible("save", isChange)
     }
+
+    private fun getIsChange(): Boolean =
+        viewModel.defaultHeader != binding.header.text.toString() ||
+                viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
+                viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
+                viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
+                viewModel.operationDelayValue.toString() != binding.operationDelay.text.toString() ||
+                viewModel.specificationLine != binding.switch1.isChecked ||
+                viewModel.defaultAddIfClick != binding.switch2.isChecked ||
+                viewModel.deleteIfSwiped != binding.switch3.isChecked ||
+                viewModel.dateChanged != binding.switch4.isChecked ||
+                viewModel.showMessageInternetOk != binding.switch5.isChecked
 
     private fun saveSettings() {
         hideKeyboardFromView(requireActivity(), requireView())
@@ -195,9 +197,18 @@ class SettingsFragment : Fragment() {
             ed.putInt("operationDelayValue", if(this.isNotEmpty()) this.toInt() else TIME_DELAY_OPERATION)
         }
         ed.apply()
+
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
-        appbarMenu.findItem(R.id.save).isVisible = false
+        actionBar.setButtonVisible("save",false)
         loadSettings()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(1000)
+            definitionOfChange()
+        }
     }
 
     override fun onDestroyView() {

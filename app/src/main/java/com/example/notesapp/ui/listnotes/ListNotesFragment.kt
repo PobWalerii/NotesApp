@@ -4,14 +4,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -24,14 +20,14 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentListNotesBinding
-import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.ConnectReceiver
+import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
-import com.example.notesapp.utils.RemoteService
-import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.utils.AnimateActionBar.animateTitleChange
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import com.example.notesapp.servicesandreceivers.RemoteService
+import com.example.notesapp.utils.AppActionBar
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showConfirmationDeleteDialog
+import com.example.notesapp.utils.ConfirmationDeleteDialog.showMessageNotPossible
+import com.example.notesapp.utils.ShowConnectStatus
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +40,8 @@ class ListNotesFragment : Fragment() {
 
     @Inject
     lateinit var connectReceiver: ConnectReceiver
+    @Inject
+    lateinit var showConnectStatus: ShowConnectStatus
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -54,7 +52,6 @@ class ListNotesFragment : Fragment() {
 
     private var defaultAddIfClick: Boolean = true
     private var deleteIfSwiped: Boolean = true
-    private var showMessageInternetOk: Boolean = false
     private var showInfoLoad: Boolean = false
     private var showInfoLoadIfStart: Boolean = false
 
@@ -63,6 +60,8 @@ class ListNotesFragment : Fragment() {
     private var counter: Job? = null
 
     private val viewModel by viewModels<NotesViewModel>()
+
+    private lateinit var actionBar: AppActionBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,13 +79,13 @@ class ListNotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
-        loadAndRefreshSettings()
         setupRecycler()
+        loadAndRefreshSettings()
+        observeConnectStatus()
         loadData()
         startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
-        observeErrorMessages()
         observeLoadStatus()
     }
 
@@ -130,19 +129,11 @@ class ListNotesFragment : Fragment() {
         counter = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.counterDelayFlow.collect { seconds ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    showCount(seconds)
+                    if (!viewModel.isLoadedFlow.value) {
+                        actionBar.setSpannableTitle(if (seconds > 0) {getString(R.string.text_wait)+" $seconds"} else "")
+                    }
                 }
             }
-        }
-    }
-
-    private fun showCount(seconds: Int) {
-        if (!viewModel.isLoadedFlow.value) {
-            val actionBar = (activity as MainActivity).supportActionBar
-            actionBar?.title = getString(R.string.app_name) +
-                    if (seconds > 0) {
-                        "  /$seconds"
-                    } else ""
         }
     }
 
@@ -159,16 +150,20 @@ class ListNotesFragment : Fragment() {
             viewModel.isLoadedFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                        val actionBar = (activity as MainActivity).supportActionBar
-                        actionBar?.title = getString(R.string.app_name) +
-                                if (it) {
-                                    "  " + getString(R.string.text_load)
-                                } else ""
+                        actionBar.setSpannableTitle(
+                            if (it) getString(R.string.text_load)  else ""
+                        )
                     }
                     if (viewModel.firstDataLoad) {
                         binding.visibleProgressRound = it
                     } else {
                         binding.visibleProgressHorizontal = it
+                    }
+                    if (!it) {
+                        val behavior =
+                            (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
+                                .behavior as HideBottomViewOnScrollBehavior
+                        behavior.slideUp(binding.floatingActionButton)
                     }
                 }
             }
@@ -184,40 +179,23 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
-
     private fun reactToConnectionStatusChange(isConnect: Boolean) {
-        binding.floatingActionButton.isEnabled = isConnect
-        if (isConnect) {
-            if(showMessageInternetOk && !viewModel.lastConnectionStatus) {
-                Toast.makeText(context, R.string.text_internet_ok, Toast.LENGTH_LONG).show()
-            }
-            viewModel.restartLoadRemoteData()
-            itemTouchHelper.attachToRecyclerView(recyclerView)
-        } else {
-            if (viewModel.lastConnectionStatus) {
-                if (viewModel.isStartApp) {
-                    Toast.makeText(context, R.string.text_no_internet, Toast.LENGTH_LONG).show()
-                } else {
-                    showSnack()
-                }
-            }
-            viewModel.stopLoadRemoteData()
-            itemTouchHelper.attachToRecyclerView(null)
-        }
-        viewModel.lastConnectionStatus = isConnect
-    }
 
-    private fun observeErrorMessages() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.serviceErrorFlow.collect { message ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (message.isNotEmpty()) {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        viewModel.clearServiceErrorMessage()
-                    }
-                }
-            }
+        binding.floatingActionButton.isEnabled = isConnect
+
+        showConnectStatus.showStatus(
+            isConnect,
+            requireView(),
+            viewModel.isStartApp,
+        )
+        if (isConnect) {
+            viewModel.restartLoadRemoteData()
+        } else {
+            viewModel.stopLoadRemoteData()
         }
+        itemTouchHelper.attachToRecyclerView(
+            if(deleteIfSwiped && isConnect) recyclerView else null
+        )
     }
 
     private fun observeRemoteDatabaseChanged() {
@@ -244,49 +222,38 @@ class ListNotesFragment : Fragment() {
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        if(deleteIfSwiped) {
-            itemTouchHelper =
-                ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-                    override fun onMove(
-                        recycler: RecyclerView,
-                        holder: RecyclerView.ViewHolder,
-                        target: RecyclerView.ViewHolder,
-                    ) = false
+        itemTouchHelper =
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recycler: RecyclerView,
+                    holder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder,
+                ) = false
 
-                    override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                        deleteNoteRequest(holder.adapterPosition)
-                    }
-                })
-        }
+                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
+                    deleteNote(holder.adapterPosition)
+                }
+            })
     }
 
-    private fun deleteNoteRequest(position: Int) {
+    private fun deleteNote(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.title_delete)
-            .setIcon(R.drawable.warning)
-            .setMessage(R.string.text_delete)
-            .setPositiveButton(R.string.but_yes_txt) { _, _ ->
-                deleteNote(position, note)
-            }
-            .setNegativeButton(R.string.but_no_txt) { _, _ ->
+
+        showConfirmationDeleteDialog(
+            requireContext(),
+            onConfirmed = {
+                if(connectReceiver.isConnectStatusFlow.value) {
+                    viewModel.deleteNote(note)
+                } else {
+                    showMessageNotPossible(requireContext())
+                    adapter.notifyItemChanged(position)
+                }
+            },
+            onCancelled = {
                 adapter.notifyItemChanged(position)
             }
-            .create()
-        dialog.setOnCancelListener {
-            adapter.notifyItemChanged(position)
-        }
-        dialog.show()
-    }
-
-    private fun deleteNote(position: Int, note: Notes) {
-        if(connectReceiver.isConnectStatusFlow.value) {
-            viewModel.deleteNote(note)
-        } else {
-            Toast.makeText(context,R.string.operation_not_possible,Toast.LENGTH_LONG).show()
-            adapter.notifyItemChanged(position)
-        }
+        )
     }
 
     private fun startSettingsFragment() {
@@ -324,7 +291,10 @@ class ListNotesFragment : Fragment() {
 
         defaultAddIfClick = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
         deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
-        showMessageInternetOk = sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+
+        showConnectStatus.setShowMessageInternetOk(
+            sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+        )
 
         val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
         val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
@@ -337,8 +307,8 @@ class ListNotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        connectReceiver.initReceiver()
         broadcastDateRegister()
-        observeConnectStatus()
         observeCounterDelay()
     }
 
@@ -361,53 +331,27 @@ class ListNotesFragment : Fragment() {
         }
     }
 
-    private fun showSnack() {
-        val snack = Snackbar.make(
-            binding.coordinator,
-            R.string.text_no_internet,
-            Snackbar.LENGTH_LONG
-        )
-        val snackView = snack.view
-        val textView: TextView =
-            snackView.findViewById(com.google.android.material.R.id.snackbar_text)
-        textView.setCompoundDrawablesWithIntrinsicBounds(
-            R.drawable.warning,
-            0,
-            0,
-            0
-        )
-        textView.compoundDrawablePadding = resources.getDimensionPixelOffset(R.dimen.snackbar_icon_padding)
-        snack.show()
-    }
-
     private fun setupActionBar() {
-
-        val actionBar = (activity as MainActivity).supportActionBar
-
-        //actionBar?.title = getString(R.string.app_name)
-        animateTitleChange(actionBar, requireContext(), getString(R.string.app_name))
-
-        actionBar?.setDisplayHomeAsUpEnabled(false)
-
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
-            override fun onPrepareMenu(menu: Menu) {
-                menu.findItem(R.id.save).isVisible = false
-                menu.findItem(R.id.delete).isVisible = false
+        actionBar = AppActionBar(
+            requireActivity(),
+            requireContext(),
+            R.string.app_name,
+            viewLifecycleOwner,
+            isHomeKey = false,
+            isSettings = true,
+        )
+        viewLifecycleOwner.lifecycleScope.launch {
+            actionBar.isItemMenuPressedFlow.collect {
+                if(it=="settings") {
+                    startSettingsFragment()
+                }
             }
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.appbar_menu, menu)
-            }
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                startSettingsFragment()
-                return true
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
     }
 
     override fun onPause() {
         super.onPause()
         counter?.cancel()
-        showCount(0)
     }
 
     override fun onDestroyView() {
