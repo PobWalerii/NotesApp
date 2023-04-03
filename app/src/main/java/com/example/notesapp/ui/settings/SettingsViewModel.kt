@@ -1,8 +1,10 @@
 package com.example.notesapp.ui.settings
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 
 class SettingsViewModel: ViewModel() {
+
     var defaultHeader: String = ""
     var specificationLine: Boolean = true
     var defaultAddIfClick: Boolean = true
@@ -13,4 +15,8 @@ class SettingsViewModel: ViewModel() {
     var queryDelayValue: Int = 0
     var requestIntervalValue: Int = 0
     var operationDelayValue: Int = 0
+
+    fun loadSettings(sPref: SharedPreferences) {
+
+    }
 }

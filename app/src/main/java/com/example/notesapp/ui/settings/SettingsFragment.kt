@@ -23,6 +23,7 @@ import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
 import com.example.notesapp.databinding.FragmentSettingsBinding
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment() {
@@ -44,9 +45,10 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupActionBar()
         loadSettings()
         setListenersSettingsChanged()
+        setupActionBar()
+        setupActionBarMenuListener()
     }
 
     private fun setupActionBar() {
@@ -57,7 +59,9 @@ class SettingsFragment : Fragment() {
             R.string.settings,
             viewLifecycleOwner,
         )
+    }
 
+    private fun setupActionBarMenuListener() {
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
                 if(it=="save") {
@@ -69,6 +73,8 @@ class SettingsFragment : Fragment() {
 
     private fun loadSettings() {
         val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
+        viewModel.loadSettings(sPref)
+
         sPref.getString("defaultHeader", DEFAULT_HEADER).toString().apply {
             binding.defaultHeader = this
             viewModel.defaultHeader = this
@@ -117,18 +123,23 @@ class SettingsFragment : Fragment() {
         }
         binding.switch1.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch2.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch3.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch4.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.switch5.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
         }
         binding.startDelay.addTextChangedListener {
             definitionOfChange()
@@ -145,19 +156,21 @@ class SettingsFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        actionBar.setButtonVisible("save",
-            viewModel.defaultHeader != binding.header.text.toString() ||
-            viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
-            viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
-            viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
-            viewModel.operationDelayValue.toString() != binding.operationDelay.text.toString() ||
-            viewModel.specificationLine != binding.switch1.isChecked ||
-            viewModel.defaultAddIfClick != binding.switch2.isChecked ||
-            viewModel.deleteIfSwiped != binding.switch3.isChecked ||
-            viewModel.dateChanged != binding.switch4.isChecked ||
-            viewModel.showMessageInternetOk != binding.switch5.isChecked
-        )
+        val isChange = getIsChange()
+        actionBar.setButtonVisible("save", isChange)
     }
+
+    private fun getIsChange(): Boolean =
+        viewModel.defaultHeader != binding.header.text.toString() ||
+                viewModel.startDelayValue.toString() != binding.startDelay.text.toString() ||
+                viewModel.queryDelayValue.toString() != binding.queryDelay.text.toString() ||
+                viewModel.requestIntervalValue.toString() != binding.requestInterval.text.toString() ||
+                viewModel.operationDelayValue.toString() != binding.operationDelay.text.toString() ||
+                viewModel.specificationLine != binding.switch1.isChecked ||
+                viewModel.defaultAddIfClick != binding.switch2.isChecked ||
+                viewModel.deleteIfSwiped != binding.switch3.isChecked ||
+                viewModel.dateChanged != binding.switch4.isChecked ||
+                viewModel.showMessageInternetOk != binding.switch5.isChecked
 
     private fun saveSettings() {
         hideKeyboardFromView(requireActivity(), requireView())
@@ -188,6 +201,14 @@ class SettingsFragment : Fragment() {
         Toast.makeText(context,getString(R.string.settings_is_saved),Toast.LENGTH_SHORT).show()
         actionBar.setButtonVisible("save",false)
         loadSettings()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(1000)
+            definitionOfChange()
+        }
     }
 
     override fun onDestroyView() {

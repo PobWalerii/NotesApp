@@ -11,6 +11,7 @@ import android.view.MenuItem
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.example.notesapp.R
@@ -22,18 +23,18 @@ import kotlinx.coroutines.flow.asStateFlow
 class AppActionBar(
     private val activity: Activity,
     private val context: Context,
-    titleId: Int,
-    lifecycleOwner: LifecycleOwner,
-    isHomeKey: Boolean = true,
-    isSave: Boolean = false,
-    isDelete: Boolean = false,
-    isSettings: Boolean = false,
+    private val titleId: Int,
+    private val lifecycleOwner: LifecycleOwner,
+    private val isHomeKey: Boolean = true,
+    private val isSave: Boolean = false,
+    private val isDelete: Boolean = false,
+    private val isSettings: Boolean = false,
 ) {
 
     private val isItemMenuPressed = MutableStateFlow("")
     val isItemMenuPressedFlow: StateFlow<String> = isItemMenuPressed.asStateFlow()
 
-    lateinit var appbarMenu: Menu
+    private var appbarMenu: Menu? = null
     private val actionBar = (activity as MainActivity).supportActionBar
     private val title = context.getString(titleId)
 
@@ -45,10 +46,10 @@ class AppActionBar(
                 menu.findItem(R.id.save).isVisible = isSave
                 menu.findItem(R.id.delete).isVisible = isDelete
                 menu.findItem(R.id.settings).isVisible = isSettings
-                appbarMenu = menu
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.appbar_menu, menu)
+                appbarMenu = menu
             }
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 when(menuItem.itemId) {
@@ -81,14 +82,14 @@ class AppActionBar(
     }
 
     fun setButtonVisible(item: String, isVisible: Boolean) {
-        appbarMenu.findItem(
+        appbarMenu?.findItem(
             when (item) {
                 "save" -> R.id.save
                 "delete" -> R.id.delete
                 "settings" -> R.id.settings
                 else -> 0
             }
-        ).isVisible = isVisible
+        )?.isVisible = isVisible
         isItemMenuPressed.value = ""
     }
 

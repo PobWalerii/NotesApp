@@ -131,6 +131,7 @@ class EditNotesFragment : Fragment() {
             actionBar.isItemMenuPressedFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     hideKeyboardFromView(requireContext(), requireView())
+                    observeEditNote()
                     if (it == "save") {
                         saveNote()
                     } else if (it == "delete") {
@@ -148,7 +149,6 @@ class EditNotesFragment : Fragment() {
                 onConfirmed = {
                     if (connectReceiver.isConnectStatusFlow.value) {
                         viewModel.deleteNote()
-                        observeEditNote()
                     } else {
                         showMessageNotPossible(requireContext())
                     }
@@ -166,7 +166,6 @@ class EditNotesFragment : Fragment() {
                 binding.titleNoteText.text.toString(),
                 binding.textNoteText.text.toString()
             )
-            observeEditNote()
         } else {
             showMessageNotPossible(requireContext())
         }
