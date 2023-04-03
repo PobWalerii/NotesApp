@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 
 class SettingsViewModel: ViewModel() {
 
+    //состояния
+
     var defaultHeader: String = ""
     var specificationLine: Boolean = true
     var defaultAddIfClick: Boolean = true
