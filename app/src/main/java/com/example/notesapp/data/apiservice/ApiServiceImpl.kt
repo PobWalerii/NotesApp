@@ -5,7 +5,7 @@ import com.example.notesapp.R
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,26 +61,26 @@ class ApiServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllNote(delayTime: Long): NoteResponse = withContext(Dispatchers.IO) {
-        delay(delayTime)
+    override suspend fun getAllNote(delayTime: Int): NoteResponse = withContext(Dispatchers.IO) {
+        delay((delayTime*1000).toLong())
         NoteResponse(timeLoadBase, listNotes)
     }
 
     override suspend fun deleteNote(note: Notes, delayTime: Int) {
-            makeDelay(delayTime)
-            if (isInetConnect()) {
-                remoteDao.deleteNote(note)
-            } else {
-                throw Exception(applicationContext.getString(R.string.operation_failed))
-            }
+        makeDelay(delayTime)
+        if (isInetConnect()) {
+            remoteDao.deleteNote(note)
+        } else {
+            throw Exception(applicationContext.getString(R.string.operation_failed))
+        }
     }
     override suspend fun addNote(note: Notes, delayTime: Int): Long {
-            makeDelay(delayTime)
-            if (isInetConnect()) {
-                return remoteDao.insertNote(note)
-            } else {
-                throw Exception(applicationContext.getString(R.string.operation_failed))
-            }
+        makeDelay(delayTime)
+        if (isInetConnect()) {
+            return remoteDao.insertNote(note)
+        } else {
+            throw Exception(applicationContext.getString(R.string.operation_failed))
+        }
     }
 
     private suspend fun makeDelay(delayTime: Int) {

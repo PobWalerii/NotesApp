@@ -1,7 +1,7 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.ShowConnectStatus
 import dagger.Module
 import dagger.Provides

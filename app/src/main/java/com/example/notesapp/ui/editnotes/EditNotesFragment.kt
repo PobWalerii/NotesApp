@@ -2,7 +2,6 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -10,10 +9,9 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
-import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
@@ -56,7 +54,6 @@ class EditNotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loadData()
-        loadSettings()
         setListenersDataChanged()
         setupActionBar()
     }
@@ -108,13 +105,6 @@ class EditNotesFragment : Fragment() {
     private fun setDataForEdit() {
         binding.noteName = viewModel.currentNoteName
         binding.noteSpecification = viewModel.currentNoteSpecification
-    }
-
-    private fun loadSettings() {
-        val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
-        viewModel.dateChangedStrategy = sPref.getBoolean("dateChanged",
-            DATE_CHANGE_WHEN_CONTENT
-        )
     }
 
     private fun setupActionBar() {
@@ -186,6 +176,7 @@ class EditNotesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         observeConnectStatus()
+        observeEditNote()
         observeCounterDelay()
     }
 

@@ -6,7 +6,8 @@ import com.example.notesapp.R
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -14,17 +15,13 @@ class NotesRepository(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
     private val connectReceiver: ConnectReceiver,
+    private val appSettings: AppSettings,
     private val applicationContext: Context
 ) {
 
     private var insertedOrEditedId: Long = 0L
     private var fixedTimeLoadedDate: Long = 0L
     private var successfulInitialDataUpload = false
-
-    private var startDelayValue: Long = 0L
-    private var queryDelayValue: Long = 0L
-    private var requestIntervalValue: Long = 0L
-    private var operationDelayValue: Int = 0
 
     private var job: Job? = null
 
@@ -44,20 +41,11 @@ class NotesRepository(
 
     private var isLoadCanceled = false
 
-    fun refreshDelaySettings(startDelay: Int, queryDelay: Int, requestInterval: Int, operationDelay: Int) {
-        startDelayValue = (startDelay*1000).toLong()
-        queryDelayValue = (queryDelay*1000).toLong()
-        requestIntervalValue = (requestInterval*1000).toLong()
-        operationDelayValue = operationDelay
-    }
-
     fun setRemoteDatabaseChanged(timeRemote: Long) {
         if(fixedTimeLoadedDate != timeRemote) {
             isRemoteDatabaseChanged.value = true
         }
     }
-
-    fun getRequestInterval(): Long = requestIntervalValue
 
     fun setInsertedOrEditedIdNull() {
         insertedOrEditedId = 0L
@@ -103,7 +91,9 @@ class NotesRepository(
             isLoadCanceled = false
             isLoaded.value = true
             try {
-                apiService.getAllNote(if (start) startDelayValue else queryDelayValue).apply {
+                apiService.getAllNote(
+                    if (start) appSettings.startDelayValue.value else appSettings.queryDelayValue.value
+                ).apply {
                     fixedTimeLoadedDate = this.timeBase
                     isRemoteDatabaseChanged.value = false
                     successfulInitialDataUpload = true
@@ -143,7 +133,7 @@ class NotesRepository(
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isRemoteConnect()) {
-                    val resultId: Long = apiService.addNote(note, operationDelayValue)
+                    val resultId: Long = apiService.addNote(note, appSettings.operationDelayValue.value)
                     insertedOrEditedId = resultId
                     isNoteEdited.value = true
                 } else {
@@ -159,7 +149,7 @@ class NotesRepository(
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isRemoteConnect()) {
-                    apiService.deleteNote(note, operationDelayValue)
+                    apiService.deleteNote(note, appSettings.operationDelayValue.value)
                     isNoteEdited.value = true
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)

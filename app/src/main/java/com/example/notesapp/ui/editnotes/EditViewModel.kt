@@ -3,6 +3,7 @@ package com.example.notesapp.ui.editnotes
 import androidx.lifecycle.ViewModel
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditViewModel  @Inject constructor(
-    private val notesRepository: NotesRepository
+    private val notesRepository: NotesRepository,
+    private val appSettings: AppSettings
 ): ViewModel() {
 
     var currentNote: Notes? = null
@@ -20,7 +22,6 @@ class EditViewModel  @Inject constructor(
     var currentNoteName: String = ""
     var currentNoteSpecification: String = ""
     var currentNoteDate: Long = 0L
-    var dateChangedStrategy: Boolean = true
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
     val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
@@ -33,7 +34,7 @@ class EditViewModel  @Inject constructor(
             currentId,
             title,
             content,
-            if ((dateChangedStrategy && content!=currentNoteSpecification) || currentId==0L) {
+            if ((appSettings.dateChanged.value && content!=currentNoteSpecification) || currentId==0L) {
                 Date().time
             } else {
                 currentNoteDate

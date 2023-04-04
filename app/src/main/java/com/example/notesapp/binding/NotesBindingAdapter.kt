@@ -1,4 +1,4 @@
-package com.example.notesapp.bindingadapters
+package com.example.notesapp.binding
 
 import android.widget.TextView
 import androidx.databinding.BindingAdapter

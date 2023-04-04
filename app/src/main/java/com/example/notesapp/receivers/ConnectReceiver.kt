@@ -1,4 +1,4 @@
-package com.example.notesapp.servicesandreceivers
+package com.example.notesapp.receivers
 
 import android.content.Context
 import android.net.ConnectivityManager

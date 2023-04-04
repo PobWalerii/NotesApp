@@ -21,10 +21,6 @@ class NotesViewModel @Inject constructor(
     val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
     val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
 
-    fun refreshRepoSettings(startDelay: Int, queryDelay: Int, requestInterval: Int, operationDelay: Int) {
-        notesRepository.refreshDelaySettings(startDelay, queryDelay, requestInterval, operationDelay)
-    }
-
     fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
 
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()

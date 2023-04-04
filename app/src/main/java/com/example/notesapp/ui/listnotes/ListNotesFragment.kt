@@ -20,9 +20,9 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentListNotesBinding
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
-import com.example.notesapp.servicesandreceivers.RemoteService
+import com.example.notesapp.services.BackService
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
@@ -139,7 +139,7 @@ class ListNotesFragment : Fragment() {
 
     private fun startRemoteService() {
         if (!viewModel.isStartApp) {
-            val serviceIntent = Intent(context, RemoteService::class.java)
+            val serviceIntent = Intent(context, BackService::class.java)
             context?.startService(serviceIntent)
             observeRemoteDatabaseChanged()
         }
@@ -300,9 +300,6 @@ class ListNotesFragment : Fragment() {
 
         val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
         val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
-        val requestIntervalValue = sPref.getInt("requestIntervalValue", KeyConstants.INTERVAL_REQUESTS)
-        val operationDelayValue = sPref.getInt("operationDelayValue", KeyConstants.TIME_DELAY_OPERATION)
-        viewModel.refreshRepoSettings(startDelayValue, queryDelayValue, requestIntervalValue, operationDelayValue)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
     }
@@ -364,7 +361,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val serviceIntent = Intent(context, RemoteService::class.java)
+        val serviceIntent = Intent(context, BackService::class.java)
         context?.stopService(serviceIntent)
     }
 

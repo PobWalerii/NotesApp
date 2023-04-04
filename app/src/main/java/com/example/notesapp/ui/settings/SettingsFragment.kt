@@ -14,6 +14,7 @@ import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
@@ -64,11 +65,13 @@ class SettingsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
-                hideKeyboardFromView(requireActivity(), requireView())
-                if(it=="save") {
-                    saveSettings()
-                } else if(it=="todefault") {
-                    setSettingsToDefault()
+                CoroutineScope(Dispatchers.Main).launch {
+                    hideKeyboardFromView(requireActivity(), requireView())
+                    if (it == "save") {
+                        saveSettings()
+                    } else if (it == "todefault") {
+                        setSettingsToDefault()
+                    }
                 }
             }
         }
@@ -176,7 +179,10 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        definitionOfChange()
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(100)
+            definitionOfChange()
+        }
     }
 
     override fun onDestroyView() {

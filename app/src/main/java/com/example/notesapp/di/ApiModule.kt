@@ -7,7 +7,7 @@ import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.apiservice.ApiServiceImpl
 import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.database.RemoteDatabase
-import com.example.notesapp.servicesandreceivers.ConnectReceiver
+import com.example.notesapp.receivers.ConnectReceiver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
