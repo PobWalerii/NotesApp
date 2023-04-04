@@ -8,7 +8,6 @@ import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
-import androidx.preference.PreferenceFragmentCompat
 import com.example.notesapp.R
 import dagger.hilt.android.AndroidEntryPoint
 

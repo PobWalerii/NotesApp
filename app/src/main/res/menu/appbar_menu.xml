@@ -20,4 +20,10 @@
         android:title="@string/delete"
         app:showAsAction="ifRoom"
         app:iconTint="@color/gray" />
+    <item
+        android:id="@+id/todefault"
+        android:icon="@drawable/todefault"
+        android:title="@string/todefault"
+        app:showAsAction="ifRoom"
+        app:iconTint="@color/gray" />
 </menu>

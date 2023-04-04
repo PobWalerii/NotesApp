@@ -15,9 +15,9 @@ import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import com.example.notesapp.utils.AppActionBar
-import com.example.notesapp.utils.ConfirmationDeleteDialog.showConfirmationDeleteDialog
-import com.example.notesapp.utils.ConfirmationDeleteDialog.showMessageNotPossible
+import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
+import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.example.notesapp.utils.ShowConnectStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -144,7 +144,9 @@ class EditNotesFragment : Fragment() {
 
     private fun deleteNote() {
         if (connectReceiver.isConnectStatusFlow.value) {
-            showConfirmationDeleteDialog(
+            showConfirmationDialog(
+                R.string.title_delete,
+                R.string.text_delete,
                 requireContext(),
                 onConfirmed = {
                     if (connectReceiver.isConnectStatusFlow.value) {

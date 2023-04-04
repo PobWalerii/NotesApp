@@ -29,6 +29,7 @@ class AppActionBar(
     private val isSave: Boolean = false,
     private val isDelete: Boolean = false,
     private val isSettings: Boolean = false,
+    private val toDefault: Boolean = false
 ) {
 
     private val isItemMenuPressed = MutableStateFlow("")
@@ -46,6 +47,7 @@ class AppActionBar(
                 menu.findItem(R.id.save).isVisible = isSave
                 menu.findItem(R.id.delete).isVisible = isDelete
                 menu.findItem(R.id.settings).isVisible = isSettings
+                menu.findItem(R.id.todefault).isVisible = toDefault
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.appbar_menu, menu)
@@ -64,6 +66,9 @@ class AppActionBar(
                     }
                     R.id.settings -> {
                         itemMenuPressed("settings")
+                    }
+                    R.id.todefault -> {
+                        itemMenuPressed("todefault")
                     }
                     else -> {}
                 }
@@ -87,6 +92,7 @@ class AppActionBar(
                 "save" -> R.id.save
                 "delete" -> R.id.delete
                 "settings" -> R.id.settings
+                "todefault" -> R.id.todefault
                 else -> 0
             }
         )?.isVisible = isVisible

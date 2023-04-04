@@ -2,7 +2,9 @@ package com.example.notesapp.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
@@ -13,12 +15,15 @@ import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AppSettings(
-    context: Context
+    private val context: Context
 ) {
 
     private val _defaultHeader = MutableStateFlow(DEFAULT_HEADER)
@@ -53,21 +58,30 @@ class AppSettings(
 
     private var sPref: SharedPreferences = context.getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
 
+    private val _isLoadedPreferences = MutableStateFlow(false)
+    val isLoadedPreferences: StateFlow<Boolean> = _isLoadedPreferences.asStateFlow()
+
     init {
         getPreferences()
     }
 
     private fun getPreferences() {
-        _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
-        _specificationLine.value = sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
-        _defaultAddIfClick.value = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
-        _deleteIfSwiped.value = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
-        _dateChanged.value = sPref.getBoolean("dateChanged", DATE_CHANGE_WHEN_CONTENT)
-        _showMessageInternetOk.value = sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
-        _startDelayValue.value = sPref.getInt("startDelayValue", TIME_DELAY_START)
-        _queryDelayValue.value = sPref.getInt("queryDelayValue", TIME_DELAY_QUERY)
-        _requestIntervalValue.value = sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS)
-        _operationDelayValue.value = sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION)
+        CoroutineScope(Dispatchers.Main).launch {
+            _isLoadedPreferences.value = false
+            _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
+            _specificationLine.value =
+                sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
+            _defaultAddIfClick.value = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
+            _deleteIfSwiped.value = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
+            _dateChanged.value = sPref.getBoolean("dateChanged", DATE_CHANGE_WHEN_CONTENT)
+            _showMessageInternetOk.value =
+                sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+            _startDelayValue.value = sPref.getInt("startDelayValue", TIME_DELAY_START)
+            _queryDelayValue.value = sPref.getInt("queryDelayValue", TIME_DELAY_QUERY)
+            _requestIntervalValue.value = sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS)
+            _operationDelayValue.value = sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION)
+            _isLoadedPreferences.value = true
+        }
     }
 
     fun savePreferences(
@@ -80,7 +94,8 @@ class AppSettings(
         startDelayValue: Int,
         queryDelayValue: Int,
         requestIntervalValue: Int,
-        operationDelayValue: Int
+        operationDelayValue: Int,
+        getDefault: Boolean = false
     ) {
         val ed: SharedPreferences.Editor = sPref.edit()
         ed.putString("defaultHeader", defaultHeader.ifEmpty { DEFAULT_HEADER })
@@ -94,6 +109,11 @@ class AppSettings(
         ed.putInt("requestIntervalValue", if(requestIntervalValue>0) requestIntervalValue else INTERVAL_REQUESTS)
         ed.putInt("operationDelayValue", operationDelayValue)
         ed.apply()
+        Toast.makeText(
+            context, context.getString(
+                if (getDefault) R.string.settings_to_default else R.string.settings_is_saved
+            ), Toast.LENGTH_SHORT
+        ).show()
         getPreferences()
     }
 
@@ -108,7 +128,8 @@ class AppSettings(
             TIME_DELAY_START,
             TIME_DELAY_QUERY,
             INTERVAL_REQUESTS,
-            TIME_DELAY_OPERATION
+            TIME_DELAY_OPERATION,
+            getDefault = true
         )
     }
 

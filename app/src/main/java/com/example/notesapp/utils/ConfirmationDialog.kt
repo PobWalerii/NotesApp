@@ -2,19 +2,20 @@ package com.example.notesapp.utils
 
 import android.app.AlertDialog
 import android.content.Context
-import android.widget.Toast
 import com.example.notesapp.R
 
-object ConfirmationDeleteDialog {
+object ConfirmationDialog {
 
-    fun showConfirmationDeleteDialog(
+    fun showConfirmationDialog(
+        title: Int,
+        message: Int,
         context: Context,
         onConfirmed: () -> Unit,
         onCancelled: () -> Unit
     ): AlertDialog {
         val builder = AlertDialog.Builder(context)
-            .setTitle(R.string.title_delete)
-            .setMessage(R.string.text_delete)
+            .setTitle(title)
+            .setMessage(message)
             .setIcon(R.drawable.warning)
             .setPositiveButton(R.string.but_yes_txt) { _, _ ->
                 onConfirmed()
@@ -30,9 +31,7 @@ object ConfirmationDeleteDialog {
         return dialog
     }
 
-    fun showMessageNotPossible(context: Context) {
-        Toast.makeText(context,R.string.operation_not_possible, Toast.LENGTH_LONG).show()
-    }
+
 
 
 }

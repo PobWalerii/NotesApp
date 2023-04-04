@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
@@ -25,8 +24,8 @@ import com.example.notesapp.servicesandreceivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.servicesandreceivers.RemoteService
 import com.example.notesapp.utils.AppActionBar
-import com.example.notesapp.utils.ConfirmationDeleteDialog.showConfirmationDeleteDialog
-import com.example.notesapp.utils.ConfirmationDeleteDialog.showMessageNotPossible
+import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
+import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.example.notesapp.utils.ShowConnectStatus
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
@@ -241,7 +240,9 @@ class ListNotesFragment : Fragment() {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
 
-        showConfirmationDeleteDialog(
+        showConfirmationDialog(
+            R.string.title_delete,
+            R.string.text_delete,
             requireContext(),
             onConfirmed = {
                 if(connectReceiver.isConnectStatusFlow.value) {
