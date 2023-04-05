@@ -52,11 +52,6 @@ class NotesRepository(
     }
     fun getInsertedOrEditedIdValue(): Long = insertedOrEditedId
 
-    fun setStartFlowParameters() {
-        isNoteEdited.value = false
-        serviceError.value = ""
-    }
-
     fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
 
     fun getNoteById(noteId: Long): Flow<Notes?> =
@@ -136,6 +131,8 @@ class NotesRepository(
                     val resultId: Long = apiService.addNote(note, appSettings.operationDelayValue.value)
                     insertedOrEditedId = resultId
                     isNoteEdited.value = true
+                    delay(10)
+                    isNoteEdited.value = false
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
@@ -151,6 +148,8 @@ class NotesRepository(
                 if(isRemoteConnect()) {
                     apiService.deleteNote(note, appSettings.operationDelayValue.value)
                     isNoteEdited.value = true
+                    delay(10)
+                    isNoteEdited.value = false
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }

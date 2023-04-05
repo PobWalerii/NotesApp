@@ -49,8 +49,4 @@ class EditViewModel  @Inject constructor(
         }
     }
 
-    fun setStartFlowParameters() {
-        notesRepository.setStartFlowParameters()
-    }
-
 }

@@ -18,10 +18,7 @@ import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.example.notesapp.utils.ShowConnectStatus
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -86,7 +83,6 @@ class EditNotesFragment : Fragment() {
 
     private fun loadData() {
         viewModel.currentId = args.idNote
-        viewModel.setStartFlowParameters()
         if (args.idNote != 0L) {
             lifecycle.coroutineScope.launch {
                 viewModel.getNoteById(args.idNote).collect { note ->
@@ -133,34 +129,22 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun deleteNote() {
-        if (connectReceiver.isConnectStatusFlow.value) {
-            showConfirmationDialog(
-                R.string.title_delete,
-                R.string.text_delete,
-                requireContext(),
-                onConfirmed = {
-                    if (connectReceiver.isConnectStatusFlow.value) {
-                        viewModel.deleteNote()
-                    } else {
-                        showMessageNotPossible(requireContext())
-                    }
-                },
-                onCancelled = { }
-            )
-        } else {
-            showMessageNotPossible(requireContext())
-        }
+        showConfirmationDialog(
+            R.string.title_delete,
+            R.string.text_delete,
+            requireContext(),
+            onConfirmed = {
+                viewModel.deleteNote()
+            },
+            onCancelled = { }
+        )
     }
 
     private fun saveNote() {
-        if(connectReceiver.isConnectStatusFlow.value) {
-            viewModel.saveNote(
-                binding.titleNoteText.text.toString(),
-                binding.textNoteText.text.toString()
-            )
-        } else {
-            showMessageNotPossible(requireContext())
-        }
+        viewModel.saveNote(
+            binding.titleNoteText.text.toString(),
+            binding.textNoteText.text.toString()
+        )
     }
 
     private fun observeEditNote() {
@@ -178,6 +162,10 @@ class EditNotesFragment : Fragment() {
         observeConnectStatus()
         observeEditNote()
         observeCounterDelay()
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(100)
+            definitionOfChange()
+        }
     }
 
     override fun onDestroyView() {
@@ -187,6 +175,7 @@ class EditNotesFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        hideKeyboardFromView(requireContext(),requireView())
         counter?.cancel()
         showCount(0)
     }

@@ -23,6 +23,7 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.services.BackService
+import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
@@ -42,6 +43,8 @@ class ListNotesFragment : Fragment() {
     lateinit var connectReceiver: ConnectReceiver
     @Inject
     lateinit var showConnectStatus: ShowConnectStatus
+    @Inject
+    lateinit var appSettings: AppSettings
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -50,8 +53,6 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private var defaultAddIfClick: Boolean = true
-    private var deleteIfSwiped: Boolean = true
     private var showInfoLoad: Boolean = false
     private var showInfoLoadIfStart: Boolean = false
 
@@ -194,7 +195,7 @@ class ListNotesFragment : Fragment() {
             viewModel.stopLoadRemoteData()
         }
         itemTouchHelper.attachToRecyclerView(
-            if(deleteIfSwiped && isConnect) recyclerView else null
+            if(appSettings.deleteIfSwiped.value && isConnect) recyclerView else null
         )
     }
 
@@ -264,7 +265,7 @@ class ListNotesFragment : Fragment() {
 
     private fun setupButtonAddListener() {
         binding.floatingActionButton.setOnClickListener {
-            if ( defaultAddIfClick ) {
+            if ( appSettings.defaultAddIfClick.value ) {
                 viewModel.addNote()
             } else {
                 findNavController().navigate(
@@ -285,24 +286,20 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun loadAndRefreshSettings() {
-        val sPref = requireActivity().getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
 
-        val defaultHeader = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
-        val defaultSpecificationLine = sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
-        adapter.setSettings(defaultSpecificationLine, defaultHeader)
+        adapter.setSettings(appSettings.specificationLine.value, appSettings.defaultHeader.value)
 
-        defaultAddIfClick = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
-        deleteIfSwiped = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
+        showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
 
-        showConnectStatus.setShowMessageInternetOk(
-            sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
-        )
-
-        val startDelayValue = sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
-        val queryDelayValue = sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
+        val startDelayValue = appSettings.startDelayValue.value//sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
+        val queryDelayValue = appSettings.queryDelayValue.value//sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
     }
+
+
+
+
 
     override fun onResume() {
         super.onResume()

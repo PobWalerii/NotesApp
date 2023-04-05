@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
 
@@ -176,6 +177,12 @@ class SettingsFragment : Fragment() {
         )
         definitionOfChange()
     }
+
+    override fun onStop() {
+        super.onStop()
+        hideKeyboardFromView(requireContext(),requireView())
+    }
+
 
     override fun onResume() {
         super.onResume()
