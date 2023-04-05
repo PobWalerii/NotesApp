@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,21 +12,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
-import com.example.notesapp.constants.KeyConstants
-import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
-import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
-import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
-import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
-import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.databinding.FragmentListNotesBinding
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
-import com.example.notesapp.utils.ShowConnectStatus
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -39,10 +30,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ListNotesFragment : Fragment() {
 
-    @Inject
-    lateinit var connectReceiver: ConnectReceiver
-    @Inject
-    lateinit var showConnectStatus: ShowConnectStatus
+    //@Inject
+    //lateinit var connectReceiver: ConnectReceiver
+    //@Inject
+    //lateinit var showConnectStatus: ShowConnectStatus
     @Inject
     lateinit var appSettings: AppSettings
 
@@ -104,7 +95,7 @@ class ListNotesFragment : Fragment() {
                             startRemoteService()
                         } else {
                             viewModel.firstDataLoad = it.isEmpty()
-                            if(connectReceiver.isConnectStatusFlow.value) {
+                            if(viewModel.isConnectStatus.value) {
                                 viewModel.loadRemoteData()
                             } else {
                                 viewModel.setIsLoadCanceled()
@@ -173,7 +164,7 @@ class ListNotesFragment : Fragment() {
 
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
-            connectReceiver.isConnectStatusFlow.collect { isConnect ->
+            viewModel.isConnectStatus.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
                     reactToConnectionStatusChange(isConnect)
                 }
@@ -184,11 +175,11 @@ class ListNotesFragment : Fragment() {
 
         binding.floatingActionButton.isEnabled = isConnect
 
-        showConnectStatus.showStatus(
-            isConnect,
-            requireView(),
-            viewModel.isStartApp,
-        )
+        //showConnectStatus.showStatus(
+        //    isConnect,
+        //    requireView(),
+        //    viewModel.isStartApp,
+        //)
         if (isConnect) {
             viewModel.restartLoadRemoteData()
         } else {
@@ -204,7 +195,7 @@ class ListNotesFragment : Fragment() {
             viewModel.isRemoteDatabaseChangedFlow.collect { isChanged ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (isChanged) {
-                        if (connectReceiver.isConnectStatusFlow.value) {
+                        if (viewModel.isConnectStatus.value) {
                             viewModel.loadRemoteData()
                         } else {
                             viewModel.setIsLoadCanceled()
@@ -246,7 +237,7 @@ class ListNotesFragment : Fragment() {
             R.string.text_delete,
             requireContext(),
             onConfirmed = {
-                if(connectReceiver.isConnectStatusFlow.value) {
+                if(viewModel.isConnectStatus.value) {
                     viewModel.deleteNote(note)
                 } else {
                     showMessageNotPossible(requireContext())
@@ -289,10 +280,10 @@ class ListNotesFragment : Fragment() {
 
         adapter.setSettings(appSettings.specificationLine.value, appSettings.defaultHeader.value)
 
-        showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
+        //showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
 
-        val startDelayValue = appSettings.startDelayValue.value//sPref.getInt("startDelayValue", KeyConstants.TIME_DELAY_START)
-        val queryDelayValue = appSettings.queryDelayValue.value//sPref.getInt("queryDelayValue", KeyConstants.TIME_DELAY_QUERY)
+        val startDelayValue = appSettings.startDelayValue.value
+        val queryDelayValue = appSettings.queryDelayValue.value
         showInfoLoad = queryDelayValue > 0
         showInfoLoadIfStart = startDelayValue > 0
     }
@@ -303,7 +294,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        connectReceiver.initReceiver()
+        //connectReceiver.initReceiver()
         broadcastDateRegister()
         observeCounterDelay()
     }

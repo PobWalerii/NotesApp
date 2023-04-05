@@ -25,6 +25,7 @@ class EditViewModel  @Inject constructor(
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
     val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
+    val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
 
     fun getNoteById(idNote: Long): Flow<Notes?> =
         notesRepository.getNoteById(idNote)
@@ -47,6 +48,11 @@ class EditViewModel  @Inject constructor(
         currentNote?.let {note ->
             notesRepository.deleteNote(note)
         }
+    }
+
+    fun isChangedNote(title: String, text: String): Boolean {
+        return currentNoteName != title ||
+               currentNoteSpecification != text
     }
 
 }

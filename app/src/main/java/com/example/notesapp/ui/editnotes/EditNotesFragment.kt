@@ -11,23 +11,15 @@ import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentEditNotesBinding
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
-import com.example.notesapp.utils.ShowConnectStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class EditNotesFragment : Fragment() {
-
-    @Inject
-    lateinit var connectReceiver: ConnectReceiver
-    @Inject
-    lateinit var showConnectStatus: ShowConnectStatus
 
     private var _binding: FragmentEditNotesBinding? = null
     private val binding get() = _binding!!
@@ -55,16 +47,6 @@ class EditNotesFragment : Fragment() {
         setupActionBar()
     }
 
-    private fun observeConnectStatus() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            connectReceiver.isConnectStatusFlow.collect { isConnect ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    showConnectStatus.showStatus(isConnect)
-                }
-            }
-        }
-    }
-
     private fun setListenersDataChanged() {
         binding.titleNoteText.addTextChangedListener {
             definitionOfChange()
@@ -75,10 +57,10 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        actionBar.setButtonVisible("save",
-            viewModel.currentNoteName != binding.titleNoteText.text.toString() ||
-            viewModel.currentNoteSpecification != binding.textNoteText.text.toString()
-        )
+        actionBar.setButtonVisible("save",viewModel.isChangedNote(
+            binding.titleNoteText.text.toString(),
+            binding.textNoteText.text.toString()
+        ))
     }
 
     private fun loadData() {
@@ -129,22 +111,34 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun deleteNote() {
-        showConfirmationDialog(
-            R.string.title_delete,
-            R.string.text_delete,
-            requireContext(),
-            onConfirmed = {
-                viewModel.deleteNote()
-            },
-            onCancelled = { }
-        )
+        if(viewModel.isConnectStatus.value) {
+            showConfirmationDialog(
+                R.string.title_delete,
+                R.string.text_delete,
+                requireContext(),
+                onConfirmed = {
+                    if(viewModel.isConnectStatus.value) {
+                        viewModel.deleteNote()
+                    } else {
+                        showMessageNotPossible(requireContext())
+                    }
+                },
+                onCancelled = { }
+            )
+        } else {
+            showMessageNotPossible(requireContext())
+        }
     }
 
     private fun saveNote() {
-        viewModel.saveNote(
-            binding.titleNoteText.text.toString(),
-            binding.textNoteText.text.toString()
-        )
+        if(viewModel.isConnectStatus.value) {
+            viewModel.saveNote(
+                binding.titleNoteText.text.toString(),
+                binding.textNoteText.text.toString()
+            )
+        } else {
+            showMessageNotPossible(requireContext())
+        }
     }
 
     private fun observeEditNote() {
@@ -159,7 +153,6 @@ class EditNotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        observeConnectStatus()
         observeEditNote()
         observeCounterDelay()
         CoroutineScope(Dispatchers.Main).launch {

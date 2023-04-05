@@ -25,6 +25,8 @@ class NotesRepository(
 
     private var job: Job? = null
 
+    val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
 

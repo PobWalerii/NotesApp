@@ -20,6 +20,7 @@ class NotesViewModel @Inject constructor(
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
     val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
     val counterDelayFlow: StateFlow<Int> = notesRepository.counterDelayFlow
+    val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
 
     fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
 
