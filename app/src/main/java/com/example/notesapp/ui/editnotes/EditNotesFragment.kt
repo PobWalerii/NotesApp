@@ -171,9 +171,9 @@ class EditNotesFragment : Fragment() {
 
     private fun observeCounterDelay() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { seconds ->
+            viewModel.counterDelay.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    actionBar.startCounter(seconds)
+                    actionBar.startCounter(start)
                 }
             }
         }

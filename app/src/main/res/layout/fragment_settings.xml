@@ -4,6 +4,9 @@
 
     <data>
         <variable
+            name="firstRun"
+            type="Boolean" />
+        <variable
             name="defaultHeader"
             type="String" />
         <variable
@@ -40,12 +43,22 @@
         android:layout_height="match_parent"
         android:background="@color/gray"
         android:padding="@dimen/settings_margin"
-        tools:context=".ui.settings.SettingsFragment">
+        tools:context=".ui.settings.SettingsFragment"
+        tools:ignore="ScrollViewCount">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="@string/text11"
+                android:checked="@{firstRun}"/>
 
             <TextView
                 android:layout_width="match_parent"

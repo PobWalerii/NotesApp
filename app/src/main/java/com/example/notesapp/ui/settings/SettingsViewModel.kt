@@ -11,6 +11,7 @@ class SettingsViewModel @Inject constructor(
     private val appSettings: AppSettings
 ): ViewModel() {
 
+    val firstRun: StateFlow<Boolean> = appSettings.firstRun
     val defaultHeader: StateFlow<String> = appSettings.defaultHeader
     val specificationLine: StateFlow<Boolean> = appSettings.specificationLine
     val defaultAddIfClick: StateFlow<Boolean> = appSettings.defaultAddIfClick
@@ -29,6 +30,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun savePreferences(
+        firstRun: Boolean,
         defaultHeader: String,
         specificationLine: Boolean,
         defaultAddIfClick: Boolean,
@@ -41,6 +43,7 @@ class SettingsViewModel @Inject constructor(
         operationDelayValue: Int
     ) {
         appSettings.savePreferences(
+            firstRun,
             defaultHeader,
             specificationLine,
             defaultAddIfClick,
@@ -55,6 +58,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun isChange(
+        _firstRun: Boolean,
         _defaultHeader: String,
         _specificationLine: Boolean,
         _defaultAddIfClick: Boolean,
@@ -66,7 +70,8 @@ class SettingsViewModel @Inject constructor(
         _requestIntervalValue: String,
         _operationDelayValue: String,
     ): Boolean {
-        return  defaultHeader.value != _defaultHeader ||
+        return  firstRun.value != _firstRun ||
+                defaultHeader.value != _defaultHeader ||
                 specificationLine.value != _specificationLine ||
                 defaultAddIfClick.value != _defaultAddIfClick ||
                 deleteIfSwiped.value != _deleteIfSwiped ||

@@ -101,19 +101,22 @@ class AppActionBar(
         isItemMenuPressed.value = ""
     }
 
-    fun startCounter(seconds: Int) {
-        if (seconds > 1) {
-            var count = seconds
-            CoroutineScope(Dispatchers.Main).launch {
-                while (count >= 0) {
-                    setSpannableTitle(
-                        if (count > 0) {
-                            context.getString(R.string.text_wait) + " $count"
-                        } else ""
-                    )
-                    count--
+
+    private var counter: Job? = null
+    fun startCounter(start: Boolean) {
+        if (start) {
+            var count = 1
+            counter = CoroutineScope(Dispatchers.Main).launch {
+                while (start) {
+                    setSpannableTitle(context.getString(R.string.text_wait) + " $count")
+                    count++
                     withContext(Dispatchers.Default) { delay(1000) }
                 }
+            }
+        } else {
+            CoroutineScope(Dispatchers.Main).launch {
+                counter?.cancel()
+                setSpannableTitle("")
             }
         }
     }

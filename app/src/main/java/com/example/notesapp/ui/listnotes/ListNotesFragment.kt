@@ -116,10 +116,10 @@ class ListNotesFragment : Fragment() {
 
     private fun observeCounterDelay() {
         counter = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { seconds ->
+            viewModel.counterDelay.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (!viewModel.isLoadedFlow.value) {
-                        actionBar.startCounter(seconds)
+                        actionBar.startCounter(start)
                     }
                 }
             }

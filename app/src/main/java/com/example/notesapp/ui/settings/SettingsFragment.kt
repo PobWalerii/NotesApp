@@ -90,6 +90,7 @@ class SettingsFragment : Fragment() {
         )
     }
     private fun showSettings() {
+        binding.firstRun = viewModel.firstRun.value
         binding.defaultHeader = viewModel.defaultHeader.value
         binding.specificationLine = viewModel.specificationLine.value
         binding.defaultAddIfClick = viewModel.defaultAddIfClick.value
@@ -148,6 +149,7 @@ class SettingsFragment : Fragment() {
 
     private fun getIsChange(): Boolean =
         viewModel.isChange(
+            binding.switch6.isChecked,
             binding.header.text.toString(),
             binding.switch1.isChecked,
             binding.switch2.isChecked,
@@ -162,6 +164,7 @@ class SettingsFragment : Fragment() {
 
     private fun saveSettings() {
         viewModel.savePreferences(
+            binding.switch6.isChecked,
             binding.header.text.toString(),
             binding.switch1.isChecked,
             binding.switch2.isChecked,
