@@ -2,20 +2,22 @@ package com.example.notesapp.utils
 
 import android.app.Activity
 import android.content.Context
+import android.provider.Settings.Global.getString
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.example.notesapp.R
 import com.example.notesapp.ui.main.MainActivity
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -97,6 +99,23 @@ class AppActionBar(
             }
         )?.isVisible = isVisible
         isItemMenuPressed.value = ""
+    }
+
+    fun startCounter(seconds: Int) {
+        if (seconds > 1) {
+            var count = seconds
+            CoroutineScope(Dispatchers.Main).launch {
+                while (count >= 0) {
+                    setSpannableTitle(
+                        if (count > 0) {
+                            context.getString(R.string.text_wait) + " $count"
+                        } else ""
+                    )
+                    count--
+                    withContext(Dispatchers.Default) { delay(1000) }
+                }
+            }
+        }
     }
 
     fun setSpannableTitle(text: String) {

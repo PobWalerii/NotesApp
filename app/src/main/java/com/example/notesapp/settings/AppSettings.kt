@@ -12,6 +12,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.INTERVAL_REQUESTS
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
+import com.example.notesapp.constants.KeyConstants.SING_OF_FIRST_RUN
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
@@ -25,6 +26,9 @@ import kotlinx.coroutines.launch
 class AppSettings(
     private val context: Context
 ) {
+
+    private val _firstRun = MutableStateFlow(SING_OF_FIRST_RUN)
+    val firstRun: StateFlow<Boolean> = _firstRun.asStateFlow()
 
     private val _defaultHeader = MutableStateFlow(DEFAULT_HEADER)
     val defaultHeader: StateFlow<String> = _defaultHeader.asStateFlow()
@@ -65,9 +69,17 @@ class AppSettings(
         getPreferences()
     }
 
+    fun setFromAppFirstRun() {
+        val ed: SharedPreferences.Editor = sPref.edit()
+        ed.putBoolean("firstRun", false)
+        ed.apply()
+        _firstRun.value = false
+    }
+
     private fun getPreferences() {
         CoroutineScope(Dispatchers.Main).launch {
             _isLoadedPreferences.value = false
+            _firstRun.value = sPref.getBoolean("firstRun", SING_OF_FIRST_RUN)
             _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
             _specificationLine.value =
                 sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
@@ -85,6 +97,7 @@ class AppSettings(
     }
 
     fun savePreferences(
+        firstRun: Boolean,
         defaultHeader: String,
         specificationLine: Boolean,
         defaultAddIfClick: Boolean,
@@ -98,6 +111,7 @@ class AppSettings(
         getDefault: Boolean = false
     ) {
         val ed: SharedPreferences.Editor = sPref.edit()
+        ed.putBoolean("firstRun", firstRun)
         ed.putString("defaultHeader", defaultHeader.ifEmpty { DEFAULT_HEADER })
         ed.putBoolean("specificationLine", specificationLine)
         ed.putBoolean("defaultAddIfClick", defaultAddIfClick)
@@ -119,6 +133,7 @@ class AppSettings(
 
     fun setDefaultPreferences() {
         savePreferences(
+            SING_OF_FIRST_RUN,
             DEFAULT_HEADER,
             DEFAULT_SPECIFICATION_LINE,
             DEFAULT_ADD_IF_CLICK,

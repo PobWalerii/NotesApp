@@ -35,7 +35,7 @@ class ConnectReceiver(
         observeStatusConnect()
     }
 
-    fun initReceiver() {
+    private fun initReceiver() {
         setStatus(connectivityManager.activeNetwork != null)
     }
 

@@ -10,6 +10,8 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
+import com.example.notesapp.settings.AppSettings
+import dagger.hilt.android.AndroidEntryPoint
 
 @SuppressLint("NotifyDataSetChanged")
 class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
@@ -22,6 +24,7 @@ class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
     private var currentId: Long = 0L
 
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
         private val binding = ListNotesItemBinding.bind(itemView)
         fun bind(item: Notes, currentId: Long, isSingleLine: Boolean, defaultHeader: String) {
             binding.note = item

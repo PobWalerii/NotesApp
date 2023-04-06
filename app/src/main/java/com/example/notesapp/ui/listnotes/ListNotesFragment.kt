@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,10 +31,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ListNotesFragment : Fragment() {
 
-    //@Inject
-    //lateinit var connectReceiver: ConnectReceiver
-    //@Inject
-    //lateinit var showConnectStatus: ShowConnectStatus
     @Inject
     lateinit var appSettings: AppSettings
 
@@ -72,13 +69,13 @@ class ListNotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
         setupRecycler()
-        loadAndRefreshSettings()
-        observeConnectStatus()
+        refreshSettings()
         loadData()
         startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
         observeLoadStatus()
+        observeConnectStatus()
     }
 
     private fun loadData() {
@@ -119,10 +116,10 @@ class ListNotesFragment : Fragment() {
 
     private fun observeCounterDelay() {
         counter = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelayFlow.collect { seconds ->
+            viewModel.counterDelay.collect { seconds ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (!viewModel.isLoadedFlow.value) {
-                        actionBar.setSpannableTitle(if (seconds > 0) {getString(R.string.text_wait)+" $seconds"} else "")
+                        actionBar.startCounter(seconds)
                     }
                 }
             }
@@ -172,7 +169,6 @@ class ListNotesFragment : Fragment() {
         }
     }
     private fun reactToConnectionStatusChange(isConnect: Boolean) {
-
         binding.floatingActionButton.isEnabled = isConnect
 
         //showConnectStatus.showStatus(
@@ -276,9 +272,12 @@ class ListNotesFragment : Fragment() {
         })
     }
 
-    private fun loadAndRefreshSettings() {
+    private fun refreshSettings() {
 
-        adapter.setSettings(appSettings.specificationLine.value, appSettings.defaultHeader.value)
+        adapter.setSettings(
+            appSettings.specificationLine.value,
+            appSettings.defaultHeader.value
+        )
 
         //showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
 
@@ -288,13 +287,13 @@ class ListNotesFragment : Fragment() {
         showInfoLoadIfStart = startDelayValue > 0
     }
 
-
-
-
+    override fun onPause() {
+        super.onPause()
+        counter?.cancel()
+    }
 
     override fun onResume() {
         super.onResume()
-        //connectReceiver.initReceiver()
         broadcastDateRegister()
         observeCounterDelay()
     }
@@ -336,10 +335,6 @@ class ListNotesFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        counter?.cancel()
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

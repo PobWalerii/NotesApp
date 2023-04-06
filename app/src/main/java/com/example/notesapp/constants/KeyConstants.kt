@@ -13,4 +13,5 @@ object KeyConstants {
     const val DELETE_IF_SWIPED = true
     const val DATE_CHANGE_WHEN_CONTENT = true
     const val SHOW_MESSAGE_INTERNET_OK = false
+    const val SING_OF_FIRST_RUN = true
 }

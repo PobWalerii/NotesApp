@@ -28,8 +28,6 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    private var counter: Job? = null
-
     private lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
@@ -169,28 +167,16 @@ class EditNotesFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         hideKeyboardFromView(requireContext(),requireView())
-        counter?.cancel()
-        showCount(0)
     }
 
     private fun observeCounterDelay() {
-        counter = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelayFlow.collect { seconds ->
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.counterDelay.collect { seconds ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    showCount(seconds)
+                    actionBar.startCounter(seconds)
                 }
             }
         }
     }
-
-    private fun showCount(seconds: Int) {
-        actionBar.setSpannableTitle(
-            if (seconds > 0) {
-                getString(R.string.text_wait) + " $seconds"
-            } else ""
-        )
-    }
-
-
 
 }

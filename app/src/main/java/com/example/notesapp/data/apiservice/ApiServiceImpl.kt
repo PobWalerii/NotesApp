@@ -6,24 +6,23 @@ import com.example.notesapp.data.remotedatabase.database.RemoteDao
 import com.example.notesapp.data.remotedatabase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import javax.inject.Inject
 
 class ApiServiceImpl @Inject constructor(
     private val remoteDao: RemoteDao,
     private val connectReceiver: ConnectReceiver,
+    private val appSettings: AppSettings,
     private val applicationContext: Context
 ): ApiService {
 
     private var timeLoadBase: Long = 0L
     private var listNotes: List<Notes> = emptyList()
 
-    private val counterDelay = MutableStateFlow(0)
-    override val counterDelayFlow: StateFlow<Int> = counterDelay.asStateFlow()
+    //private val counterDelay = MutableStateFlow(0)
+    //override val counterDelayFlow: StateFlow<Int> = counterDelay.asStateFlow()
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -61,13 +60,20 @@ class ApiServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllNote(delayTime: Int): NoteResponse = withContext(Dispatchers.IO) {
-        delay((delayTime*1000).toLong())
-        NoteResponse(timeLoadBase, listNotes)
-    }
+    override suspend fun getAllNote(firstRun: Boolean): NoteResponse =
+        withContext(Dispatchers.IO) {
+            delay(
+                ((if (firstRun) {
+                    appSettings.startDelayValue.value
+                } else {
+                    appSettings.queryDelayValue.value
+                }) * 1000).toLong()
+            )
+            NoteResponse(timeLoadBase, listNotes)
+        }
 
     override suspend fun deleteNote(note: Notes, delayTime: Int) {
-        makeDelay(delayTime)
+        delay((delayTime*1000).toLong())
         if (isInetConnect()) {
             remoteDao.deleteNote(note)
         } else {
@@ -75,14 +81,14 @@ class ApiServiceImpl @Inject constructor(
         }
     }
     override suspend fun addNote(note: Notes, delayTime: Int): Long {
-        makeDelay(delayTime)
+        delay((delayTime*1000).toLong())
         if (isInetConnect()) {
             return remoteDao.insertNote(note)
         } else {
             throw Exception(applicationContext.getString(R.string.operation_failed))
         }
     }
-
+/*
     private suspend fun makeDelay(delayTime: Int) {
         if( delayTime !=0 ) {
             var i = delayTime - 1
@@ -100,6 +106,8 @@ class ApiServiceImpl @Inject constructor(
             counterDelay.value = 0
         }
     }
+
+ */
 
     private fun isInetConnect(): Boolean {
         return connectReceiver.isConnectStatusFlow.value
