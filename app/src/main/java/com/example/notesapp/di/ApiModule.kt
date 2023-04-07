@@ -3,10 +3,10 @@ package com.example.notesapp.di
 import android.content.Context
 import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
-import com.example.notesapp.data.apiservice.ApiService
-import com.example.notesapp.data.apiservice.ApiServiceImpl
-import com.example.notesapp.data.remotedatabase.database.RemoteDao
-import com.example.notesapp.data.remotedatabase.database.RemoteDatabase
+import com.example.notesapp.data.remotebase.apiservice.ApiService
+import com.example.notesapp.data.remotebase.apiservice.ApiServiceImpl
+import com.example.notesapp.data.remotebase.database.RemoteDao
+import com.example.notesapp.data.remotebase.database.RemoteDatabase
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
 import dagger.Module

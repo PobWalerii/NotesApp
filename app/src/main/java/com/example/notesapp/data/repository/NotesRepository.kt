@@ -4,13 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import com.example.notesapp.R
-import com.example.notesapp.data.apiservice.ApiService
+import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.flow.*
 import javax.inject.Singleton
 
@@ -22,13 +23,6 @@ class NotesRepository(
     private val appSettings: AppSettings,
     private val applicationContext: Context
 ) {
-
-
-
-
-
-
-
 
 
 
@@ -50,31 +44,17 @@ class NotesRepository(
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
-
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
 
     private val serviceError = MutableStateFlow("")
     val serviceErrorFlow: StateFlow<String> = serviceError.asStateFlow()
 
-    private val isLoaded = MutableStateFlow(false)
-    val isLoadedFlow: StateFlow<Boolean> = isLoaded.asStateFlow()
+    private val isLoad = MutableStateFlow(false)
+    val isLoadFlow: StateFlow<Boolean> = isLoad.asStateFlow()
 
     private val counterDelay = MutableStateFlow(false)
     val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     init {
         observeErrorMessages()
@@ -129,22 +109,16 @@ class NotesRepository(
 
     private fun loadRemoteData() {
         job = CoroutineScope(Dispatchers.Default).launch {
-            isLoaded.value = true
             try {
+                CoroutineScope(Dispatchers.Main).launch {
+                    isLoad.value = true
+                }
                 apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase
                     val list: List<Notes> = this.fullList
                     notesDao.updateDatabase(list)
                 }
-                if(firstRun.value) {
-                    appSettings.setFromAppFirstRun()
-                }
-                if (firstLoad.value) {
-                    appSettings.setFirstLoad()
-                    startRemoteService()
-                }
-
-
+                setStartSettings()
             } catch (e: Exception) {
                 if (e is CancellationException) {
                     serviceError.value =
@@ -157,7 +131,19 @@ class NotesRepository(
                     serviceError.value = e.message.toString()
                 }
             } finally {
-                isLoaded.value = false
+                isLoad.value = false
+            }
+        }
+    }
+
+    private fun setStartSettings() {
+        CoroutineScope(Dispatchers.Main).launch {
+            if (firstRun.value) {
+                appSettings.setFromAppFirstRun()
+            }
+            if (firstLoad.value) {
+                appSettings.setFirstLoad()
+                startRemoteService()
             }
         }
     }

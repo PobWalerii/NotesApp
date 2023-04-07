@@ -21,6 +21,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 class AppActionBar(
     private val activity: Activity,
@@ -121,7 +122,16 @@ class AppActionBar(
         }
     }
 
-    fun setSpannableTitle(text: String) {
+    fun isLoadProcess(isLoad: Boolean) {
+        CoroutineScope(Dispatchers.Main).launch {
+            if (isLoad) {
+                counter?.cancel()
+            }
+            setSpannableTitle(if (isLoad) context.getString(R.string.text_load) else "")
+        }
+    }
+
+    private fun setSpannableTitle(text: String) {
         val spannableString = SpannableString(title+text)
         spannableString.setSpan(
             ForegroundColorSpan(ContextCompat.getColor(context, R.color.gray)),

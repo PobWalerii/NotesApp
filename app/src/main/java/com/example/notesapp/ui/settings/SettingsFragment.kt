@@ -104,6 +104,10 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setListenersSettingsChanged() {
+        binding.switch6.setOnCheckedChangeListener { _, _ ->
+            definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
+        }
         binding.header.addTextChangedListener {
             definitionOfChange()
         }

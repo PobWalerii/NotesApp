@@ -1,9 +1,10 @@
-package com.example.notesapp.data.apiservice
+package com.example.notesapp.data.remotebase.apiservice
 
 import android.content.Context
+import android.widget.Toast
 import com.example.notesapp.R
-import com.example.notesapp.data.remotedatabase.database.RemoteDao
-import com.example.notesapp.data.remotedatabase.model.NoteResponse
+import com.example.notesapp.data.remotebase.database.RemoteDao
+import com.example.notesapp.data.remotebase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
@@ -23,6 +24,7 @@ class ApiServiceImpl @Inject constructor(
     private var listNotes: List<Notes> = emptyList()
 
     val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+    val firstRun: StateFlow<Boolean> = appSettings.firstRun
 
     init {
         observeDataChange()
@@ -52,11 +54,11 @@ class ApiServiceImpl @Inject constructor(
     }
 
     override suspend fun getAllNote(): NoteResponse {
-        if (appSettings.firstRun.value) {
+        if (firstRun.value) {
             setStartData()
         }
         delay(
-            ((if (appSettings.firstRun.value) {
+            ((if (firstRun.value) {
                 appSettings.startDelayValue.value
             } else {
                 appSettings.queryDelayValue.value

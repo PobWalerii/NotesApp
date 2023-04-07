@@ -9,10 +9,10 @@
             name="visibleInfoText"
             type="Boolean" />
         <variable
-            name="visibleProgressHorizontal"
+            name="firstRun"
             type="Boolean" />
         <variable
-            name="visibleProgressRound"
+            name="isLoad"
             type="Boolean" />
     </data>
 
@@ -34,7 +34,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:visibility="@{visibleProgressHorizontal ? View.VISIBLE : View.GONE}" />
+            app:visibility="@{isLoad &amp;&amp; !firstRun ? View.VISIBLE : View.GONE}" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinator"
@@ -63,7 +63,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:visibility="@{visibleProgressRound ? View.VISIBLE : View.GONE}" />
+                app:visibility="@{isLoad &amp;&amp; firstRun ? View.VISIBLE : View.GONE}" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/floatingActionButton"

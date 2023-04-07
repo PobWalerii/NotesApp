@@ -1,7 +1,6 @@
-package com.example.notesapp.data.apiservice
-import com.example.notesapp.data.remotedatabase.model.NoteResponse
+package com.example.notesapp.data.remotebase.apiservice
+import com.example.notesapp.data.remotebase.model.NoteResponse
 import com.example.notesapp.data.database.entitys.Notes
-import kotlinx.coroutines.flow.StateFlow
 
 interface ApiService  {
     suspend fun getAllNote(): NoteResponse

@@ -14,13 +14,14 @@ class NotesViewModel @Inject constructor(
     private val notesRepository: NotesRepository
 ): ViewModel() {
 
-    var firstDataLoad = false
-    var isStartApp = true
+    //var firstDataLoad = false
+    //var isStartApp = true
 
-    val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
+    val isLoadFlow: StateFlow<Boolean> = notesRepository.isLoadFlow
     //val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
     val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
+    val firstRun: StateFlow<Boolean> = notesRepository.firstRun
 
     //fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
 

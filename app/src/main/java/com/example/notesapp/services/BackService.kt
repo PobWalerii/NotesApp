@@ -3,7 +3,7 @@ package com.example.notesapp.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.example.notesapp.data.apiservice.ApiService
+import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings

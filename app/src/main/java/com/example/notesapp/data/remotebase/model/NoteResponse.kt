@@ -1,4 +1,4 @@
-package com.example.notesapp.data.remotedatabase.model
+package com.example.notesapp.data.remotebase.model
 
 import com.example.notesapp.data.database.entitys.Notes
 

@@ -127,18 +127,16 @@ class ListNotesFragment : Fragment() {
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoadedFlow.collect {
+            viewModel.isLoadFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
-                    //if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                    //    actionBar.setSpannableTitle(
-                    //        if (it) getString(R.string.text_load)  else ""
-                    //    )
+                    actionBar.isLoadProcess(it)
+                    //if (viewModel.firstDataLoad) {
+                    //    binding.visibleProgressRound = it
+                    //} else {
+                    //    binding.visibleProgressHorizontal = it
                     //}
-                    if (viewModel.firstDataLoad) {
-                        binding.visibleProgressRound = it
-                    } else {
-                        binding.visibleProgressHorizontal = it
-                    }
+                    binding.isLoad = it
+                    binding.firstRun = viewModel.firstRun.value
                     if (!it) {
                         val behavior =
                             (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
