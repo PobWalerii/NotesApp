@@ -18,28 +18,28 @@ class NotesViewModel @Inject constructor(
     var isStartApp = true
 
     val isLoadedFlow: StateFlow<Boolean> = notesRepository.isLoadedFlow
-    val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
+    //val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
     val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
 
-    fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
+    //fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
 
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
 
-    fun loadRemoteData() {
-        notesRepository.loadRemoteData(isStartApp)
-    }
+    //fun loadRemoteData() {
+    //    notesRepository.loadRemoteData(isStartApp)
+    //}
 
-    fun stopLoadRemoteData() {
-        notesRepository.stopLoadRemoteData()
-    }
-    fun restartLoadRemoteData() {
-        notesRepository.restartLoadRemoteData(isStartApp)
-    }
+    //fun stopLoadRemoteData() {
+    //    notesRepository.stopLoadRemoteData()
+    //}
+    //fun restartLoadRemoteData() {
+    //    notesRepository.restartLoadRemoteData(isStartApp)
+    //}
 
-    fun setIsLoadCanceled() {
-        notesRepository.setIsLoadCanceled()
-    }
+    //fun setIsLoadCanceled() {
+    //    notesRepository.setIsLoadCanceled()
+    //}
 
     fun deleteNote(note: Notes) {
         notesRepository.deleteNote(note)
@@ -51,10 +51,10 @@ class NotesViewModel @Inject constructor(
         )
     }
 
-    fun setInsertedOrEditedIdNull() {
-        notesRepository.setInsertedOrEditedIdNull()
-    }
+    //fun setInsertedOrEditedIdNull() {
+    //    notesRepository.setInsertedOrEditedIdNull()
+    //}
 
-    fun getInsertedOrEditedIdValue() = notesRepository.getInsertedOrEditedIdValue()
+    //fun getInsertedOrEditedIdValue() = notesRepository.getInsertedOrEditedIdValue()
 
 }

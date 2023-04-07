@@ -1,6 +1,7 @@
 package com.example.notesapp.ui.main
 
 import android.animation.ObjectAnimator
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
 import com.example.notesapp.R
+import com.example.notesapp.services.BackService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,6 +38,12 @@ class MainActivity : AppCompatActivity() {
             slideUp.doOnEnd { splashScreenViewProvider.remove() }
             slideUp.start()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val serviceIntent = Intent(this, BackService::class.java)
+        this.stopService(serviceIntent)
     }
 
 

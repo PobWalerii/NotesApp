@@ -1,12 +1,14 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -21,12 +23,29 @@ class NotesRepository(
     private val applicationContext: Context
 ) {
 
-    private var insertedOrEditedId: Long = 0L
-    private var fixedTimeLoadedDate: Long = 0L
+
+
+
+
+
+
+
+
+
+
+    private var insertedOrEditedId: Long = 0
     private var successfulInitialDataUpload = false
+    fun setInsertedOrEditedIdNull() {
+        insertedOrEditedId = 0L
+    }
+    fun getInsertedOrEditedIdValue(): Long = insertedOrEditedId
+
+
+
 
     private var job: Job? = null
-
+    private var fixedTimeLoadedDate: Long = 0
+    private var fixedTimeRemoteDate: Long = 0
     val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
@@ -41,41 +60,26 @@ class NotesRepository(
     private val isLoaded = MutableStateFlow(false)
     val isLoadedFlow: StateFlow<Boolean> = isLoaded.asStateFlow()
 
-    private val isRemoteDatabaseChanged = MutableStateFlow(false)
-    val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = isRemoteDatabaseChanged.asStateFlow()
-
     private val counterDelay = MutableStateFlow(false)
     val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
 
 
 
-    private var isLoadCanceled = false
-
-    fun setRemoteDatabaseChanged(timeRemote: Long) {
-        if(fixedTimeLoadedDate != timeRemote) {
-            isRemoteDatabaseChanged.value = true
-        }
-    }
-
-    fun setInsertedOrEditedIdNull() {
-        insertedOrEditedId = 0L
-    }
-    fun getInsertedOrEditedIdValue(): Long = insertedOrEditedId
 
 
 
 
 
 
-    ////////////////////////////////////////////////////
+
+
+
+
+
     init {
-
-
-
-
+        observeErrorMessages()
+        observeConnectStatus()
     }
-
-
 
     fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
 
@@ -83,19 +87,13 @@ class NotesRepository(
         flow {
             emit(notesDao.getNoteById(noteId).firstOrNull())
         }
-    /////////////////////////////////////////////////////////////
 
-
-
-
-
-    fun setIsLoadCanceled() {
-        isLoadCanceled = true
+    fun setRemoteBaseTime(timeRemote: Long) {
+        if(fixedTimeLoadedDate != timeRemote) {
+            fixedTimeRemoteDate = timeRemote
+            loadRemoteData()
+        }
     }
-    fun getInitialDataUpload(): Boolean = successfulInitialDataUpload
-
-
-
 
     private fun observeErrorMessages() {
         CoroutineScope(Dispatchers.Default).launch {
@@ -110,33 +108,47 @@ class NotesRepository(
         }
     }
 
-    fun loadRemoteData(start: Boolean = false) {
-        if(start) {
-            observeErrorMessages()
+    private fun observeConnectStatus() {
+        CoroutineScope(Dispatchers.Default).launch {
+            isConnectStatus.collect { isConnect ->
+                if( isConnect ) {
+                    if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
+                        loadRemoteData()
+                    }
+                } else {
+                    job?.cancel()
+                }
+            }
         }
+    }
+
+    private fun startRemoteService() {
+        val serviceIntent = Intent(applicationContext, BackService::class.java)
+        applicationContext.startService(serviceIntent)
+    }
+
+    private fun loadRemoteData() {
         job = CoroutineScope(Dispatchers.Default).launch {
-            //isLoadCanceled = false
             isLoaded.value = true
             try {
-                apiService.getAllNote(firstRun.value).apply {
+                apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase
-                    //isRemoteDatabaseChanged.value = false
-                    //successfulInitialDataUpload = true
                     val list: List<Notes> = this.fullList
                     notesDao.updateDatabase(list)
                 }
-                /////////////////
                 if(firstRun.value) {
                     appSettings.setFromAppFirstRun()
                 }
-                appSettings.setFirstLoad()
-                /////////////////////
+                if (firstLoad.value) {
+                    appSettings.setFirstLoad()
+                    startRemoteService()
+                }
+
 
             } catch (e: Exception) {
                 if (e is CancellationException) {
-                    //isLoadCanceled = true
                     serviceError.value =
-                        if (start) {
+                        if (firstRun.value || firstLoad.value) {
                             applicationContext.getString(R.string.interrupted_start_load)
                         } else {
                             applicationContext.getString(R.string.interrupted_update_load)
@@ -150,27 +162,15 @@ class NotesRepository(
         }
     }
 
-    //fun stopLoadRemoteData() {
-    //    CoroutineScope(Dispatchers.Default).launch {
-    //        job?.cancel()
-    //    }
-    //}
-    //fun restartLoadRemoteData(start: Boolean) {
-    //    if(isLoadCanceled) {
-    //        loadRemoteData(start)
-    //    }
-    //}
-
     fun addNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                if(isRemoteConnect()) {
+                if(isConnectStatus.value) {
                     counterDelay.value = true
-                    val resultId: Long = apiService.addNote(note, appSettings.operationDelayValue.value)
+                    val resultId: Long = apiService.addNote(note)
                     insertedOrEditedId = resultId
                     isNoteEdited.value = true
-                    delay(10)
-                    isNoteEdited.value = false
+
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
@@ -178,6 +178,8 @@ class NotesRepository(
                 serviceError.value = e.message.toString()
             } finally {
                 counterDelay.value = false
+                delay(10)
+                isNoteEdited.value = false
             }
         }
     }
@@ -185,12 +187,10 @@ class NotesRepository(
     fun deleteNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                if(isRemoteConnect()) {
+                if(isConnectStatus.value) {
                     counterDelay.value = true
-                    apiService.deleteNote(note, appSettings.operationDelayValue.value)
+                    apiService.deleteNote(note)
                     isNoteEdited.value = true
-                    delay(10)
-                    isNoteEdited.value = false
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
@@ -198,12 +198,10 @@ class NotesRepository(
                 serviceError.value = e.message.toString()
             } finally {
                 counterDelay.value = false
+                delay(10)
+                isNoteEdited.value = false
             }
         }
-    }
-
-    private fun isRemoteConnect(): Boolean {
-        return connectReceiver.isConnectStatusFlow.value
     }
 
 }

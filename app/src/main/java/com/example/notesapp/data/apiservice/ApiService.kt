@@ -4,10 +4,9 @@ import com.example.notesapp.data.database.entitys.Notes
 import kotlinx.coroutines.flow.StateFlow
 
 interface ApiService  {
-    suspend fun getAllNote(firstRun: Boolean): NoteResponse
-    suspend fun addNote(note: Notes, delayTime: Int): Long
-    suspend fun deleteNote(note: Notes, delayTime: Int)
+    suspend fun getAllNote(): NoteResponse
+    suspend fun addNote(note: Notes): Long
+    suspend fun deleteNote(note: Notes)
     fun getChangeBaseTime(): Long
 
-    //val counterDelayFlow: StateFlow<Int>
 }

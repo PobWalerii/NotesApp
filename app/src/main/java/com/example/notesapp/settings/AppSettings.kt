@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 class AppSettings(
     private val context: Context
 ) {
-    private val _firstLoad = MutableStateFlow(false)
+    private val _firstLoad = MutableStateFlow(true)
     val firstLoad: StateFlow<Boolean> = _firstLoad.asStateFlow()
 
     private val _firstRun = MutableStateFlow(SING_OF_FIRST_RUN)
@@ -79,7 +79,7 @@ class AppSettings(
     }
 
     fun setFirstLoad() {
-        _firstLoad.value = true
+        _firstLoad.value = false
     }
 
     private fun getPreferences() {

@@ -41,12 +41,10 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private var showInfoLoad: Boolean = false
-    private var showInfoLoadIfStart: Boolean = false
+    //private var showInfoLoad: Boolean = false
+    //private var showInfoLoadIfStart: Boolean = false
 
     private lateinit var receiver: DateChangedBroadcastReceiver
-
-    private var counter: Job? = null
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -71,7 +69,7 @@ class ListNotesFragment : Fragment() {
         setupRecycler()
         refreshSettings()
         loadData()
-        startRemoteService()
+        //startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
         observeLoadStatus()
@@ -84,6 +82,9 @@ class ListNotesFragment : Fragment() {
                 CoroutineScope(Dispatchers.Main).launch {
                     binding.visibleInfoText = it.isEmpty()
                     adapter.setList(it)
+
+
+                    /*
                     if (viewModel.isStartApp) {
                         if (viewModel.getInitialDataUpload()) {
                             viewModel.isStartApp = false
@@ -109,40 +110,30 @@ class ListNotesFragment : Fragment() {
                             }
                         }
                     }
+
+                     */
+
+
                 }
             }
         }
     }
 
-    private fun observeCounterDelay() {
-        counter = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { start ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (!viewModel.isLoadedFlow.value) {
-                        actionBar.startCounter(start)
-                    }
-                }
-            }
-        }
-    }
 
-    private fun startRemoteService() {
-        if (!viewModel.isStartApp) {
-            val serviceIntent = Intent(context, BackService::class.java)
-            context?.startService(serviceIntent)
-            observeRemoteDatabaseChanged()
-        }
-    }
+
+
+
+
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadedFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
-                    if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
-                        actionBar.setSpannableTitle(
-                            if (it) getString(R.string.text_load)  else ""
-                        )
-                    }
+                    //if ((showInfoLoad && !viewModel.isStartApp) || (showInfoLoadIfStart && viewModel.isStartApp)) {
+                    //    actionBar.setSpannableTitle(
+                    //        if (it) getString(R.string.text_load)  else ""
+                    //    )
+                    //}
                     if (viewModel.firstDataLoad) {
                         binding.visibleProgressRound = it
                     } else {
@@ -170,22 +161,14 @@ class ListNotesFragment : Fragment() {
     }
     private fun reactToConnectionStatusChange(isConnect: Boolean) {
         binding.floatingActionButton.isEnabled = isConnect
-
-        //showConnectStatus.showStatus(
-        //    isConnect,
-        //    requireView(),
-        //    viewModel.isStartApp,
-        //)
-        if (isConnect) {
-            viewModel.restartLoadRemoteData()
-        } else {
-            viewModel.stopLoadRemoteData()
-        }
         itemTouchHelper.attachToRecyclerView(
             if(appSettings.deleteIfSwiped.value && isConnect) recyclerView else null
         )
     }
 
+
+
+/*
     private fun observeRemoteDatabaseChanged() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isRemoteDatabaseChangedFlow.collect { isChanged ->
@@ -201,6 +184,8 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
+
+ */
 
     private fun setupAdapter() {
         adapter = NotesListAdapter()
@@ -281,15 +266,10 @@ class ListNotesFragment : Fragment() {
 
         //showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
 
-        val startDelayValue = appSettings.startDelayValue.value
-        val queryDelayValue = appSettings.queryDelayValue.value
-        showInfoLoad = queryDelayValue > 0
-        showInfoLoadIfStart = startDelayValue > 0
-    }
-
-    override fun onPause() {
-        super.onPause()
-        counter?.cancel()
+        //val startDelayValue = appSettings.startDelayValue.value
+        //val queryDelayValue = appSettings.queryDelayValue.value
+        //showInfoLoad = queryDelayValue > 0
+        //showInfoLoadIfStart = startDelayValue > 0
     }
 
     override fun onResume() {
@@ -342,10 +322,14 @@ class ListNotesFragment : Fragment() {
         _binding = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        val serviceIntent = Intent(context, BackService::class.java)
-        context?.stopService(serviceIntent)
+    private fun observeCounterDelay() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.counterDelay.collect { start ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    actionBar.startCounter(start)
+                }
+            }
+        }
     }
 
 }

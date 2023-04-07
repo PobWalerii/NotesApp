@@ -30,8 +30,9 @@
     <string name="text_internet_ok">Internet Connection Restored.</string>
     <string name="operation_not_possible">Operation Is Not Possible if There Is No Internet Connection</string>
     <string name="interrupted_start_load">Initial Loading of Information Interrupted</string>
-    <string name="interrupted_update_load">The Remote Database Was Changed, but the Update of the Information Was Interrupted</string>
-    <string name="operation_failed">The Operation Failed. Please Try Again if Necessary.</string>
+    <string name="interrupted_update_load">Database Update Interrupted</string>
+    <string name="operation_failed">The Operation Failed. Please Try Again if necessary.</string>
+    <string name="data_error">Error Reading Data from a Remote source</string>
 
     <string name="text1">Заголовок сообщения по умолчанию:</string>
     <string name="text2">Задержка запроса к уданенной базе в секундах при запуске приложения:</string>

@@ -32,7 +32,7 @@ class BackService: Service() {
                 if(connectReceiver.isConnectStatusFlow.value) {
                     try {
                         val remoteBaseTime = apiService.getChangeBaseTime()
-                        notesRepository.setRemoteDatabaseChanged(remoteBaseTime)
+                        notesRepository.setRemoteBaseTime(remoteBaseTime)
                     } catch (_: Exception) {}
                 }
             }
