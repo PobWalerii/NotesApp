@@ -18,6 +18,6 @@ object SettingsModule {
     fun provideAppSettings(
         @ApplicationContext applicationContext: Context
     ): AppSettings {
-        return com.example.notesapp.settings.AppSettings(applicationContext)
+        return AppSettings(applicationContext)
     }
 }
