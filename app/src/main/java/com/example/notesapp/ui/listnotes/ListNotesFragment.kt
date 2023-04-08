@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,17 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
-import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
-import com.example.notesapp.ui.MyActionBar.MyActionBar
-import com.example.notesapp.utils.AppActionBar
+import com.example.notesapp.ui.actionbar.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,7 +31,7 @@ class ListNotesFragment : Fragment() {
     @Inject
     lateinit var appSettings: AppSettings
     @Inject
-    lateinit var actionBar: MyActionBar
+    lateinit var actionBar: AppActionBar
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -44,14 +40,9 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    //private var showInfoLoad: Boolean = false
-    //private var showInfoLoadIfStart: Boolean = false
-
     private lateinit var receiver: DateChangedBroadcastReceiver
 
     private val viewModel by viewModels<NotesViewModel>()
-
-    //private lateinit var actionBar: AppActionBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +65,6 @@ class ListNotesFragment : Fragment() {
         loadData()
         setupButtonAddListener()
         setupItemClickListener()
-        //observeLoadStatus()
         observeConnectStatus()
         observeScrollStatus()
     }
@@ -107,7 +97,6 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
-                    //actionBar.isLoadProcess(it)
                     binding.isLoad = it
                     binding.firstRun = viewModel.firstRun.value
                     if (!it) {
@@ -208,24 +197,15 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun refreshSettings() {
-
         adapter.setSettings(
             appSettings.specificationLine.value,
             appSettings.defaultHeader.value
         )
-
-        //showConnectStatus.setShowMessageInternetOk(appSettings.showMessageInternetOk.value)
-
-        //val startDelayValue = appSettings.startDelayValue.value
-        //val queryDelayValue = appSettings.queryDelayValue.value
-        //showInfoLoad = queryDelayValue > 0
-        //showInfoLoadIfStart = startDelayValue > 0
     }
 
     override fun onResume() {
         super.onResume()
         broadcastDateRegister()
-        //observeCounterDelay()
         observeLoadStatus()
     }
 
@@ -251,24 +231,14 @@ class ListNotesFragment : Fragment() {
 
     private fun setupActionBar() {
 
-
-        actionBar.init(
+        actionBar.initAppbar(
             requireActivity(),
             R.string.app_name,
             viewLifecycleOwner,
             isHomeKey = false,
-            isSettings = true,)
-        /*
-        actionBar = AppActionBar(
-            requireActivity(),
-            requireContext(),
-            R.string.app_name,
-            viewLifecycleOwner,
-            isHomeKey = false,
-            isSettings = true,
+            isSettings = true
         )
 
-         */
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
                 if(it=="settings") {
@@ -278,23 +248,10 @@ class ListNotesFragment : Fragment() {
         }
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         activity?.unregisterReceiver(receiver)
         _binding = null
     }
-/*
-    private fun observeCounterDelay() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { start ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    actionBar.startCounter(start)
-                }
-            }
-        }
-    }
-
- */
 
 }

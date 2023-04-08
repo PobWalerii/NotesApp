@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.MyActionBar
+package com.example.notesapp.ui.actionbar
 
 import android.app.Activity
 import android.content.Context
@@ -22,11 +22,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Singleton
 
-class MyActionBar (
+@Singleton
+class AppActionBar(
     private val notesRepository: NotesRepository,
     private val appSettings: AppSettings,
-    private val context: Context,
+    private val context: Context
  ){
 
     private val isItemMenuPressed = MutableStateFlow("")
@@ -51,9 +53,8 @@ class MyActionBar (
         }
     }
 
-
-    fun init(
-        _activity: Activity,
+    fun initAppbar(
+        requeryActivity: Activity,
         titleId: Int,
         lifecycleOwner: LifecycleOwner,
         isHomeKey: Boolean = true,
@@ -62,7 +63,7 @@ class MyActionBar (
         isSettings: Boolean = false,
         toDefault: Boolean = false,
     ) {
-        activity = _activity
+        activity = requeryActivity
 
         actionBar = (activity as MainActivity).supportActionBar
         title = context.getString(titleId)
@@ -107,7 +108,6 @@ class MyActionBar (
 
     }
 
-
     private fun itemMenuPressed(item: String) {
         if (item == "home") {
             (activity as MainActivity).onSupportNavigateUp()
@@ -130,25 +130,29 @@ class MyActionBar (
         isItemMenuPressed.value = ""
     }
 
-    fun startCounter(start: Boolean) {
-        if (start) {
-            var count = 1
-            counter = CoroutineScope(Dispatchers.Main).launch {
-                while (start) {
-                    setSpannableTitle(context.getString(R.string.text_wait) + " $count")
-                    count++
-                    withContext(Dispatchers.Default) { delay(1000) }
+    private fun startCounter(start: Boolean) {
+        counter?.cancel()
+        if(!notesRepository.isLoadFlow.value) {
+            if (start) {
+                if (appSettings.operationDelayValue.value > 1) {
+                    var count = 1
+                    counter = CoroutineScope(Dispatchers.Main).launch {
+                        while (start) {
+                            setSpannableTitle(context.getString(R.string.text_wait) + " $count")
+                            count++
+                            withContext(Dispatchers.Default) { delay(1000) }
+                        }
+                    }
                 }
-            }
-        } else {
-            CoroutineScope(Dispatchers.Main).launch {
-                counter?.cancel()
-                setSpannableTitle("")
+            } else {
+                CoroutineScope(Dispatchers.Main).launch {
+                    setSpannableTitle("")
+                }
             }
         }
     }
 
-    fun isLoadProcess(isLoad: Boolean) {
+    private fun isLoadProcess(isLoad: Boolean) {
         CoroutineScope(Dispatchers.Main).launch {
             if (isLoad) {
                 counter?.cancel()

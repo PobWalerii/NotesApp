@@ -8,8 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentSettingsBinding
-import com.example.notesapp.ui.MyActionBar.MyActionBar
-import com.example.notesapp.utils.AppActionBar
+import com.example.notesapp.ui.actionbar.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,9 +27,7 @@ class SettingsFragment : Fragment() {
     private val viewModel by viewModels<SettingsViewModel>()
 
     @Inject
-    lateinit var actionBar: MyActionBar
-
-    //private lateinit var actionBar: AppActionBar
+    lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,23 +58,12 @@ class SettingsFragment : Fragment() {
 
     private fun setupActionBar() {
 
-        actionBar.init(
+        actionBar.initAppbar(
             requireActivity(),
-            R.string.settings,
-            viewLifecycleOwner,
-            toDefault = true)
-
-
-/*
-        actionBar = AppActionBar(
-            requireActivity(),
-            requireContext(),
             R.string.settings,
             viewLifecycleOwner,
             toDefault = true
         )
-
- */
 
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
@@ -104,6 +90,7 @@ class SettingsFragment : Fragment() {
             onCancelled = { }
         )
     }
+
     private fun showSettings() {
         binding.firstRun = viewModel.firstRun.value
         binding.defaultHeader = viewModel.defaultHeader.value

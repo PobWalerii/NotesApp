@@ -9,9 +9,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentEditNotesBinding
-import com.example.notesapp.ui.MyActionBar.MyActionBar
+import com.example.notesapp.ui.actionbar.AppActionBar
 import com.example.notesapp.ui.main.MainActivity
-import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
@@ -29,9 +28,8 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    //private lateinit var actionBar: AppActionBar
     @Inject
-    lateinit var actionBar: MyActionBar
+    lateinit var actionBar: AppActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,23 +80,12 @@ class EditNotesFragment : Fragment() {
 
     private fun setupActionBar() {
 
-        actionBar.init(
+        actionBar.initAppbar(
             requireActivity(),
             if (args.idNote == 0L) R.string.add_note else R.string.edit_note,
             viewLifecycleOwner,
-            isDelete = args.idNote != 0L,
+            isDelete = args.idNote != 0L
         )
-
-        /*
-        actionBar = AppActionBar(
-            requireActivity(),
-            requireContext(),
-            if (args.idNote == 0L) R.string.add_note else R.string.edit_note,
-            viewLifecycleOwner,
-            isDelete = args.idNote != 0L,
-        )
-
-         */
 
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
@@ -114,8 +101,6 @@ class EditNotesFragment : Fragment() {
             }
         }
     }
-
-
 
     private fun deleteNote() {
         if(viewModel.isConnectStatus.value) {
@@ -158,23 +143,9 @@ class EditNotesFragment : Fragment() {
         }
     }
 
-    /*
-    private fun observeCounterDelay() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { start ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    actionBar.startCounter(start)
-                }
-            }
-        }
-    }
-
-     */
-
     override fun onResume() {
         super.onResume()
         observeEditNote()
-        //observeCounterDelay()
         CoroutineScope(Dispatchers.Main).launch {
             delay(100)
             definitionOfChange()
