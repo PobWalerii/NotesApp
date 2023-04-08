@@ -14,33 +14,13 @@ class NotesViewModel @Inject constructor(
     private val notesRepository: NotesRepository
 ): ViewModel() {
 
-    //var firstDataLoad = false
-    //var isStartApp = true
-
     val isLoadFlow: StateFlow<Boolean> = notesRepository.isLoadFlow
-    //val isRemoteDatabaseChangedFlow: StateFlow<Boolean> = notesRepository.isRemoteDatabaseChangedFlow
-    val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
+    val idInsertOrEditFlow: StateFlow<Long> = notesRepository.idInsertOrEditFlow
+    //val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val firstRun: StateFlow<Boolean> = notesRepository.firstRun
 
-    //fun getInitialDataUpload(): Boolean = notesRepository.getInitialDataUpload()
-
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
-
-    //fun loadRemoteData() {
-    //    notesRepository.loadRemoteData(isStartApp)
-    //}
-
-    //fun stopLoadRemoteData() {
-    //    notesRepository.stopLoadRemoteData()
-    //}
-    //fun restartLoadRemoteData() {
-    //    notesRepository.restartLoadRemoteData(isStartApp)
-    //}
-
-    //fun setIsLoadCanceled() {
-    //    notesRepository.setIsLoadCanceled()
-    //}
 
     fun deleteNote(note: Notes) {
         notesRepository.deleteNote(note)
@@ -51,11 +31,5 @@ class NotesViewModel @Inject constructor(
             Notes(0, "", "", Date().time)
         )
     }
-
-    //fun setInsertedOrEditedIdNull() {
-    //    notesRepository.setInsertedOrEditedIdNull()
-    //}
-
-    //fun getInsertedOrEditedIdValue() = notesRepository.getInsertedOrEditedIdValue()
 
 }

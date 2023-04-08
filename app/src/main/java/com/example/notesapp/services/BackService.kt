@@ -28,7 +28,7 @@ class BackService: Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         scope.launch {
             while (isActive) {
-                delay((appSettings.requestIntervalValue.value*1000).toLong())
+                delay(appSettings.requestIntervalValue.value*1000L)
                 if(connectReceiver.isConnectStatusFlow.value) {
                     try {
                         val remoteBaseTime = apiService.getChangeBaseTime()

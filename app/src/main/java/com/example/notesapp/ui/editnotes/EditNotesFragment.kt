@@ -5,11 +5,11 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentEditNotesBinding
+import com.example.notesapp.ui.MyActionBar.MyActionBar
 import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
@@ -17,6 +17,7 @@ import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class EditNotesFragment : Fragment() {
@@ -28,7 +29,9 @@ class EditNotesFragment : Fragment() {
 
     private val args: EditNotesFragmentArgs by navArgs()
 
-    private lateinit var actionBar: AppActionBar
+    //private lateinit var actionBar: AppActionBar
+    @Inject
+    lateinit var actionBar: MyActionBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +46,22 @@ class EditNotesFragment : Fragment() {
         loadData()
         setListenersDataChanged()
         setupActionBar()
+    }
+
+    private fun loadData() {
+        if (args.idNote != 0L) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.getNoteById(args.idNote)
+                viewModel.isLoadedNote.collect {
+                    setDataForEdit()
+                }
+            }
+        }
+    }
+
+    private fun setDataForEdit() {
+        binding.noteName = viewModel.currentNoteName
+        binding.noteSpecification = viewModel.currentNoteSpecification
     }
 
     private fun setListenersDataChanged() {
@@ -61,30 +80,16 @@ class EditNotesFragment : Fragment() {
         ))
     }
 
-    private fun loadData() {
-        viewModel.currentId = args.idNote
-        if (args.idNote != 0L) {
-            lifecycle.coroutineScope.launch {
-                viewModel.getNoteById(args.idNote).collect { note ->
-                    if (note != null) {
-                        viewModel.currentNote = note
-                        viewModel.currentNoteName = note.noteName
-                        viewModel.currentNoteSpecification = note.noteSpecification
-                        viewModel.currentNoteDate = note.noteDate
-                        setDataForEdit()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setDataForEdit() {
-        binding.noteName = viewModel.currentNoteName
-        binding.noteSpecification = viewModel.currentNoteSpecification
-    }
-
     private fun setupActionBar() {
 
+        actionBar.init(
+            requireActivity(),
+            if (args.idNote == 0L) R.string.add_note else R.string.edit_note,
+            viewLifecycleOwner,
+            isDelete = args.idNote != 0L,
+        )
+
+        /*
         actionBar = AppActionBar(
             requireActivity(),
             requireContext(),
@@ -92,6 +97,8 @@ class EditNotesFragment : Fragment() {
             viewLifecycleOwner,
             isDelete = args.idNote != 0L,
         )
+
+         */
 
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
@@ -107,6 +114,8 @@ class EditNotesFragment : Fragment() {
             }
         }
     }
+
+
 
     private fun deleteNote() {
         if(viewModel.isConnectStatus.value) {
@@ -149,10 +158,23 @@ class EditNotesFragment : Fragment() {
         }
     }
 
+    /*
+    private fun observeCounterDelay() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.counterDelay.collect { start ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    actionBar.startCounter(start)
+                }
+            }
+        }
+    }
+
+     */
+
     override fun onResume() {
         super.onResume()
         observeEditNote()
-        observeCounterDelay()
+        //observeCounterDelay()
         CoroutineScope(Dispatchers.Main).launch {
             delay(100)
             definitionOfChange()
@@ -167,16 +189,6 @@ class EditNotesFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         hideKeyboardFromView(requireContext(),requireView())
-    }
-
-    private fun observeCounterDelay() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.counterDelay.collect { start ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    actionBar.startCounter(start)
-                }
-            }
-        }
     }
 
 }

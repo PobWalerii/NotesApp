@@ -17,6 +17,7 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
+import com.example.notesapp.ui.MyActionBar.MyActionBar
 import com.example.notesapp.utils.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
@@ -33,6 +34,8 @@ class ListNotesFragment : Fragment() {
 
     @Inject
     lateinit var appSettings: AppSettings
+    @Inject
+    lateinit var actionBar: MyActionBar
 
     private var _binding: FragmentListNotesBinding? = null
     private val binding get() = requireNotNull(_binding)
@@ -48,7 +51,7 @@ class ListNotesFragment : Fragment() {
 
     private val viewModel by viewModels<NotesViewModel>()
 
-    private lateinit var actionBar: AppActionBar
+    //private lateinit var actionBar: AppActionBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,11 +72,11 @@ class ListNotesFragment : Fragment() {
         setupRecycler()
         refreshSettings()
         loadData()
-        //startRemoteService()
         setupButtonAddListener()
         setupItemClickListener()
-        observeLoadStatus()
+        //observeLoadStatus()
         observeConnectStatus()
+        observeScrollStatus()
     }
 
     private fun loadData() {
@@ -82,59 +85,29 @@ class ListNotesFragment : Fragment() {
                 CoroutineScope(Dispatchers.Main).launch {
                     binding.visibleInfoText = it.isEmpty()
                     adapter.setList(it)
-
-
-                    /*
-                    if (viewModel.isStartApp) {
-                        if (viewModel.getInitialDataUpload()) {
-                            viewModel.isStartApp = false
-                            viewModel.firstDataLoad = false
-                            binding.visibleProgressRound = false
-                            startRemoteService()
-                        } else {
-                            viewModel.firstDataLoad = it.isEmpty()
-                            if(viewModel.isConnectStatus.value) {
-                                viewModel.loadRemoteData()
-                            } else {
-                                viewModel.setIsLoadCanceled()
-                            }
-                        }
-                    } else {
-                        viewModel.getInsertedOrEditedIdValue().let { id ->
-                            if (id != 0L) {
-                                val position = adapter.setCurrentId(id)
-                                if (position != -1) {
-                                    recyclerView.layoutManager?.scrollToPosition(position)
-                                }
-                                viewModel.setInsertedOrEditedIdNull()
-                            }
-                        }
-                    }
-
-                     */
-
-
                 }
             }
         }
     }
 
-
-
-
-
-
+    private fun observeScrollStatus() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.idInsertOrEditFlow.collect { id ->
+                if(id != 0L) {
+                    val position = adapter.setCurrentId(id)
+                    if (position != -1) {
+                        recyclerView.layoutManager?.scrollToPosition(position)
+                    }
+                }
+            }
+        }
+    }
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
-                    actionBar.isLoadProcess(it)
-                    //if (viewModel.firstDataLoad) {
-                    //    binding.visibleProgressRound = it
-                    //} else {
-                    //    binding.visibleProgressHorizontal = it
-                    //}
+                    //actionBar.isLoadProcess(it)
                     binding.isLoad = it
                     binding.firstRun = viewModel.firstRun.value
                     if (!it) {
@@ -163,27 +136,6 @@ class ListNotesFragment : Fragment() {
             if(appSettings.deleteIfSwiped.value && isConnect) recyclerView else null
         )
     }
-
-
-
-/*
-    private fun observeRemoteDatabaseChanged() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isRemoteDatabaseChangedFlow.collect { isChanged ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (isChanged) {
-                        if (viewModel.isConnectStatus.value) {
-                            viewModel.loadRemoteData()
-                        } else {
-                            viewModel.setIsLoadCanceled()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
- */
 
     private fun setupAdapter() {
         adapter = NotesListAdapter()
@@ -273,7 +225,8 @@ class ListNotesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         broadcastDateRegister()
-        observeCounterDelay()
+        //observeCounterDelay()
+        observeLoadStatus()
     }
 
     private fun broadcastDateRegister() {
@@ -295,7 +248,17 @@ class ListNotesFragment : Fragment() {
         }
     }
 
+
     private fun setupActionBar() {
+
+
+        actionBar.init(
+            requireActivity(),
+            R.string.app_name,
+            viewLifecycleOwner,
+            isHomeKey = false,
+            isSettings = true,)
+        /*
         actionBar = AppActionBar(
             requireActivity(),
             requireContext(),
@@ -304,6 +267,8 @@ class ListNotesFragment : Fragment() {
             isHomeKey = false,
             isSettings = true,
         )
+
+         */
         viewLifecycleOwner.lifecycleScope.launch {
             actionBar.isItemMenuPressedFlow.collect {
                 if(it=="settings") {
@@ -319,7 +284,7 @@ class ListNotesFragment : Fragment() {
         activity?.unregisterReceiver(receiver)
         _binding = null
     }
-
+/*
     private fun observeCounterDelay() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.counterDelay.collect { start ->
@@ -329,5 +294,7 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
+
+ */
 
 }

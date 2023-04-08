@@ -1,12 +1,15 @@
 package com.example.notesapp.ui.editnotes
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -16,19 +19,37 @@ class EditViewModel  @Inject constructor(
     private val appSettings: AppSettings
 ): ViewModel() {
 
-    var currentNote: Notes? = null
+    private var currentNote: Notes? = null
 
-    var currentId: Long = 0L
+    private var currentId: Long = 0L
     var currentNoteName: String = ""
     var currentNoteSpecification: String = ""
-    var currentNoteDate: Long = 0L
+    private var currentNoteDate: Long = 0L
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
-    val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
+    //val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
 
-    fun getNoteById(idNote: Long): Flow<Notes?> =
-        notesRepository.getNoteById(idNote)
+    private val _isLoadedNote = MutableStateFlow(false)
+    val isLoadedNote: StateFlow<Boolean> = _isLoadedNote.asStateFlow()
+
+    fun getNoteById(idNote: Long) {
+        viewModelScope.launch {
+            val note: Notes? = notesRepository.getNoteById(idNote)
+            if (note != null) {
+                setNoteForEdit(note)
+                _isLoadedNote.emit(true)
+            }
+        }
+    }
+
+    private fun setNoteForEdit(note: Notes) {
+        currentNote = note
+        currentId = note.id
+        currentNoteName = note.noteName
+        currentNoteSpecification = note.noteSpecification
+        currentNoteDate = note.noteDate
+    }
 
     fun saveNote(title: String, content: String) {
         val note = Notes(

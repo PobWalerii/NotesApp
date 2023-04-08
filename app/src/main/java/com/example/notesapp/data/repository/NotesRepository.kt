@@ -11,7 +11,6 @@ import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
-import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.flow.*
 import javax.inject.Singleton
 
@@ -19,42 +18,32 @@ import javax.inject.Singleton
 class NotesRepository(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    private val connectReceiver: ConnectReceiver,
+    connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
     private val applicationContext: Context
 ) {
-
-
-
-
-    private var insertedOrEditedId: Long = 0
-    private var successfulInitialDataUpload = false
-    fun setInsertedOrEditedIdNull() {
-        insertedOrEditedId = 0L
-    }
-    fun getInsertedOrEditedIdValue(): Long = insertedOrEditedId
-
-
-
 
     private var job: Job? = null
     private var fixedTimeLoadedDate: Long = 0
     private var fixedTimeRemoteDate: Long = 0
     val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
-    val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
+    private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
 
     private val serviceError = MutableStateFlow("")
-    val serviceErrorFlow: StateFlow<String> = serviceError.asStateFlow()
+    private val serviceErrorFlow: StateFlow<String> = serviceError.asStateFlow()
 
     private val isLoad = MutableStateFlow(false)
     val isLoadFlow: StateFlow<Boolean> = isLoad.asStateFlow()
 
     private val counterDelay = MutableStateFlow(false)
     val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
+
+    private val idInsertOrEdit = MutableStateFlow(0L)
+    val idInsertOrEditFlow: StateFlow<Long> = idInsertOrEdit.asStateFlow()
 
     init {
         observeErrorMessages()
@@ -63,10 +52,8 @@ class NotesRepository(
 
     fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
 
-    fun getNoteById(noteId: Long): Flow<Notes?> =
-        flow {
-            emit(notesDao.getNoteById(noteId).firstOrNull())
-        }
+    suspend fun getNoteById(noteId: Long): Notes? =
+        notesDao.getNoteById(noteId).firstOrNull()
 
     fun setRemoteBaseTime(timeRemote: Long) {
         if(fixedTimeLoadedDate != timeRemote) {
@@ -100,11 +87,6 @@ class NotesRepository(
                 }
             }
         }
-    }
-
-    private fun startRemoteService() {
-        val serviceIntent = Intent(applicationContext, BackService::class.java)
-        applicationContext.startService(serviceIntent)
     }
 
     private fun loadRemoteData() {
@@ -148,13 +130,19 @@ class NotesRepository(
         }
     }
 
+    private fun startRemoteService() {
+        val serviceIntent = Intent(applicationContext, BackService::class.java)
+        applicationContext.startService(serviceIntent)
+    }
+
     fun addNote(note: Notes) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isConnectStatus.value) {
                     counterDelay.value = true
+                    idInsertOrEdit.value = note.id
                     val resultId: Long = apiService.addNote(note)
-                    insertedOrEditedId = resultId
+                    idInsertOrEdit.value = resultId
                     isNoteEdited.value = true
 
                 } else {
