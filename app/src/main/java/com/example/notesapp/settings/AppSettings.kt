@@ -5,11 +5,13 @@ import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.CREATE_RECORDS_IN_BACKGROUND
 import com.example.notesapp.constants.KeyConstants.DATE_CHANGE_WHEN_CONTENT
 import com.example.notesapp.constants.KeyConstants.DEFAULT_ADD_IF_CLICK
 import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
+import com.example.notesapp.constants.KeyConstants.INTERVAL_BACKGROUND_CREATE
 import com.example.notesapp.constants.KeyConstants.INTERVAL_REQUESTS
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.constants.KeyConstants.SING_OF_FIRST_RUN
@@ -64,6 +66,12 @@ class AppSettings(
     private val _operationDelayValue = MutableStateFlow(TIME_DELAY_OPERATION)
     val operationDelayValue: StateFlow<Int> = _operationDelayValue.asStateFlow()
 
+    private val _createBackgroundRecords = MutableStateFlow(CREATE_RECORDS_IN_BACKGROUND)
+    val createBackgroundRecords: StateFlow<Boolean> = _createBackgroundRecords.asStateFlow()
+
+    private val _intervalCreateRecords = MutableStateFlow(INTERVAL_BACKGROUND_CREATE)
+    val intervalCreateRecords: StateFlow<Int> = _intervalCreateRecords.asStateFlow()
+
     private var sPref: SharedPreferences = context.getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
 
     private val _isLoadedPreferences = MutableStateFlow(false)
@@ -87,6 +95,7 @@ class AppSettings(
     private fun getPreferences() {
         CoroutineScope(Dispatchers.Main).launch {
             _isLoadedPreferences.value = false
+
             _firstRun.value = sPref.getBoolean("firstRun", SING_OF_FIRST_RUN)
             _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
             _specificationLine.value =
@@ -100,12 +109,16 @@ class AppSettings(
             _queryDelayValue.value = sPref.getInt("queryDelayValue", TIME_DELAY_QUERY)
             _requestIntervalValue.value = sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS)
             _operationDelayValue.value = sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION)
+            _createBackgroundRecords.value = sPref.getBoolean("createBackgroundRecords", CREATE_RECORDS_IN_BACKGROUND)
+            _intervalCreateRecords.value = sPref.getInt("intervalCreateRecords", INTERVAL_BACKGROUND_CREATE)
+
             _isLoadedPreferences.value = true
         }
     }
 
     fun savePreferences(
         firstRun: Boolean,
+
         defaultHeader: String,
         specificationLine: Boolean,
         defaultAddIfClick: Boolean,
@@ -116,6 +129,8 @@ class AppSettings(
         queryDelayValue: Int,
         requestIntervalValue: Int,
         operationDelayValue: Int,
+        createBackgroundRecords: Boolean,
+        intervalCreateRecords: Int,
         getDefault: Boolean = false
     ) {
         val ed: SharedPreferences.Editor = sPref.edit()
@@ -130,6 +145,8 @@ class AppSettings(
         ed.putInt("queryDelayValue", queryDelayValue)
         ed.putInt("requestIntervalValue", if(requestIntervalValue>0) requestIntervalValue else INTERVAL_REQUESTS)
         ed.putInt("operationDelayValue", operationDelayValue)
+        ed.putBoolean("createBackgroundRecords", createBackgroundRecords)
+        ed.putInt("intervalCreateRecords", intervalCreateRecords)
         ed.apply()
         Toast.makeText(
             context, context.getString(
@@ -152,6 +169,8 @@ class AppSettings(
             TIME_DELAY_QUERY,
             INTERVAL_REQUESTS,
             TIME_DELAY_OPERATION,
+            CREATE_RECORDS_IN_BACKGROUND,
+            INTERVAL_BACKGROUND_CREATE,
             getDefault = true
         )
     }

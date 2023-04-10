@@ -1,8 +1,10 @@
-package com.example.notesapp.utils
+package com.example.notesapp.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +15,15 @@ class DateChangedBroadcastReceiver : BroadcastReceiver() {
     val isDateChangedFlow: StateFlow<Boolean> = isDateChanged.asStateFlow()
 
     override fun onReceive(context: Context, intent: Intent) {
-        isDateChanged.value = true
+        isEvent()
+    }
+
+    private fun isEvent() {
+        CoroutineScope(Dispatchers.Main).launch {
+            isDateChanged.emit(true)
+            withContext(Dispatchers.Default) { delay(10) }
+            isDateChanged.emit(false)
+        }
     }
 
 }

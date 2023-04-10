@@ -1,7 +1,5 @@
 package com.example.notesapp.ui.listnotes
 
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -13,10 +11,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
 import com.example.notesapp.databinding.FragmentListNotesBinding
-import com.example.notesapp.utils.DateChangedBroadcastReceiver
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
+import com.example.notesapp.utils.DateChangedManager
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +38,7 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private lateinit var receiver: DateChangedBroadcastReceiver
+    private lateinit var broadcastManager: DateChangedManager
 
     private val viewModel by viewModels<NotesViewModel>()
 
@@ -66,7 +64,7 @@ class ListNotesFragment : Fragment() {
         setupButtonAddListener()
         setupItemClickListener()
         observeConnectStatus()
-        observeScrollStatus()
+        //observeScrollStatus()
     }
 
     private fun loadData() {
@@ -75,11 +73,19 @@ class ListNotesFragment : Fragment() {
                 CoroutineScope(Dispatchers.Main).launch {
                     binding.visibleInfoText = it.isEmpty()
                     adapter.setList(it)
+                    viewModel.getCurrentId().apply {
+                        if(this != 0L) {
+                            val position = adapter.setCurrentId(this)
+                            if (position != -1) {
+                                recyclerView.layoutManager?.scrollToPosition(position)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-
+/*
     private fun observeScrollStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.idInsertOrEditFlow.collect { id ->
@@ -92,6 +98,8 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
+
+ */
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -210,24 +218,10 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun broadcastDateRegister() {
-        receiver= DateChangedBroadcastReceiver()
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_DATE_CHANGED)
-        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        activity?.registerReceiver(receiver, filter)
-        observeDateChanged()
+        broadcastManager = DateChangedManager(adapter)
+        broadcastManager.register(requireContext())
+        broadcastManager.observeDateChanged(viewLifecycleOwner)
     }
-
-    private fun observeDateChanged() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            receiver.isDateChangedFlow.collect { isDateChanged ->
-                if(isDateChanged) {
-                    adapter.refresh()
-                }
-            }
-        }
-    }
-
 
     private fun setupActionBar() {
 
@@ -250,7 +244,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        activity?.unregisterReceiver(receiver)
+        broadcastManager.unregister(requireContext())
         _binding = null
     }
 

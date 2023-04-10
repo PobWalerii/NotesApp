@@ -3,9 +3,11 @@ package com.example.notesapp.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.ServiceNotification.setNotification
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -26,6 +28,10 @@ class BackService: Service() {
     private val scope = CoroutineScope(Dispatchers.Default)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        val notification = setNotification(applicationContext)
+        startForeground(KeyConstants.NOTIFICATION_ID, notification)
+
         scope.launch {
             while (isActive) {
                 delay(appSettings.requestIntervalValue.value*1000L)
@@ -38,6 +44,11 @@ class BackService: Service() {
             }
         }
         return START_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

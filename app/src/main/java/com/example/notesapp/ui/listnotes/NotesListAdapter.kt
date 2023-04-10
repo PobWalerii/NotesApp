@@ -10,8 +10,6 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
 import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
-import com.example.notesapp.settings.AppSettings
-import dagger.hilt.android.AndroidEntryPoint
 
 @SuppressLint("NotifyDataSetChanged")
 class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {

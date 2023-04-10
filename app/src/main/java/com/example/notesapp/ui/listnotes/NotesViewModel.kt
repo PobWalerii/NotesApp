@@ -15,8 +15,6 @@ class NotesViewModel @Inject constructor(
 ): ViewModel() {
 
     val isLoadFlow: StateFlow<Boolean> = notesRepository.isLoadFlow
-    val idInsertOrEditFlow: StateFlow<Long> = notesRepository.idInsertOrEditFlow
-    //val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val firstRun: StateFlow<Boolean> = notesRepository.firstRun
 
@@ -28,8 +26,11 @@ class NotesViewModel @Inject constructor(
 
     fun addNote() {
         notesRepository.addNote(
-            Notes(0, "", "", Date().time)
+            Notes(0, "", "", Date().time),
+            false
         )
     }
+
+    fun getCurrentId() = notesRepository.getInsertOrEditId()
 
 }

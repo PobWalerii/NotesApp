@@ -60,10 +60,6 @@ class ConnectReceiver(
     private var showView: View? = null
     private val isStartApp: Boolean = false
 
-    //fun setShowMessageInternetOk(isShow: Boolean) {
-    //    showMessageInternetOk = isShow
-    //}
-
     private fun observeStatusConnect() {
         CoroutineScope(Dispatchers.Default).launch {
             isConnectStatusFlow.collect {

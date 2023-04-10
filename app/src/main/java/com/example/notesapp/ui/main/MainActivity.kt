@@ -10,6 +10,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
 import com.example.notesapp.R
+import com.example.notesapp.services.BackRemoteService
 import com.example.notesapp.services.BackService
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,8 +43,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val serviceIntent = Intent(this, BackService::class.java)
-        this.stopService(serviceIntent)
+        //val serviceIntent = Intent(this, BackService::class.java)
+        //this.stopService(serviceIntent)
+        //val remoteServiceIntent = Intent(this, BackRemoteService::class.java)
+        //this.stopService(remoteServiceIntent)
     }
 
 

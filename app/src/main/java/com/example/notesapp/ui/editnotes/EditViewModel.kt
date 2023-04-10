@@ -27,7 +27,6 @@ class EditViewModel  @Inject constructor(
     private var currentNoteDate: Long = 0L
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
-    //val counterDelay: StateFlow<Boolean> = notesRepository.counterDelayFlow
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
 
     private val _isLoadedNote = MutableStateFlow(false)
@@ -62,7 +61,7 @@ class EditViewModel  @Inject constructor(
                 currentNoteDate
             }
         )
-        notesRepository.addNote(note)
+        notesRepository.addNote(note, true)
     }
 
     fun deleteNote() {

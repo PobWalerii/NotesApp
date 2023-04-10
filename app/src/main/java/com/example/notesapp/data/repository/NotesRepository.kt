@@ -2,12 +2,15 @@ package com.example.notesapp.data.repository
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.BackRemoteService
 import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
@@ -42,8 +45,7 @@ class NotesRepository(
     private val counterDelay = MutableStateFlow(false)
     val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
 
-    private val idInsertOrEdit = MutableStateFlow(0L)
-    val idInsertOrEditFlow: StateFlow<Long> = idInsertOrEdit.asStateFlow()
+    private var idInsertOrEdit: Long = 0
 
     init {
         observeErrorMessages()
@@ -54,6 +56,7 @@ class NotesRepository(
 
     suspend fun getNoteById(noteId: Long): Notes? =
         notesDao.getNoteById(noteId).firstOrNull()
+
 
     fun setRemoteBaseTime(timeRemote: Long) {
         if(fixedTimeLoadedDate != timeRemote) {
@@ -132,18 +135,26 @@ class NotesRepository(
 
     private fun startRemoteService() {
         val serviceIntent = Intent(applicationContext, BackService::class.java)
-        applicationContext.startService(serviceIntent)
+        val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            applicationContext.startForegroundService(remoteServiceIntent)
+            applicationContext.startForegroundService(serviceIntent)
+        } else {
+            applicationContext.startService(serviceIntent)
+            applicationContext.startService(remoteServiceIntent)
+        }
     }
 
-    fun addNote(note: Notes) {
+    fun addNote(note: Notes, fixed: Boolean) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isConnectStatus.value) {
                     counterDelay.value = true
-                    idInsertOrEdit.value = note.id
                     val resultId: Long = apiService.addNote(note)
-                    idInsertOrEdit.value = resultId
-                    isNoteEdited.value = true
+                    idInsertOrEdit = resultId
+                    if(fixed) {
+                        isNoteEdited.value = true
+                    }
 
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
@@ -156,6 +167,12 @@ class NotesRepository(
                 isNoteEdited.value = false
             }
         }
+    }
+
+    fun getInsertOrEditId(): Long {
+        val current = idInsertOrEdit
+        idInsertOrEdit = 0
+        return current
     }
 
     fun deleteNote(note: Notes) {

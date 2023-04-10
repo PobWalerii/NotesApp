@@ -22,6 +22,8 @@ class SettingsViewModel @Inject constructor(
     val queryDelayValue: StateFlow<Int> = appSettings.queryDelayValue
     val requestIntervalValue: StateFlow<Int> = appSettings.requestIntervalValue
     val operationDelayValue: StateFlow<Int> = appSettings.operationDelayValue
+    val createBackgroundRecords: StateFlow<Boolean> = appSettings.createBackgroundRecords
+    val intervalCreateRecords: StateFlow<Int> = appSettings.intervalCreateRecords
 
     var isLoadedPreferences: StateFlow<Boolean> = appSettings.isLoadedPreferences
 
@@ -40,7 +42,9 @@ class SettingsViewModel @Inject constructor(
         startDelayValue: Int,
         queryDelayValue: Int,
         requestIntervalValue: Int,
-        operationDelayValue: Int
+        operationDelayValue: Int,
+        createBackgroundRecords: Boolean,
+        intervalCreateRecords: Int
     ) {
         appSettings.savePreferences(
             firstRun,
@@ -53,7 +57,9 @@ class SettingsViewModel @Inject constructor(
             startDelayValue,
             queryDelayValue,
             requestIntervalValue,
-            operationDelayValue
+            operationDelayValue,
+            createBackgroundRecords,
+            intervalCreateRecords
         )
     }
 
@@ -69,6 +75,8 @@ class SettingsViewModel @Inject constructor(
         _queryDelayValue: String,
         _requestIntervalValue: String,
         _operationDelayValue: String,
+        _createBackgroundRecords: Boolean,
+        _intervalCreateRecords: String
     ): Boolean {
         return  firstRun.value != _firstRun ||
                 defaultHeader.value != _defaultHeader ||
@@ -80,9 +88,8 @@ class SettingsViewModel @Inject constructor(
                 startDelayValue.value.toString() != _startDelayValue ||
                 queryDelayValue.value.toString() != _queryDelayValue ||
                 requestIntervalValue.value.toString() != _requestIntervalValue ||
-                operationDelayValue.value.toString() != _operationDelayValue
+                operationDelayValue.value.toString() != _operationDelayValue ||
+                createBackgroundRecords.value != _createBackgroundRecords ||
+                intervalCreateRecords.value.toString() != _intervalCreateRecords
     }
-
-
-
 }

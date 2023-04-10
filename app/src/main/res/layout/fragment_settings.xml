@@ -36,6 +36,12 @@
         <variable
             name="operationDelayValue"
             type="Integer" />
+        <variable
+            name="createBackgroundRecords"
+            type="Boolean" />
+        <variable
+            name="intervalCreateRecords"
+            type="Integer" />
     </data>
 
     <ScrollView
@@ -193,7 +199,6 @@
                     tools:ignore="Autofill,LabelFor" />
             </LinearLayout>
 
-
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch1"
                 android:layout_width="match_parent"
@@ -238,6 +243,43 @@
                 android:textSize="@dimen/settings_text_size"
                 android:text="@string/text9"
                 android:checked="@{showMessageInternetOk}"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="@string/text12"
+                android:checked="@{createBackgroundRecords}"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/black"
+                    android:layout_weight="1"
+                    android:text="@string/text13"/>
+
+                <EditText
+                    android:id="@+id/intervalCreate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:layout_weight="9"
+                    android:textSize="@dimen/settings_text_size"
+                    android:textColor="@color/blue"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="@{intervalCreateRecords.toString()}"
+                    tools:ignore="Autofill,LabelFor" />
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -1,8 +1,10 @@
 package com.example.notesapp.ui.settings
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
-import androidx.core.widget.addTextChangedListener
+import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -103,9 +105,47 @@ class SettingsFragment : Fragment() {
         binding.queryDelayValue = viewModel.queryDelayValue.value
         binding.requestIntervalValue = viewModel.requestIntervalValue.value
         binding.operationDelayValue = viewModel.operationDelayValue.value
+        binding.createBackgroundRecords = viewModel.createBackgroundRecords.value
+        binding.intervalCreateRecords = viewModel.intervalCreateRecords.value
     }
 
     private fun setListenersSettingsChanged() {
+
+        val changeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
+        }
+        binding.switch1.setOnCheckedChangeListener(changeListener)
+        binding.switch2.setOnCheckedChangeListener(changeListener)
+        binding.switch3.setOnCheckedChangeListener(changeListener)
+        binding.switch4.setOnCheckedChangeListener(changeListener)
+        binding.switch5.setOnCheckedChangeListener(changeListener)
+        binding.switch6.setOnCheckedChangeListener(changeListener)
+        binding.switch7.setOnCheckedChangeListener(changeListener)
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                definitionOfChange()
+            }
+        }
+        binding.header.addTextChangedListener(textWatcher)
+        binding.startDelay.addTextChangedListener(textWatcher)
+        binding.queryDelay.addTextChangedListener(textWatcher)
+        binding.requestInterval.addTextChangedListener(textWatcher)
+        binding.operationDelay.addTextChangedListener(textWatcher)
+        binding.intervalCreate.addTextChangedListener(textWatcher)
+
+
+
+
+
+
+
+        /*
         binding.switch6.setOnCheckedChangeListener { _, _ ->
             definitionOfChange()
             hideKeyboardFromView(requireActivity(), requireView())
@@ -145,6 +185,15 @@ class SettingsFragment : Fragment() {
         binding.operationDelay.addTextChangedListener {
             definitionOfChange()
         }
+        binding.switch7.setOnCheckedChangeListener { _, _ ->
+            definitionOfChange()
+            hideKeyboardFromView(requireActivity(), requireView())
+        }
+        binding.intervalCreate.addTextChangedListener {
+            definitionOfChange()
+        }
+
+         */
     }
 
     private fun definitionOfChange() {
@@ -165,7 +214,9 @@ class SettingsFragment : Fragment() {
             binding.startDelay.text.toString(),
             binding.queryDelay.text.toString(),
             binding.requestInterval.text.toString(),
-            binding.operationDelay.text.toString()
+            binding.operationDelay.text.toString(),
+            binding.switch7.isChecked,
+            binding.intervalCreate.text.toString()
         )
 
     private fun saveSettings() {
@@ -182,7 +233,9 @@ class SettingsFragment : Fragment() {
             requestIntervalValue = binding.requestInterval.text.toString().toIntOrNull()
                 ?: 0,
             operationDelayValue = binding.operationDelay.text.toString().toIntOrNull()
-                ?: 0
+                ?: 0,
+            binding.switch7.isChecked,
+            intervalCreateRecords = binding.intervalCreate.text.toString().toIntOrNull() ?: 0
         )
         definitionOfChange()
     }

@@ -14,4 +14,9 @@ object KeyConstants {
     const val DATE_CHANGE_WHEN_CONTENT = true
     const val SHOW_MESSAGE_INTERNET_OK = false
     const val SING_OF_FIRST_RUN = true
+    const val CREATE_RECORDS_IN_BACKGROUND = false
+    const val INTERVAL_BACKGROUND_CREATE: Int = 60
+
+    const val CHANNEL_ID = "BackRemoteService"
+    const val NOTIFICATION_ID = 11111
 }
