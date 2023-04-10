@@ -21,7 +21,7 @@ import javax.inject.Singleton
 class NotesRepository(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    connectReceiver: ConnectReceiver,
+    private val connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
     private val applicationContext: Context
 ) {
@@ -48,6 +48,9 @@ class NotesRepository(
     private var idInsertOrEdit: Long = 0
 
     init {
+        if(isConnectStatus.value) {
+            loadRemoteData()
+        }
         observeErrorMessages()
         observeConnectStatus()
     }
@@ -137,11 +140,11 @@ class NotesRepository(
         val serviceIntent = Intent(applicationContext, BackService::class.java)
         val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(remoteServiceIntent)
             applicationContext.startForegroundService(serviceIntent)
+            //applicationContext.startForegroundService(remoteServiceIntent)
         } else {
             applicationContext.startService(serviceIntent)
-            applicationContext.startService(remoteServiceIntent)
+            //applicationContext.startService(remoteServiceIntent)
         }
     }
 

@@ -3,17 +3,16 @@ package com.example.notesapp.receivers
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkRequest
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.example.notesapp.R
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Singleton
@@ -21,39 +20,65 @@ class ConnectReceiver(
     private val applicationContext: Context
 ) {
 
-    private val connectivityManager =
-        applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
     private val isConnectStatus = MutableStateFlow(true)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
+    private val connectivityManager: ConnectivityManager
+        = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            isConnectStatus.value = true
+        }
+
+        override fun onLost(network: Network) {
+            isConnectStatus.value = false
+        }
+    }
+
     init {
+        CoroutineScope(Dispatchers.Main).launch {
+            isConnectStatus.value = false
+            connectivityManager.registerNetworkCallback(
+                NetworkRequest.Builder().build(),
+                networkCallback
+            )
+            observeStatusConnect()
+            withContext(Dispatchers.Default) { delay(10) }
+            isConnectStatus.value = connectivityManager.activeNetwork != null
+        }
+    }
+/*
+    init {
+        setStatus(!(connectivityManager.activeNetwork != null))
+        observeStatusConnect()
         connectivityManager.addDefaultNetworkActiveListener {
             changeNetwork()
         }
-        initReceiver()
-        observeStatusConnect()
+        changeNetwork()
     }
 
-    private fun initReceiver() {
-        setStatus(connectivityManager.activeNetwork != null)
-    }
+ */
 
-    private fun changeNetwork() {
-        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+ //   private fun changeNetwork() {
+ //       setStatus(connectivityManager.activeNetwork != null)
+        //connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
 
-            override fun onAvailable(network: Network) {
-                setStatus(true)
-            }
-            override fun onLost(network: Network) {
-                setStatus(false)
-            }
-        })
-    }
+        //    override fun onAvailable(network: Network) {
+        //        setStatus(true)
+        //    }
+        //    override fun onLost(network: Network) {
+        //        setStatus(false)
+        //    }
+        //})
+//    }
 
-    private fun setStatus(status: Boolean) {
-        isConnectStatus.value = status
-    }
+//    private fun setStatus(status: Boolean) {
+//        Toast.makeText(applicationContext,"$status",Toast.LENGTH_SHORT).show()
+        //CoroutineScope(Dispatchers.Main).launch {
+//            isConnectStatus.value = status
+        //}
+//    }
 
     private var lastConnectionStatus = true
     private var showMessageInternetOk = true
@@ -74,6 +99,8 @@ class ConnectReceiver(
     private fun showStatus(
         isConnect: Boolean,
     ) {
+
+        /*
         if ((isConnect && showMessageInternetOk && !lastConnectionStatus) ||
             (!isConnect && (lastConnectionStatus || (!isStartApp && showView != null)))
         ) {
@@ -87,6 +114,13 @@ class ConnectReceiver(
                 ).show()
             }
         }
+
+         */
+        Toast.makeText(
+            applicationContext,
+            if (isConnect) R.string.text_internet_ok else R.string.text_no_internet,
+            Toast.LENGTH_LONG
+        ).show()
         lastConnectionStatus = isConnect
     }
 
