@@ -3,7 +3,8 @@ package com.example.notesapp.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.example.notesapp.constants.KeyConstants
+import com.example.notesapp.constants.KeyConstants.CHANNEL_ID
+import com.example.notesapp.constants.KeyConstants.NOTIFICATION_ID
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.receivers.ConnectReceiver
@@ -29,8 +30,8 @@ class BackService: Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        val notification = setNotification(applicationContext)
-        startForeground(KeyConstants.NOTIFICATION_ID, notification)
+        //val notification = setNotification(applicationContext,CHANNEL_ID)
+        //startForeground(NOTIFICATION_ID, notification)
 
         scope.launch {
             while (isActive) {
@@ -48,14 +49,16 @@ class BackService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        scope.cancel()
+        //stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
-    }
+    //override fun onDestroy() {
+    //    super.onDestroy()
+    //    scope.cancel()
+    //}
 }

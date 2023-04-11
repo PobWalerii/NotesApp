@@ -17,6 +17,8 @@ object KeyConstants {
     const val CREATE_RECORDS_IN_BACKGROUND = false
     const val INTERVAL_BACKGROUND_CREATE: Int = 60
 
-    const val CHANNEL_ID = "BackRemoteService"
+    const val CHANNEL_ID = "BackService"
     const val NOTIFICATION_ID = 11111
+    const val CHANNEL_IDD = "BackRemoteService"
+    const val NOTIFICATION_IDD = 22222
 }

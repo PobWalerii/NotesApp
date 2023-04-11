@@ -6,6 +6,7 @@ import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

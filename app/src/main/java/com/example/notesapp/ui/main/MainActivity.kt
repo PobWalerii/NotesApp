@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         handleSplashScreen()
         super.onCreate(savedInstanceState)
@@ -43,10 +44,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        //val serviceIntent = Intent(this, BackService::class.java)
-        //this.stopService(serviceIntent)
-        //val remoteServiceIntent = Intent(this, BackRemoteService::class.java)
-        //this.stopService(remoteServiceIntent)
+        val serviceIntent = Intent(applicationContext, BackService::class.java)
+        applicationContext.stopService(serviceIntent)
+        val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
+        applicationContext.stopService(remoteServiceIntent)
     }
 
 

@@ -18,6 +18,7 @@ import com.example.notesapp.utils.DateChangedManager
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -213,6 +214,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        //viewModel.repoInit()
         broadcastDateRegister()
         observeLoadStatus()
     }

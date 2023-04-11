@@ -20,11 +20,11 @@ class ConnectReceiver(
     private val applicationContext: Context
 ) {
 
-    private val isConnectStatus = MutableStateFlow(true)
-    val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
-
     private val connectivityManager: ConnectivityManager
-        = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private val isConnectStatus = MutableStateFlow(connectivityManager.activeNetwork != null)
+    val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -37,17 +37,31 @@ class ConnectReceiver(
     }
 
     init {
-        CoroutineScope(Dispatchers.Main).launch {
-            isConnectStatus.value = false
+        CoroutineScope(Dispatchers.Default).launch {
+            observeStatusConnect()
             connectivityManager.registerNetworkCallback(
                 NetworkRequest.Builder().build(),
                 networkCallback
             )
-            observeStatusConnect()
-            withContext(Dispatchers.Default) { delay(10) }
-            isConnectStatus.value = connectivityManager.activeNetwork != null
+
         }
     }
+
+    //fun updateStatus() {
+    //    observeStatusConnect()
+    //    isConnectStatus.value = connectivityManager.activeNetwork != null
+    //}
+
+    private fun observeStatusConnect() {
+        CoroutineScope(Dispatchers.Default).launch {
+            isConnectStatusFlow.collect {
+                CoroutineScope(Dispatchers.Main).launch {
+                    showStatus(it)
+                }
+            }
+        }
+    }
+
 /*
     init {
         setStatus(!(connectivityManager.activeNetwork != null))
@@ -84,16 +98,6 @@ class ConnectReceiver(
     private var showMessageInternetOk = true
     private var showView: View? = null
     private val isStartApp: Boolean = false
-
-    private fun observeStatusConnect() {
-        CoroutineScope(Dispatchers.Default).launch {
-            isConnectStatusFlow.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    showStatus(it)
-                }
-            }
-        }
-    }
 
 
     private fun showStatus(
@@ -143,4 +147,5 @@ class ConnectReceiver(
         textView.compoundDrawablePadding = view.resources.getDimensionPixelOffset(R.dimen.snackbar_icon_padding)
         snack.show()
     }
+
 }

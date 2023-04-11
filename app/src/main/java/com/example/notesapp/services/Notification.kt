@@ -7,16 +7,15 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.notesapp.R
-import com.example.notesapp.constants.KeyConstants.CHANNEL_ID
 
 object ServiceNotification {
 
-    fun setNotification(context: Context): Notification {
+    fun setNotification(context: Context, id: String): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "BackGroundService"
+            val name = id
             val descriptionText = "Running in background"
             val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            val channel = NotificationChannel(id, name, importance).apply {
                 description = descriptionText
             }
             val notificationManager: NotificationManager =
@@ -24,8 +23,8 @@ object ServiceNotification {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("BackGroundService")
+        val notification = NotificationCompat.Builder(context, id)
+            .setContentTitle(id)
             .setContentText("Running in background")
             .setSmallIcon(R.drawable.splash)
             .build()

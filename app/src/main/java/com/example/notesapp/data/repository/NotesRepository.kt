@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
@@ -15,15 +14,16 @@ import com.example.notesapp.services.BackService
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotesRepository(
+class NotesRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
     private val connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
-    private val applicationContext: Context
+    private val applicationContext: Context,
 ) {
 
     private var job: Job? = null
@@ -48,9 +48,17 @@ class NotesRepository(
     private var idInsertOrEdit: Long = 0
 
     init {
-        if(isConnectStatus.value) {
-            loadRemoteData()
-        }
+        //connectReceiver.init()
+        //connectReceiver.updateStatus()
+        //Toast.makeText(applicationContext, "init ${isConnectStatus.value}", Toast.LENGTH_LONG).show()
+        //CoroutineScope(Dispatchers.Main).launch {
+        //    if (isConnectStatus.value) {
+        //        loadRemoteData()
+        //    }
+        //}
+        //if (!firstLoad.value) {
+        //    startRemoteService()
+        //}
         observeErrorMessages()
         observeConnectStatus()
     }
@@ -82,7 +90,7 @@ class NotesRepository(
     }
 
     private fun observeConnectStatus() {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             isConnectStatus.collect { isConnect ->
                 if( isConnect ) {
                     if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
@@ -131,20 +139,22 @@ class NotesRepository(
             }
             if (firstLoad.value) {
                 appSettings.setFirstLoad()
-                startRemoteService()
+                startServices()
             }
         }
     }
 
-    private fun startRemoteService() {
+    private fun startServices() {
         val serviceIntent = Intent(applicationContext, BackService::class.java)
-        val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(serviceIntent)
-            //applicationContext.startForegroundService(remoteServiceIntent)
-        } else {
-            applicationContext.startService(serviceIntent)
-            //applicationContext.startService(remoteServiceIntent)
+        applicationContext.startService(serviceIntent)
+
+        if (appSettings.createBackgroundRecords.value) {
+            val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(remoteServiceIntent)
+            } else {
+                applicationContext.startService(remoteServiceIntent)
+            }
         }
     }
 
@@ -158,7 +168,6 @@ class NotesRepository(
                     if(fixed) {
                         isNoteEdited.value = true
                     }
-
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }

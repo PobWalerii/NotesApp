@@ -18,7 +18,7 @@ class DateChangedManager(private val adapter: NotesListAdapter) {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_DATE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        filter.addAction(Intent.ACTION_TIME_TICK)
+        //filter.addAction(Intent.ACTION_TIME_TICK)
         context.registerReceiver(receiver, filter)
     }
 
