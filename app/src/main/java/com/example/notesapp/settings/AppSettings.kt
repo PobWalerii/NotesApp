@@ -2,6 +2,7 @@ package com.example.notesapp.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.notesapp.R
@@ -76,6 +77,8 @@ class AppSettings(
 
     private val _isLoadedPreferences = MutableStateFlow(false)
     val isLoadedPreferences: StateFlow<Boolean> = _isLoadedPreferences.asStateFlow()
+
+    var showView: View? = null
 
     init {
         getPreferences()

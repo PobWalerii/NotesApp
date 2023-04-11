@@ -48,17 +48,6 @@ class NotesRepository @Inject constructor(
     private var idInsertOrEdit: Long = 0
 
     init {
-        //connectReceiver.init()
-        //connectReceiver.updateStatus()
-        //Toast.makeText(applicationContext, "init ${isConnectStatus.value}", Toast.LENGTH_LONG).show()
-        //CoroutineScope(Dispatchers.Main).launch {
-        //    if (isConnectStatus.value) {
-        //        loadRemoteData()
-        //    }
-        //}
-        //if (!firstLoad.value) {
-        //    startRemoteService()
-        //}
         observeErrorMessages()
         observeConnectStatus()
     }

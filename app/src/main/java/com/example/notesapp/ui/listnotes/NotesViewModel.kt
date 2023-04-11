@@ -20,10 +20,6 @@ class NotesViewModel @Inject constructor(
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val firstRun: StateFlow<Boolean> = notesRepository.firstRun
 
-    //fun repoInit() {
-    //    notesRepository.init()
-    //}
-
     fun loadDatabase(): Flow<List<Notes>> = notesRepository.loadDataBase()
 
     fun deleteNote(note: Notes) {

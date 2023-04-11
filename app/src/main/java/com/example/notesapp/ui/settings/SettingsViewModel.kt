@@ -27,6 +27,10 @@ class SettingsViewModel @Inject constructor(
 
     var isLoadedPreferences: StateFlow<Boolean> = appSettings.isLoadedPreferences
 
+    init {
+        appSettings.showView = null
+    }
+
     fun setDefaultPreferences() {
         appSettings.setDefaultPreferences()
     }

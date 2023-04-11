@@ -58,6 +58,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        appSettings.showView = binding.recycler
         setupActionBar()
         setupRecycler()
         refreshSettings()
