@@ -12,13 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class DateChangedManager(private val adapter: NotesListAdapter) {
+
     private val receiver = DateChangedBroadcastReceiver()
 
     fun register(context: Context) {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_DATE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        //filter.addAction(Intent.ACTION_TIME_TICK)
         context.registerReceiver(receiver, filter)
     }
 

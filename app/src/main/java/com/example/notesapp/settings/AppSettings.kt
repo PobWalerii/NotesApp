@@ -14,6 +14,7 @@ import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
 import com.example.notesapp.constants.KeyConstants.DELETE_IF_SWIPED
 import com.example.notesapp.constants.KeyConstants.INTERVAL_BACKGROUND_CREATE
 import com.example.notesapp.constants.KeyConstants.INTERVAL_REQUESTS
+import com.example.notesapp.constants.KeyConstants.MIN_INTERVAL_BACKGROUND_CREATE
 import com.example.notesapp.constants.KeyConstants.SHOW_MESSAGE_INTERNET_OK
 import com.example.notesapp.constants.KeyConstants.SING_OF_FIRST_RUN
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
@@ -84,7 +85,7 @@ class AppSettings(
         getPreferences()
     }
 
-    fun setFromAppFirstRun() {
+    fun setAppFirstRun() {
         val ed: SharedPreferences.Editor = sPref.edit()
         ed.putBoolean("firstRun", false)
         ed.apply()
@@ -149,7 +150,7 @@ class AppSettings(
         ed.putInt("requestIntervalValue", if(requestIntervalValue>0) requestIntervalValue else INTERVAL_REQUESTS)
         ed.putInt("operationDelayValue", operationDelayValue)
         ed.putBoolean("createBackgroundRecords", createBackgroundRecords)
-        ed.putInt("intervalCreateRecords", intervalCreateRecords)
+        ed.putInt("intervalCreateRecords", if(intervalCreateRecords>=MIN_INTERVAL_BACKGROUND_CREATE) intervalCreateRecords else MIN_INTERVAL_BACKGROUND_CREATE)
         ed.apply()
         Toast.makeText(
             context, context.getString(

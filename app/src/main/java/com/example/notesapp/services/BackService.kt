@@ -30,8 +30,8 @@ class BackService: Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        //val notification = setNotification(applicationContext,CHANNEL_ID)
-        //startForeground(NOTIFICATION_ID, notification)
+        val notification = setNotification(applicationContext,CHANNEL_ID)
+        startForeground(NOTIFICATION_ID, notification)
 
         scope.launch {
             while (isActive) {
@@ -50,15 +50,17 @@ class BackService: Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         scope.cancel()
-        //stopForeground(STOP_FOREGROUND_REMOVE)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-    //override fun onDestroy() {
-    //    super.onDestroy()
-    //    scope.cancel()
-    //}
+
 }

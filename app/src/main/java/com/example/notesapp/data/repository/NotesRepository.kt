@@ -11,6 +11,7 @@ import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.services.BackRemoteService
 import com.example.notesapp.services.BackService
+import com.example.notesapp.services.RemoteServiceManager
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -23,6 +24,7 @@ class NotesRepository @Inject constructor(
     private val apiService: ApiService,
     private val connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
+    private val remoteManager: RemoteServiceManager,
     private val applicationContext: Context,
 ) {
 
@@ -56,7 +58,6 @@ class NotesRepository @Inject constructor(
 
     suspend fun getNoteById(noteId: Long): Notes? =
         notesDao.getNoteById(noteId).firstOrNull()
-
 
     fun setRemoteBaseTime(timeRemote: Long) {
         if(fixedTimeLoadedDate != timeRemote) {
@@ -103,7 +104,9 @@ class NotesRepository @Inject constructor(
                     val list: List<Notes> = this.fullList
                     notesDao.updateDatabase(list)
                 }
-                setStartSettings()
+                if( firstLoad.value ) {
+                    actionAfterStart()
+                }
             } catch (e: Exception) {
                 if (e is CancellationException) {
                     serviceError.value =
@@ -121,29 +124,23 @@ class NotesRepository @Inject constructor(
         }
     }
 
-    private fun setStartSettings() {
+    private fun actionAfterStart() {
         CoroutineScope(Dispatchers.Main).launch {
             if (firstRun.value) {
-                appSettings.setFromAppFirstRun()
+                appSettings.setAppFirstRun()
             }
-            if (firstLoad.value) {
-                appSettings.setFirstLoad()
-                startServices()
-            }
+            appSettings.setFirstLoad()
+            fixedTimeRemoteDate = fixedTimeLoadedDate
+            startService()
         }
     }
 
-    private fun startServices() {
+    private fun startService() {
         val serviceIntent = Intent(applicationContext, BackService::class.java)
-        applicationContext.startService(serviceIntent)
-
-        if (appSettings.createBackgroundRecords.value) {
-            val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(remoteServiceIntent)
-            } else {
-                applicationContext.startService(remoteServiceIntent)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            applicationContext.startForegroundService(serviceIntent)
+        } else {
+            applicationContext.startService(serviceIntent)
         }
     }
 
@@ -174,6 +171,9 @@ class NotesRepository @Inject constructor(
         val current = idInsertOrEdit
         idInsertOrEdit = 0
         return current
+    }
+    fun setInsertOrEditId(current: Long) {
+        idInsertOrEdit = current
     }
 
     fun deleteNote(note: Notes) {

@@ -112,6 +112,9 @@ class SettingsFragment : Fragment() {
     private fun setListenersSettingsChanged() {
 
         val changeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            if(buttonView==binding.switch7) {
+                binding.intervalCreate.isEnabled = isChecked
+            }
             definitionOfChange()
             hideKeyboardFromView(requireActivity(), requireView())
         }
@@ -139,62 +142,6 @@ class SettingsFragment : Fragment() {
         binding.requestInterval.addTextChangedListener(textWatcher)
         binding.operationDelay.addTextChangedListener(textWatcher)
         binding.intervalCreate.addTextChangedListener(textWatcher)
-
-
-
-
-
-
-
-        /*
-        binding.switch6.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.header.addTextChangedListener {
-            definitionOfChange()
-        }
-        binding.switch1.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.switch2.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.switch3.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.switch4.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.switch5.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.startDelay.addTextChangedListener {
-            definitionOfChange()
-        }
-        binding.queryDelay.addTextChangedListener {
-            definitionOfChange()
-        }
-        binding.requestInterval.addTextChangedListener {
-            definitionOfChange()
-        }
-        binding.operationDelay.addTextChangedListener {
-            definitionOfChange()
-        }
-        binding.switch7.setOnCheckedChangeListener { _, _ ->
-            definitionOfChange()
-            hideKeyboardFromView(requireActivity(), requireView())
-        }
-        binding.intervalCreate.addTextChangedListener {
-            definitionOfChange()
-        }
-
-         */
     }
 
     private fun definitionOfChange() {

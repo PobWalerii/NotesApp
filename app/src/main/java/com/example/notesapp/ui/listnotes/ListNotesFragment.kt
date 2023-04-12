@@ -161,6 +161,7 @@ class ListNotesFragment : Fragment() {
     private fun deleteNote(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
+        viewModel.setCurrentId(note.id)
 
         showConfirmationDialog(
             R.string.title_delete,
@@ -199,6 +200,7 @@ class ListNotesFragment : Fragment() {
     private fun setupItemClickListener() {
         adapter.setOnItemClickListener(object : NotesListAdapter.OnItemClickListener {
             override fun onItemClick(currentId: Long) {
+                viewModel.setCurrentId(currentId)
                 findNavController().navigate(
                     ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
                 )
@@ -215,7 +217,6 @@ class ListNotesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        //viewModel.repoInit()
         broadcastDateRegister()
         observeLoadStatus()
     }

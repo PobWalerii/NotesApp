@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.example.notesapp.constants.KeyConstants.CHANNEL_IDD
-import com.example.notesapp.constants.KeyConstants.NOTIFICATION_ID
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_IDD
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.data.remotebase.database.RemoteDao
@@ -45,6 +44,12 @@ class BackRemoteService: Service() {
         stopSelf()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+    }
+
     private suspend fun addRecord() {
         remoteDao.insertNote(
             Notes(
@@ -59,8 +64,5 @@ class BackRemoteService: Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-    //override fun onDestroy() {
-    //    super.onDestroy()
-    //    scope.cancel()
-    //}
+
 }

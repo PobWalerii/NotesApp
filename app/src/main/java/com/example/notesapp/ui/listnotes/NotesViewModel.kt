@@ -34,5 +34,8 @@ class NotesViewModel @Inject constructor(
     }
 
     fun getCurrentId() = notesRepository.getInsertOrEditId()
+    fun setCurrentId(current: Long) {
+        notesRepository.setInsertOrEditId(current)
+    }
 
 }

@@ -8,6 +8,7 @@ import com.example.notesapp.data.database.AppDatabase
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.RemoteServiceManager
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides
@@ -41,9 +42,10 @@ object DatabaseModule {
         apiService: ApiService,
         connectReceiver: ConnectReceiver,
         appSettings: AppSettings,
+        remoteManager: RemoteServiceManager,
         @ApplicationContext applicationContext: Context
         ): NotesRepository {
-            return NotesRepository(notesDao, apiService, connectReceiver, appSettings, applicationContext)
+            return NotesRepository(notesDao, apiService, connectReceiver, appSettings, remoteManager, applicationContext)
         }
 
 }

@@ -67,7 +67,7 @@
                 android:layout_marginBottom="@dimen/text_item_margin_edge"
                 android:textSize="@dimen/item_spicification_text_size"
                 android:textStyle="italic"
-               app:dateToString="@{note.noteDate}"/>
+                app:dateToString="@{note.noteDate}"/>
 
         </LinearLayout>
 
