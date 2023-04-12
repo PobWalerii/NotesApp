@@ -38,8 +38,11 @@ class ConnectReceiver(
         }
     }
 
-    init {
-        CoroutineScope(Dispatchers.Default).launch {
+    private var job1: Job? = null
+    private var job2: Job? = null
+
+    fun init() {
+        job1 = CoroutineScope(Dispatchers.Default).launch {
             observeStatusConnect()
             connectivityManager.registerNetworkCallback(
                 NetworkRequest.Builder().build(),
@@ -48,8 +51,13 @@ class ConnectReceiver(
         }
     }
 
+    fun closeObserve() {
+        job1?.cancel()
+        job2?.cancel()
+    }
+
     private fun observeStatusConnect() {
-        CoroutineScope(Dispatchers.Default).launch {
+        job2 = CoroutineScope(Dispatchers.Default).launch {
             isConnectStatusFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     showStatus(it)

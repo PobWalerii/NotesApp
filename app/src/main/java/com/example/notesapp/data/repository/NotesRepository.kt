@@ -1,17 +1,12 @@
 package com.example.notesapp.data.repository
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.database.dao.NotesDao
 import com.example.notesapp.data.database.entitys.Notes
 import com.example.notesapp.receivers.ConnectReceiver
-import com.example.notesapp.services.BackRemoteService
-import com.example.notesapp.services.BackService
-import com.example.notesapp.services.RemoteServiceManager
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -22,13 +17,14 @@ import javax.inject.Singleton
 class NotesRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    private val connectReceiver: ConnectReceiver,
+    connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
-    private val remoteManager: RemoteServiceManager,
     private val applicationContext: Context,
 ) {
 
     private var job: Job? = null
+    private var connect: Job? = null
+    private var message: Job? = null
     private var fixedTimeLoadedDate: Long = 0
     private var fixedTimeRemoteDate: Long = 0
     val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
@@ -49,7 +45,8 @@ class NotesRepository @Inject constructor(
 
     private var idInsertOrEdit: Long = 0
 
-    init {
+    fun init() {
+        Toast.makeText(applicationContext,"Start Repositiory",Toast.LENGTH_SHORT).show()
         observeErrorMessages()
         observeConnectStatus()
     }
@@ -67,7 +64,7 @@ class NotesRepository @Inject constructor(
     }
 
     private fun observeErrorMessages() {
-        CoroutineScope(Dispatchers.Default).launch {
+        message = CoroutineScope(Dispatchers.Default).launch {
             serviceErrorFlow.collect { message ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (message.isNotEmpty()) {
@@ -80,7 +77,7 @@ class NotesRepository @Inject constructor(
     }
 
     private fun observeConnectStatus() {
-        CoroutineScope(Dispatchers.Main).launch {
+        connect = CoroutineScope(Dispatchers.Main).launch {
             isConnectStatus.collect { isConnect ->
                 if( isConnect ) {
                     if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
@@ -91,6 +88,12 @@ class NotesRepository @Inject constructor(
                 }
             }
         }
+    }
+
+    fun clearResources() {
+        connect?.cancel()
+        message?.cancel()
+        job?.cancel()
     }
 
     private fun loadRemoteData() {
@@ -131,16 +134,6 @@ class NotesRepository @Inject constructor(
             }
             appSettings.setFirstLoad()
             fixedTimeRemoteDate = fixedTimeLoadedDate
-            startService()
-        }
-    }
-
-    private fun startService() {
-        val serviceIntent = Intent(applicationContext, BackService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(serviceIntent)
-        } else {
-            applicationContext.startService(serviceIntent)
         }
     }
 

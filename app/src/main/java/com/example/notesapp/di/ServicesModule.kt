@@ -1,7 +1,8 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.services.RemoteServiceManager
+import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.ServicesManager
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides
@@ -12,15 +13,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RemoteModule {
+object ServicesModule {
 
     @Singleton
     @Provides
     fun provideRemoteServiceManager(
         appSettings: AppSettings,
+        connectReceiver: ConnectReceiver,
         @ApplicationContext applicationContext: Context
-    ): RemoteServiceManager {
-        return RemoteServiceManager(appSettings, applicationContext)
+    ): ServicesManager {
+        return ServicesManager(appSettings, connectReceiver, applicationContext)
     }
 
 

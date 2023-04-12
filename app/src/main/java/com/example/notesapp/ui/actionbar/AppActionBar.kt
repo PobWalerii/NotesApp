@@ -38,19 +38,26 @@ class AppActionBar(
     private var actionBar: ActionBar? = null
     private var title = ""
     private var counter: Job? = null
-    lateinit var activity: Activity
+    private lateinit var activity: Activity
+    private var job1: Job? = null
+    private var job2: Job? = null
 
-    init {
-        CoroutineScope(Dispatchers.Default).launch {
+    fun init() {
+        job1 = CoroutineScope(Dispatchers.Default).launch {
             notesRepository.counterDelayFlow.collect {
                 startCounter(it)
             }
         }
-        CoroutineScope(Dispatchers.Default).launch {
+        job2 = CoroutineScope(Dispatchers.Default).launch {
             notesRepository.isLoadFlow.collect {
                 isLoadProcess(it)
             }
         }
+    }
+
+    fun closeResources() {
+        job1?.cancel()
+        job2?.cancel()
     }
 
     fun initAppbar(

@@ -92,8 +92,8 @@ class AppSettings(
         _firstRun.value = false
     }
 
-    fun setFirstLoad() {
-        _firstLoad.value = false
+    fun setFirstLoad(isStart: Boolean = false) {
+        _firstLoad.value = isStart
     }
 
     private fun getPreferences() {

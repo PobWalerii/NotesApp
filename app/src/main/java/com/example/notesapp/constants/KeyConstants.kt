@@ -16,7 +16,7 @@ object KeyConstants {
     const val SING_OF_FIRST_RUN = true
     const val CREATE_RECORDS_IN_BACKGROUND = false
     const val INTERVAL_BACKGROUND_CREATE: Int = 60
-    const val MIN_INTERVAL_BACKGROUND_CREATE: Int = 10
+    const val MIN_INTERVAL_BACKGROUND_CREATE: Int = 5
 
     const val CHANNEL_ID = "BackService"
     const val NOTIFICATION_ID = 11111

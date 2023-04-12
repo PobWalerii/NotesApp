@@ -1,26 +1,45 @@
 package com.example.notesapp.ui.main
 
 import android.animation.ObjectAnimator
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.animation.LinearInterpolator
+import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
 import com.example.notesapp.R
-import com.example.notesapp.services.BackRemoteService
-import com.example.notesapp.services.BackService
+import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.services.ServicesManager
+import com.example.notesapp.settings.AppSettings
+import com.example.notesapp.ui.actionbar.AppActionBar
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var servicesManager: ServicesManager
+    @Inject
+    lateinit var appSettings: AppSettings
+    @Inject
+    lateinit var notesRepository: NotesRepository
+    @Inject
+    lateinit var connectReceiver: ConnectReceiver
+    @Inject
+    lateinit var appActionBar: AppActionBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         handleSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        notesRepository.init()
+        servicesManager.init()
+        connectReceiver.init()
+        appActionBar.init()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -44,11 +63,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val serviceIntent = Intent(applicationContext, BackService::class.java)
-        applicationContext.stopService(serviceIntent)
-        val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
-        applicationContext.stopService(remoteServiceIntent)
+        Toast.makeText(applicationContext,"Stop All Services", Toast.LENGTH_SHORT).show()
+        servicesManager.stopAllServices()
+        connectReceiver.closeObserve()
+        notesRepository.clearResources()
+        appActionBar.closeResources()
+        appSettings.setFirstLoad(true)
     }
-
 
 }

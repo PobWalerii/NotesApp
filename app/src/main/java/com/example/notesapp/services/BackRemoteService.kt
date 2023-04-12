@@ -12,8 +12,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @AndroidEntryPoint
+@Singleton
 class BackRemoteService: Service() {
 
     @Inject
