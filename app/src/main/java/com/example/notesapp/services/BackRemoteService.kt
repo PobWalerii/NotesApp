@@ -23,14 +23,14 @@ class BackRemoteService: Service() {
     @Inject
     lateinit var remoteDao: RemoteDao
 
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val notification = ServiceNotification.setNotification(applicationContext,CHANNEL_IDD)
         startForeground(NOTIFICATION_IDD, notification)
 
-        scope.launch {
+        coroutineScope.launch {
             while (isActive) {
                 delay(appSettings.intervalCreateRecords.value * 1000L)
                 addRecord()
@@ -41,14 +41,14 @@ class BackRemoteService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        scope.cancel()
+        coroutineScope.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        scope.cancel()
+        coroutineScope.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 

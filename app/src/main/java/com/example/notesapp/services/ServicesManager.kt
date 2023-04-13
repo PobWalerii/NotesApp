@@ -6,10 +6,7 @@ import android.os.Build
 import android.widget.Toast
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Singleton
 
 @Singleton
@@ -22,12 +19,10 @@ class ServicesManager(
     private val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
     private val serviceIntent = Intent(applicationContext, BackService::class.java)
 
-    private var job1: Job? = null
-    private var job2: Job? = null
-    private var job3: Job? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     fun init() {
-        job1 = CoroutineScope(Dispatchers.Default).launch {
+        coroutineScope.launch {
             appSettings.createBackgroundRecords.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (start) {
@@ -40,7 +35,7 @@ class ServicesManager(
                 }
             }
         }
-        job2 = CoroutineScope(Dispatchers.Default).launch {
+        coroutineScope.launch {
             appSettings.firstLoad.collect { isStartLoad ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (!isStartLoad && connectReceiver.isConnectStatusFlow.value) {
@@ -51,7 +46,7 @@ class ServicesManager(
             }
         }
 
-        job3 =CoroutineScope(Dispatchers.Default).launch {
+        coroutineScope.launch {
             connectReceiver.isConnectStatusFlow.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if(!appSettings.firstLoad.value) {
@@ -69,9 +64,7 @@ class ServicesManager(
     }
 
     fun stopAllServices() {
-        job1?.cancel()
-        job2?.cancel()
-        job3?.cancel()
+        coroutineScope.cancel()
         stopService()
         stopRemoteService()
     }

@@ -22,6 +22,10 @@ class ApiServiceImpl @Inject constructor(
     private var listNotes: List<Notes> = emptyList()
 
     private val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+    private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
+    private val startDelayValue: StateFlow<Int> = appSettings.startDelayValue
+    private val queryDelayValue: StateFlow<Int> = appSettings.queryDelayValue
+    private val operationDelayValue: StateFlow<Int> = appSettings.operationDelayValue
 
     private var timeLoadBase: Long = 0L
 
@@ -42,16 +46,17 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun getAllNote(): NoteResponse {
         setStartData()
-        withContext(Dispatchers.Main) {
-            val delayValue = if (appSettings.firstLoad.value) {
-                appSettings.startDelayValue.value
-            } else {
-                appSettings.queryDelayValue.value
-            }
-            withContext(Dispatchers.IO) {
-                delay(delayValue * 1000L)
-            }
+        val delayValue = if (firstLoad.value) {
+            startDelayValue.value
+        } else {
+            queryDelayValue.value
         }
+        withContext(Dispatchers.IO) {
+            delay(5000)
+        }
+
+
+
         if (isConnectStatus.value) {
             return NoteResponse(timeLoadBase, listNotes)
         } else {
@@ -61,8 +66,7 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun deleteNote(note: Notes) {
         withContext(Dispatchers.IO) {
-            delay(appSettings.operationDelayValue.value * 1000L)
-        }
+            delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)}
         if (isConnectStatus.value) {
             remoteDao.deleteNote(note)
         } else {
@@ -72,8 +76,7 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun addNote(note: Notes): Long {
         withContext(Dispatchers.IO) {
-            delay(appSettings.operationDelayValue.value * 1000L)
-        }
+        delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)}
         if (isConnectStatus.value) {
             return remoteDao.insertNote(note)
         } else {
@@ -81,7 +84,7 @@ class ApiServiceImpl @Inject constructor(
         }
     }
 
-    private fun setStartData() {
+    private suspend fun setStartData() {
         CoroutineScope(Dispatchers.Main).launch {
             if (appSettings.firstRun.value) {
                 val startList: List<Notes> =
@@ -105,9 +108,9 @@ class ApiServiceImpl @Inject constructor(
                             1600000000000
                         )
                     )
-                CoroutineScope(Dispatchers.IO).launch {
+                //CoroutineScope(Dispatchers.IO).launch {
                     remoteDao.startDatabase(startList)
-                }
+                //}
             }
         }
     }

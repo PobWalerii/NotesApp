@@ -18,7 +18,6 @@ import com.example.notesapp.utils.DateChangedManager
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +65,6 @@ class ListNotesFragment : Fragment() {
         setupButtonAddListener()
         setupItemClickListener()
         observeConnectStatus()
-        //observeScrollStatus()
     }
 
     private fun loadData() {
@@ -87,21 +85,6 @@ class ListNotesFragment : Fragment() {
             }
         }
     }
-/*
-    private fun observeScrollStatus() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.idInsertOrEditFlow.collect { id ->
-                if(id != 0L) {
-                    val position = adapter.setCurrentId(id)
-                    if (position != -1) {
-                        recyclerView.layoutManager?.scrollToPosition(position)
-                    }
-                }
-            }
-        }
-    }
-
- */
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {

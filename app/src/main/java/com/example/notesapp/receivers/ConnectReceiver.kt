@@ -28,21 +28,19 @@ class ConnectReceiver(
     private val isConnectStatus = MutableStateFlow(connectivityManager.activeNetwork != null)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             isConnectStatus.value = true
         }
-
         override fun onLost(network: Network) {
             isConnectStatus.value = false
         }
     }
 
-    private var job1: Job? = null
-    private var job2: Job? = null
-
     fun init() {
-        job1 = CoroutineScope(Dispatchers.Default).launch {
+        coroutineScope.launch {
             observeStatusConnect()
             connectivityManager.registerNetworkCallback(
                 NetworkRequest.Builder().build(),
@@ -52,12 +50,11 @@ class ConnectReceiver(
     }
 
     fun closeObserve() {
-        job1?.cancel()
-        job2?.cancel()
+        coroutineScope.cancel()
     }
 
     private fun observeStatusConnect() {
-        job2 = CoroutineScope(Dispatchers.Default).launch {
+        coroutineScope.launch {
             isConnectStatusFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     showStatus(it)

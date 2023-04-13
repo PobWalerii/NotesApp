@@ -94,14 +94,15 @@ class NotesRepository @Inject constructor(
         connect?.cancel()
         message?.cancel()
         job?.cancel()
+        serviceError.value = ""
     }
 
     private fun loadRemoteData() {
         job = CoroutineScope(Dispatchers.Default).launch {
             try {
-                CoroutineScope(Dispatchers.Main).launch {
-                    isLoad.value = true
-                }
+                //CoroutineScope(Dispatchers.Main).launch {
+                withContext(Dispatchers.Main) {isLoad.value = true}
+                //}
                 apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase
                     val list: List<Notes> = this.fullList
@@ -147,6 +148,7 @@ class NotesRepository @Inject constructor(
                     if(fixed) {
                         isNoteEdited.value = true
                     }
+                    //delay(10)
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
@@ -176,6 +178,7 @@ class NotesRepository @Inject constructor(
                     counterDelay.value = true
                     apiService.deleteNote(note)
                     isNoteEdited.value = true
+                    //delay(10)
                 } else {
                     serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }

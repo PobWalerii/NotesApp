@@ -31,7 +31,4 @@ object ConfirmationDialog {
         return dialog
     }
 
-
-
-
 }

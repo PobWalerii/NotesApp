@@ -32,14 +32,19 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var appActionBar: AppActionBar
 
+    override fun onStart() {
+        super.onStart()
+        appSettings.setFirstLoad(true)
+        connectReceiver.init()
+        notesRepository.init()
+        servicesManager.init()
+        appActionBar.init()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         handleSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        notesRepository.init()
-        servicesManager.init()
-        connectReceiver.init()
-        appActionBar.init()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -68,7 +73,6 @@ class MainActivity : AppCompatActivity() {
         connectReceiver.closeObserve()
         notesRepository.clearResources()
         appActionBar.closeResources()
-        appSettings.setFirstLoad(true)
     }
 
 }
