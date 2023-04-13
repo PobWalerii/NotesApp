@@ -20,12 +20,9 @@ import com.example.notesapp.constants.KeyConstants.SING_OF_FIRST_RUN
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_OPERATION
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_QUERY
 import com.example.notesapp.constants.KeyConstants.TIME_DELAY_START
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Singleton
@@ -81,8 +78,9 @@ class AppSettings(
 
     var showView: View? = null
 
-    init {
+    fun init() {
         getPreferences()
+        setFirstLoad(true)
     }
 
     fun setAppFirstRun() {
@@ -97,7 +95,7 @@ class AppSettings(
     }
 
     private fun getPreferences() {
-        CoroutineScope(Dispatchers.Main).launch {
+        //CoroutineScope(Dispatchers.Main).launch {
             _isLoadedPreferences.value = false
 
             _firstRun.value = sPref.getBoolean("firstRun", SING_OF_FIRST_RUN)
@@ -117,7 +115,7 @@ class AppSettings(
             _intervalCreateRecords.value = sPref.getInt("intervalCreateRecords", INTERVAL_BACKGROUND_CREATE)
 
             _isLoadedPreferences.value = true
-        }
+        //}
     }
 
     fun savePreferences(

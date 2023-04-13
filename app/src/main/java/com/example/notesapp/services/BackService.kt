@@ -25,14 +25,14 @@ class BackService: Service() {
     @Inject
     lateinit var appSettings: AppSettings
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private var job: Job? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val notification = setNotification(applicationContext, CHANNEL_ID)
         startForeground(NOTIFICATION_ID, notification)
 
-        coroutineScope.launch {
+        job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
                 delay(appSettings.requestIntervalValue.value * 1000L)
                 try {
@@ -46,14 +46,14 @@ class BackService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        coroutineScope.cancel()
+        job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        coroutineScope.cancel()
+        job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 

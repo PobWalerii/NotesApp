@@ -26,10 +26,8 @@ class ServicesManager(
             appSettings.createBackgroundRecords.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (start) {
-                        Toast.makeText(applicationContext,"Start Service Remote Base",Toast.LENGTH_SHORT).show()
                         startRemoteService()
                     } else {
-                        Toast.makeText(applicationContext,"Stop Service Remote Base",Toast.LENGTH_SHORT).show()
                         stopRemoteService()
                     }
                 }
@@ -39,7 +37,6 @@ class ServicesManager(
             appSettings.firstLoad.collect { isStartLoad ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (!isStartLoad && connectReceiver.isConnectStatusFlow.value) {
-                        Toast.makeText(applicationContext,"Start Service variant 1",Toast.LENGTH_SHORT).show()
                         startService()
                     }
                 }
@@ -51,10 +48,8 @@ class ServicesManager(
                 CoroutineScope(Dispatchers.Main).launch {
                     if(!appSettings.firstLoad.value) {
                         if (isConnect) {
-                            Toast.makeText(applicationContext,"Start Service variant 2",Toast.LENGTH_SHORT).show()
                             startService()
                         } else {
-                            Toast.makeText(applicationContext,"Stop Service",Toast.LENGTH_SHORT).show()
                             stopService()
                         }
                     }

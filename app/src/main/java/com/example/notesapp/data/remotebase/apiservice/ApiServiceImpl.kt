@@ -50,13 +50,10 @@ class ApiServiceImpl @Inject constructor(
             startDelayValue.value
         } else {
             queryDelayValue.value
-        }
+        }*1000L
         withContext(Dispatchers.IO) {
-            delay(5000)
+            delay(delayValue)
         }
-
-
-
         if (isConnectStatus.value) {
             return NoteResponse(timeLoadBase, listNotes)
         } else {
@@ -66,7 +63,9 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun deleteNote(note: Notes) {
         withContext(Dispatchers.IO) {
-            delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)}
+            delay(operationDelayValue.value * 1000L)
+            //delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)
+        }
         if (isConnectStatus.value) {
             remoteDao.deleteNote(note)
         } else {
@@ -76,7 +75,9 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun addNote(note: Notes): Long {
         withContext(Dispatchers.IO) {
-        delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)}
+            delay(operationDelayValue.value * 1000L)
+        //delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)
+        }
         if (isConnectStatus.value) {
             return remoteDao.insertNote(note)
         } else {

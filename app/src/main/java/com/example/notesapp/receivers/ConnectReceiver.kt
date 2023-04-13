@@ -28,7 +28,7 @@ class ConnectReceiver(
     private val isConnectStatus = MutableStateFlow(connectivityManager.activeNetwork != null)
     val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private var job: Job? = null
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -40,25 +40,22 @@ class ConnectReceiver(
     }
 
     fun init() {
-        coroutineScope.launch {
-            observeStatusConnect()
-            connectivityManager.registerNetworkCallback(
-                NetworkRequest.Builder().build(),
-                networkCallback
-            )
-        }
+        observeStatusConnect()
+        connectivityManager.registerNetworkCallback(
+            NetworkRequest.Builder().build(),
+            networkCallback
+        )
     }
 
     fun closeObserve() {
-        coroutineScope.cancel()
+        job?.cancel()
+        connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
     private fun observeStatusConnect() {
-        coroutineScope.launch {
+        job = CoroutineScope(Dispatchers.Default).launch {
             isConnectStatusFlow.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    showStatus(it)
-                }
+                withContext(Dispatchers.Main) { showStatus(it) }
             }
         }
     }
@@ -68,7 +65,7 @@ class ConnectReceiver(
     ) {
         if (isConnect) {
             if (appSettings.showMessageInternetOk.value && !appSettings.firstLoad.value) {
-                Toast.makeText(applicationContext, R.string.text_internet_ok, Toast.LENGTH_LONG)
+                Toast.makeText(applicationContext, R.string.text_internet_ok, Toast.LENGTH_SHORT)
                     .show()
             }
         } else {
