@@ -29,7 +29,6 @@ class BackService: Service() {
     lateinit var appSettings: AppSettings
 
     private var job: Job? = null
-    private var isRunning = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -38,7 +37,6 @@ class BackService: Service() {
 
         job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
-                withContext(Dispatchers.Main) {setRuning()}
                 delay(appSettings.requestIntervalValue.value * 1000L)
                 try {
                     val remoteBaseTime = apiService.getChangeBaseTime()
@@ -58,7 +56,6 @@ class BackService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isRunning = false
         job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
@@ -67,10 +64,4 @@ class BackService: Service() {
         return null
     }
 
-    fun getRuning() = isRunning
-    private fun setRuning() {
-        isRunning = true
-        Toast.makeText(applicationContext, "сервис поставил $isRunning", Toast.LENGTH_LONG).show()
-        Toast.makeText(applicationContext, "getRuning() ${getRuning()}", Toast.LENGTH_LONG).show()
-    }
 }

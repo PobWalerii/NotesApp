@@ -17,8 +17,6 @@ class ServicesManager(
     appSettings: AppSettings,
     connectReceiver: ConnectReceiver,
     private val applicationContext: Context,
-    private val backService: BackService,
-    private val backRemoteService: BackRemoteService
 ) {
 
     private val remoteServiceIntent = createRemoteServiceIntent()
@@ -27,7 +25,6 @@ class ServicesManager(
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
     private val createBackgroundRecords: StateFlow<Boolean> = appSettings.createBackgroundRecords
     private val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
-
 
     private var job1: Job? = null
     private var job2: Job? = null
@@ -96,33 +93,21 @@ class ServicesManager(
     }
 
     private fun stopService() {
-            Toast.makeText(applicationContext, "хочу ${backService.getRuning()}", Toast.LENGTH_LONG)
-                .show()
-            if (backService.getRuning()) {
-                try {
-                    applicationContext.stopService(serviceIntent)
-                    Toast.makeText(applicationContext, "Stop", Toast.LENGTH_LONG).show()
-                } catch (_: Exception) {
-                    Toast.makeText(applicationContext, "No Stop", Toast.LENGTH_LONG).show()
-                    noStartOrStopService()
-                }
-            }
-
+        try {
+            applicationContext.stopService(serviceIntent)
+        } catch (_: Exception) {
+            noStartOrStopService()
+        }
     }
     private fun startService() {
-        Toast.makeText(applicationContext, "${backService.getRuning()}", Toast.LENGTH_LONG).show()
-        if (!backService.getRuning()) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    applicationContext.startForegroundService(serviceIntent)
-                } else {
-                    applicationContext.startService(serviceIntent)
-                }
-                Toast.makeText(applicationContext, "Start", Toast.LENGTH_LONG).show()
-                Toast.makeText(applicationContext, "${backService.getRuning()}", Toast.LENGTH_LONG).show()
-            } catch (_: Exception) {
-                noStartOrStopService()
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(serviceIntent)
+            } else {
+                applicationContext.startService(serviceIntent)
             }
+        } catch (_: Exception) {
+            noStartOrStopService()
         }
     }
 
@@ -139,7 +124,9 @@ class ServicesManager(
         }
     }
 
-    private fun createRemoteServiceIntent() = Intent(applicationContext, BackRemoteService::class.java)
-    private fun createServiceIntent() = Intent(applicationContext, BackService::class.java)
+    private fun createRemoteServiceIntent() = Intent(applicationContext, remoteServiceClass())
+    private fun createServiceIntent() = Intent(applicationContext, serviceClass())
+    private fun serviceClass() = BackService::class.java
+    private fun remoteServiceClass() = BackRemoteService::class.java
 
 }
