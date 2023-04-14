@@ -28,6 +28,7 @@ class NotesApplication : Application() {
         appSettings.init()
         connectReceiver.init()
         servicesManager.init()
+
         appActionBar.init()
         notesRepository.init()
     }

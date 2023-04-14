@@ -4,26 +4,41 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
+import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.MAX_RETRY_ATTEMPTS
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
 
 @Singleton
 class ServicesManager(
-    private val appSettings: AppSettings,
-    private val connectReceiver: ConnectReceiver,
+    appSettings: AppSettings,
+    connectReceiver: ConnectReceiver,
     private val applicationContext: Context,
+    private val backService: BackService,
+    private val backRemoteService: BackRemoteService
 ) {
 
-    private val remoteServiceIntent = Intent(applicationContext, BackRemoteService::class.java)
-    private val serviceIntent = Intent(applicationContext, BackService::class.java)
+    private val remoteServiceIntent = createRemoteServiceIntent()
+    private val serviceIntent = createServiceIntent()
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
+    private val createBackgroundRecords: StateFlow<Boolean> = appSettings.createBackgroundRecords
+    private val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+
+
+    private var job1: Job? = null
+    private var job2: Job? = null
+    private var job3: Job? = null
+
+    private var actBackService: Boolean = false
+    private var countActBackService: Int = 0
 
     fun init() {
-        coroutineScope.launch {
-            appSettings.createBackgroundRecords.collect { start ->
+        job1 = CoroutineScope(Dispatchers.Default).launch {
+            createBackgroundRecords.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (start) {
                         startRemoteService()
@@ -33,25 +48,28 @@ class ServicesManager(
                 }
             }
         }
-        coroutineScope.launch {
-            appSettings.firstLoad.collect { isStartLoad ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (!isStartLoad && connectReceiver.isConnectStatusFlow.value) {
-                        startService()
-                    }
+
+        job2 = CoroutineScope(Dispatchers.Default).launch {
+            firstLoad.collect { isStartLoad ->
+                if (!isStartLoad) {
+                    startLocalService()
                 }
             }
         }
+    }
 
-        coroutineScope.launch {
-            connectReceiver.isConnectStatusFlow.collect { isConnect ->
+    private fun startLocalService() {
+        job2?.cancel()
+        job3 = CoroutineScope(Dispatchers.Default).launch {
+            isConnectStatus.collect { isConnect ->
                 CoroutineScope(Dispatchers.Main).launch {
-                    if(!appSettings.firstLoad.value) {
-                        if (isConnect) {
-                            startService()
-                        } else {
-                            stopService()
-                        }
+                    actBackService = isConnect
+                    countActBackService = 0
+                    if (isConnect) {
+                        startService()
+                    } else {
+                        Toast.makeText(applicationContext, "Wont Stop", Toast.LENGTH_LONG).show()
+                        stopService()
                     }
                 }
             }
@@ -59,7 +77,9 @@ class ServicesManager(
     }
 
     fun stopAllServices() {
-        coroutineScope.cancel()
+        job1?.cancel()
+        job2?.cancel()
+        job3?.cancel()
         stopService()
         stopRemoteService()
     }
@@ -76,15 +96,50 @@ class ServicesManager(
     }
 
     private fun stopService() {
-        applicationContext.stopService(serviceIntent)
+            Toast.makeText(applicationContext, "хочу ${backService.getRuning()}", Toast.LENGTH_LONG)
+                .show()
+            if (backService.getRuning()) {
+                try {
+                    applicationContext.stopService(serviceIntent)
+                    Toast.makeText(applicationContext, "Stop", Toast.LENGTH_LONG).show()
+                } catch (_: Exception) {
+                    Toast.makeText(applicationContext, "No Stop", Toast.LENGTH_LONG).show()
+                    noStartOrStopService()
+                }
+            }
+
     }
     private fun startService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(serviceIntent)
-        } else {
-            applicationContext.startService(serviceIntent)
+        Toast.makeText(applicationContext, "${backService.getRuning()}", Toast.LENGTH_LONG).show()
+        if (!backService.getRuning()) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    applicationContext.startForegroundService(serviceIntent)
+                } else {
+                    applicationContext.startService(serviceIntent)
+                }
+                Toast.makeText(applicationContext, "Start", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, "${backService.getRuning()}", Toast.LENGTH_LONG).show()
+            } catch (_: Exception) {
+                noStartOrStopService()
+            }
         }
     }
 
+    private fun noStartOrStopService() {
+        countActBackService ++
+        if(countActBackService <= MAX_RETRY_ATTEMPTS) {
+            if (actBackService) {
+                startService()
+            } else {
+                stopService()
+            }
+        } else {
+            Toast.makeText(applicationContext, R.string.service_error, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun createRemoteServiceIntent() = Intent(applicationContext, BackRemoteService::class.java)
+    private fun createServiceIntent() = Intent(applicationContext, BackService::class.java)
 
 }

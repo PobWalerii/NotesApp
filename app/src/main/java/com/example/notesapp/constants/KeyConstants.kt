@@ -22,4 +22,6 @@ object KeyConstants {
     const val NOTIFICATION_ID = 11111
     const val CHANNEL_IDD = "BackRemoteService"
     const val NOTIFICATION_IDD = 22222
+
+    const val MAX_RETRY_ATTEMPTS = 3
 }

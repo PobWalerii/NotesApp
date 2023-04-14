@@ -1,21 +1,17 @@
 package com.example.notesapp.ui.main
 
-import android.animation.ObjectAnimator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.view.animation.LinearInterpolator
-import androidx.core.animation.doOnEnd
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
 import com.example.notesapp.R
+import com.example.notesapp.utils.AppSplashScreen.startSplash
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        handleSplashScreen()
+        startSplash(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
     }
@@ -24,19 +20,9 @@ class MainActivity : AppCompatActivity() {
         return findNavController(R.id.fragmentContainerView).navigateUp() || super.onSupportNavigateUp()
     }
 
-    fun handleSplashScreen() {
-        val splashScreen = installSplashScreen()
-        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            val slideUp = ObjectAnimator.ofFloat(
-                splashScreenViewProvider.view,
-                View.ALPHA,
-                0f
-            )
-            slideUp.interpolator = LinearInterpolator()
-            slideUp.duration = 1000L
-            slideUp.doOnEnd { splashScreenViewProvider.remove() }
-            slideUp.start()
-        }
+    override fun onStop() {
+        super.onStop()
+        startSplash(this)
     }
 
 }

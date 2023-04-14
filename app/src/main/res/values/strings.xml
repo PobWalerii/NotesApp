@@ -33,6 +33,7 @@
     <string name="interrupted_update_load">Database Update Interrupted</string>
     <string name="operation_failed">The Operation Failed. Please Try Again if necessary.</string>
     <string name="data_error">Error Reading Data from a Remote source</string>
+    <string name="service_error">Unexpected Issue with background Service Management</string>
 
     <string name="text1">Заголовок сообщения по умолчанию:</string>
     <string name="text2">Задержка запроса к уданенной базе в секундах при запуске приложения:</string>
