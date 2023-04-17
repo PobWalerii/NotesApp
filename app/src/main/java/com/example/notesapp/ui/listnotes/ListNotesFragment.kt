@@ -67,7 +67,7 @@ class ListNotesFragment : Fragment() {
 
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadDatabase().collect {
+            viewModel.listNotesFlow.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     binding.visibleInfoText = it.isEmpty()
                     adapter.setList(it)

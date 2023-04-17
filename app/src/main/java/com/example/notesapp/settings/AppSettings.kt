@@ -27,7 +27,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AppSettings(
-    private val context: Context
+    private val applicationContext: Context
 ) {
     private val _firstLoad = MutableStateFlow(true)
     val firstLoad: StateFlow<Boolean> = _firstLoad.asStateFlow()
@@ -84,7 +84,7 @@ class AppSettings(
     private val _intervalCreateRecords = MutableStateFlow(INTERVAL_BACKGROUND_CREATE)
     val intervalCreateRecords: StateFlow<Int> = _intervalCreateRecords.asStateFlow()
 
-    private var sPref: SharedPreferences = context.getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
+    private var sPref: SharedPreferences = applicationContext.getSharedPreferences("MyPref", AppCompatActivity.MODE_PRIVATE)
 
     private val _isLoadedPreferences = MutableStateFlow(false)
     val isLoadedPreferences: StateFlow<Boolean> = _isLoadedPreferences.asStateFlow()
@@ -93,9 +93,14 @@ class AppSettings(
 
     fun init() {
         getPreferences()
-        setFirstLoad(true)
         setIsBackService(false)
         setIsRemoteService(false)
+        Toast.makeText(applicationContext,"AppSettings init ok", Toast.LENGTH_SHORT).show()
+    }
+
+    fun close() {
+        setFirstLoad(true)
+        Toast.makeText(applicationContext,"AppSettings close ok", Toast.LENGTH_SHORT).show()
     }
 
     fun setAppFirstRun() {
@@ -182,7 +187,7 @@ class AppSettings(
         ed.putInt("intervalCreateRecords", if(intervalCreateRecords>=MIN_INTERVAL_BACKGROUND_CREATE) intervalCreateRecords else MIN_INTERVAL_BACKGROUND_CREATE)
         ed.apply()
         Toast.makeText(
-            context, context.getString(
+            applicationContext, applicationContext.getString(
                 if (getDefault) R.string.settings_to_default else R.string.settings_is_saved
             ), Toast.LENGTH_SHORT
         ).show()

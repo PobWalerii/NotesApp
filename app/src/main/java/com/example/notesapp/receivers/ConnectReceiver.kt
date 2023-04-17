@@ -39,9 +39,11 @@ class ConnectReceiver(
             networkCallback
         )
         setConnectStatus(connectivityManager.activeNetwork != null)
+        Toast.makeText(applicationContext,"ConnectReceiver init ok", Toast.LENGTH_SHORT).show()
     }
     fun close() {
         connectivityManager.unregisterNetworkCallback(networkCallback)
+        Toast.makeText(applicationContext,"ConnectReceiver close ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun setConnectStatus(status: Boolean) {

@@ -24,7 +24,8 @@ class NotesRepository @Inject constructor(
     private var connect: Job? = null
     private var message: Job? = null
     private var fixedTimeLoadedDate: Long = 0
-    private var fixedTimeRemoteDate: Long = 0
+    private var fixedTimeRemoteDate: Long = 1
+
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
@@ -41,17 +42,18 @@ class NotesRepository @Inject constructor(
     private val counterDelay = MutableStateFlow(false)
     val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
 
+    val listNotesFlow: Flow<List<Notes>> = notesDao.loadDataBase()
+
     private var idInsertOrEdit: Long = 0
 
     fun init() {
-        CoroutineScope(Dispatchers.Main).launch {
+        //CoroutineScope(Dispatchers.Main).launch {
+            //delay(1000)
             observeErrorMessages()
             observeConnectStatus()
-        }
-        Toast.makeText(applicationContext,"Kоннект при старте - ${isConnectStatus.value}",Toast.LENGTH_SHORT).show()
+        //}
+        Toast.makeText(applicationContext,"NotesRepository init ok", Toast.LENGTH_SHORT).show()
     }
-
-    fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
 
     suspend fun getNoteById(noteId: Long): Notes? =
         notesDao.getNoteById(noteId).firstOrNull()
@@ -97,6 +99,7 @@ class NotesRepository @Inject constructor(
         message?.cancel()
         job?.cancel()
         serviceError.value = ""
+        Toast.makeText(applicationContext,"NotesRepository close ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadRemoteData() {

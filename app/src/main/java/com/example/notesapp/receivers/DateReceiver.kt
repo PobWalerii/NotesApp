@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.widget.Toast
 import com.example.notesapp.settings.AppSettings
 import javax.inject.Singleton
 
@@ -20,9 +21,11 @@ class DateManager(
         filter.addAction(Intent.ACTION_DATE_CHANGED)
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
         applicationContext.registerReceiver(receiver, filter)
+        Toast.makeText(applicationContext,"DateManager init ok", Toast.LENGTH_SHORT).show()
     }
     fun close() {
         applicationContext.unregisterReceiver(receiver)
+        Toast.makeText(applicationContext,"DateManager close ok", Toast.LENGTH_SHORT).show()
     }
 }
 

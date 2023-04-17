@@ -57,6 +57,7 @@ class ServicesManager(
                 }
             }
         }
+        Toast.makeText(applicationContext,"ServicesManager init ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun startLocalService() {
@@ -82,6 +83,7 @@ class ServicesManager(
         job3?.cancel()
         stopService()
         stopRemoteService()
+        Toast.makeText(applicationContext,"ServicesManager close ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun stopRemoteService() {
