@@ -4,10 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.database.AppDatabase
-import com.example.notesapp.data.database.dao.NotesDao
+import com.example.notesapp.data.localbase.AppDatabase
+import com.example.notesapp.data.localbase.dao.NotesDao
 import com.example.notesapp.data.repository.NotesRepository
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides
@@ -39,14 +38,10 @@ object DatabaseModule {
     fun provideNotesRepository(
         notesDao: NotesDao,
         apiService: ApiService,
-        connectReceiver: ConnectReceiver,
         appSettings: AppSettings,
-        //remoteManager: ServicesManager,
         @ApplicationContext applicationContext: Context
         ): NotesRepository {
-            return NotesRepository(notesDao, apiService, connectReceiver, appSettings,
-                //remoteManager,
-            applicationContext)
+            return NotesRepository(notesDao, apiService, appSettings, applicationContext)
         }
 
 }

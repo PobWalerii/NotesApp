@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.IBinder
 import com.example.notesapp.constants.KeyConstants.CHANNEL_IDD
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_IDD
-import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.data.remotebase.database.RemoteDao
+import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -39,6 +39,11 @@ class BackRemoteService: Service() {
         return START_STICKY
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        appSettings.setIsRemoteService(true)
+    }
+
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         job?.cancel()
@@ -50,6 +55,7 @@ class BackRemoteService: Service() {
         super.onDestroy()
         job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        appSettings.setIsRemoteService(false)
     }
 
     private suspend fun addRecord() {

@@ -3,26 +3,33 @@ package com.example.notesapp.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import android.content.IntentFilter
+import com.example.notesapp.settings.AppSettings
+import javax.inject.Singleton
 
-class DateChangedBroadcastReceiver : BroadcastReceiver() {
+@Singleton
+class DateManager(
+    private val appSettings: AppSettings,
+    private val applicationContext: Context,
+) {
 
-    private val isDateChanged = MutableStateFlow(false)
-    val isDateChangedFlow: StateFlow<Boolean> = isDateChanged.asStateFlow()
+    private val receiver = DateChangedBroadcastReceiver(appSettings)
 
+    fun init() {
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_DATE_CHANGED)
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        applicationContext.registerReceiver(receiver, filter)
+    }
+    fun close() {
+        applicationContext.unregisterReceiver(receiver)
+    }
+}
+
+class DateChangedBroadcastReceiver(
+    private val appSettings: AppSettings
+): BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        isEvent()
+        appSettings.setIsDateChanged(true)
     }
-
-    private fun isEvent() {
-        CoroutineScope(Dispatchers.Main).launch {
-            isDateChanged.emit(true)
-            withContext(Dispatchers.Default) { delay(10) }
-            isDateChanged.emit(false)
-        }
-    }
-
 }

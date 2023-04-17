@@ -6,16 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
-import com.example.notesapp.constants.KeyConstants.DEFAULT_HEADER
-import com.example.notesapp.constants.KeyConstants.DEFAULT_SPECIFICATION_LINE
-import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
+import com.example.notesapp.settings.AppSettings
 
 @SuppressLint("NotifyDataSetChanged")
-class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
-
-    private var isSingleLine: Boolean = DEFAULT_SPECIFICATION_LINE
-    private var defaultHeader: String =  DEFAULT_HEADER
+class NotesListAdapter(
+    private val appSettings: AppSettings,
+): RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
 
     private var listener: OnItemClickListener? = null
     private var listNotes: List<Notes> = emptyList()
@@ -24,11 +22,10 @@ class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
         private val binding = ListNotesItemBinding.bind(itemView)
-        fun bind(item: Notes, currentId: Long, isSingleLine: Boolean, defaultHeader: String) {
+        fun bind(item: Notes, currentId: Long, appSettings: AppSettings) {
             binding.note = item
             binding.currentId = currentId
-            binding.isSingleLine = isSingleLine
-            binding.defaultHeader = defaultHeader
+            binding.appSettings = appSettings
         }
         fun getBinding(): ListNotesItemBinding = binding
     }
@@ -58,7 +55,7 @@ class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(listNotes[position], currentId, isSingleLine, defaultHeader)
+        holder.bind(listNotes[position], currentId, appSettings)
     }
 
     override fun getItemCount(): Int = listNotes.size
@@ -76,11 +73,6 @@ class NotesListAdapter: RecyclerView.Adapter<NotesListAdapter.ViewHolder>() {
     fun setList(list: List<Notes>) {
         listNotes = list
         notifyDataSetChanged()
-    }
-
-    fun setSettings(isLine: Boolean, header: String) {
-        isSingleLine = isLine
-        defaultHeader = header
     }
 
     fun refresh() {

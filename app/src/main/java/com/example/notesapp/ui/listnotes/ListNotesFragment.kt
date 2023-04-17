@@ -14,7 +14,6 @@ import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
-import com.example.notesapp.utils.DateChangedManager
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,8 +37,6 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private lateinit var broadcastManager: DateChangedManager
-
     private val viewModel by viewModels<NotesViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,11 +57,12 @@ class ListNotesFragment : Fragment() {
         appSettings.showView = binding.recycler
         setupActionBar()
         setupRecycler()
-        refreshSettings()
         loadData()
         setupButtonAddListener()
         setupItemClickListener()
         observeConnectStatus()
+        observeLoadStatus()
+        observeDateChanged()
     }
 
     private fun loadData() {
@@ -120,7 +118,7 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = NotesListAdapter()
+        adapter = NotesListAdapter(appSettings)
         adapter.setHasStableIds(true)
     }
 
@@ -191,25 +189,6 @@ class ListNotesFragment : Fragment() {
         })
     }
 
-    private fun refreshSettings() {
-        adapter.setSettings(
-            appSettings.specificationLine.value,
-            appSettings.defaultHeader.value
-        )
-    }
-
-    override fun onResume() {
-        super.onResume()
-        broadcastDateRegister()
-        observeLoadStatus()
-    }
-
-    private fun broadcastDateRegister() {
-        broadcastManager = DateChangedManager(adapter)
-        broadcastManager.register(requireContext())
-        broadcastManager.observeDateChanged(viewLifecycleOwner)
-    }
-
     private fun setupActionBar() {
 
         actionBar.initAppbar(
@@ -221,7 +200,7 @@ class ListNotesFragment : Fragment() {
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
-            actionBar.isItemMenuPressedFlow.collect {
+            actionBar.isItemMenuPressed.collect {
                 if(it=="settings") {
                     startSettingsFragment()
                 }
@@ -229,9 +208,16 @@ class ListNotesFragment : Fragment() {
         }
     }
 
+    private fun observeDateChanged() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            appSettings.isDateChanged.collect {
+                adapter.refresh()
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        broadcastManager.unregister(requireContext())
         _binding = null
     }
 

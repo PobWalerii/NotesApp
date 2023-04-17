@@ -2,10 +2,9 @@ package com.example.notesapp.data.remotebase.apiservice
 
 import android.content.Context
 import com.example.notesapp.R
-import com.example.notesapp.data.remotebase.database.RemoteDao
-import com.example.notesapp.data.remotebase.model.NoteResponse
-import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.data.remotebase.database.dao.RemoteDao
+import com.example.notesapp.data.remotebase.database.model.NoteResponse
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -14,14 +13,13 @@ import javax.inject.Inject
 
 class ApiServiceImpl @Inject constructor(
     private val remoteDao: RemoteDao,
-    connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
     private val applicationContext: Context
 ): ApiService {
 
     private var listNotes: List<Notes> = emptyList()
 
-    private val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+    private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
     private val startDelayValue: StateFlow<Int> = appSettings.startDelayValue
     private val queryDelayValue: StateFlow<Int> = appSettings.queryDelayValue

@@ -10,10 +10,9 @@ import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.settings.AppSettings
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Singleton
@@ -25,39 +24,29 @@ class ConnectReceiver(
     private val connectivityManager: ConnectivityManager =
         applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val isConnectStatus = MutableStateFlow(connectivityManager.activeNetwork != null)
-    val isConnectStatusFlow: StateFlow<Boolean> = isConnectStatus.asStateFlow()
-
-    private var job: Job? = null
-
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            isConnectStatus.value = true
+            setConnectStatus(true)
         }
         override fun onLost(network: Network) {
-            isConnectStatus.value = false
+            setConnectStatus(false)
         }
     }
 
     fun init() {
-        observeStatusConnect()
         connectivityManager.registerNetworkCallback(
             NetworkRequest.Builder().build(),
             networkCallback
         )
+        setConnectStatus(connectivityManager.activeNetwork != null)
     }
-
-    fun closeObserve() {
-        job?.cancel()
+    fun close() {
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
-    private fun observeStatusConnect() {
-        job = CoroutineScope(Dispatchers.Default).launch {
-            isConnectStatusFlow.collect {
-                withContext(Dispatchers.Main) { showStatus(it) }
-            }
-        }
+    private fun setConnectStatus(status: Boolean) {
+        appSettings.setIsConnectStatus(status)
+        showStatus(status)
     }
 
     private fun showStatus(

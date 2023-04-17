@@ -88,7 +88,7 @@ class EditNotesFragment : Fragment() {
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
-            actionBar.isItemMenuPressedFlow.collect {
+            actionBar.isItemMenuPressed.collect {
                 CoroutineScope(Dispatchers.Main).launch {
                     hideKeyboardFromView(requireContext(), requireView())
                     observeEditNote()

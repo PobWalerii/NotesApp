@@ -1,8 +1,9 @@
 package com.example.notesapp.ui.listnotes
 
 import androidx.lifecycle.ViewModel
-import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    private val notesRepository: NotesRepository
+    private val notesRepository: NotesRepository,
 ): ViewModel() {
 
     val isLoadFlow: StateFlow<Boolean> = notesRepository.isLoadFlow

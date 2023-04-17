@@ -5,9 +5,8 @@ import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.remotebase.apiservice.ApiServiceImpl
-import com.example.notesapp.data.remotebase.database.RemoteDao
+import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.RemoteDatabase
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides
@@ -39,11 +38,10 @@ object ApiModule {
     @Provides
     fun provideApiService(
         remoteDao: RemoteDao,
-        connectReceiver: ConnectReceiver,
         appSettings: AppSettings,
         @ApplicationContext applicationContext: Context
     ): ApiService {
-        return ApiServiceImpl(remoteDao, connectReceiver, appSettings, applicationContext)
+        return ApiServiceImpl(remoteDao, appSettings, applicationContext)
     }
 
 }

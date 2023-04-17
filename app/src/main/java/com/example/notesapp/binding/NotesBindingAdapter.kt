@@ -2,11 +2,11 @@ package com.example.notesapp.binding
 
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.example.notesapp.settings.AppSettings
 import java.text.SimpleDateFormat
 import java.util.*
 
 object NotesBindingAdapter {
-
     @JvmStatic
     @BindingAdapter("dateToString")
     fun dateToString(textView: TextView, dateNote: Long) {

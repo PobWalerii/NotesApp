@@ -4,9 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.database.dao.NotesDao
-import com.example.notesapp.data.database.entitys.Notes
-import com.example.notesapp.receivers.ConnectReceiver
+import com.example.notesapp.data.localbase.dao.NotesDao
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -17,7 +16,6 @@ import javax.inject.Singleton
 class NotesRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    connectReceiver: ConnectReceiver,
     private val appSettings: AppSettings,
     private val applicationContext: Context,
 ) {
@@ -27,7 +25,7 @@ class NotesRepository @Inject constructor(
     private var message: Job? = null
     private var fixedTimeLoadedDate: Long = 0
     private var fixedTimeRemoteDate: Long = 0
-    val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+    val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
@@ -46,9 +44,11 @@ class NotesRepository @Inject constructor(
     private var idInsertOrEdit: Long = 0
 
     fun init() {
-        Toast.makeText(applicationContext,"Start Repositiory",Toast.LENGTH_SHORT).show()
-        observeErrorMessages()
-        observeConnectStatus()
+        CoroutineScope(Dispatchers.Main).launch {
+            observeErrorMessages()
+            observeConnectStatus()
+        }
+        Toast.makeText(applicationContext,"Kоннект при старте - ${isConnectStatus.value}",Toast.LENGTH_SHORT).show()
     }
 
     fun loadDataBase(): Flow<List<Notes>> = notesDao.loadDataBase()
@@ -80,7 +80,9 @@ class NotesRepository @Inject constructor(
         connect = CoroutineScope(Dispatchers.Main).launch {
             isConnectStatus.collect { isConnect ->
                 if( isConnect ) {
+                    Toast.makeText(applicationContext,"Ecть коннект",Toast.LENGTH_SHORT).show()
                     if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
+                        Toast.makeText(applicationContext,"Хотим читать",Toast.LENGTH_SHORT).show()
                         loadRemoteData()
                     }
                 } else {
@@ -101,7 +103,9 @@ class NotesRepository @Inject constructor(
         job = CoroutineScope(Dispatchers.Default).launch {
             try {
                 //CoroutineScope(Dispatchers.Main).launch {
-                withContext(Dispatchers.Main) {isLoad.value = true}
+                //withContext(Dispatchers.Main) {
+                    isLoad.value = true
+                //}
                 //}
                 apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase

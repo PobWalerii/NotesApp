@@ -32,6 +32,19 @@ class AppSettings(
     private val _firstLoad = MutableStateFlow(true)
     val firstLoad: StateFlow<Boolean> = _firstLoad.asStateFlow()
 
+    private val _isBackService = MutableStateFlow(false)
+    val isBackService: StateFlow<Boolean> = _isBackService.asStateFlow()
+
+    private val _isRemoteService = MutableStateFlow(false)
+    val isRemoteService: StateFlow<Boolean> = _isRemoteService.asStateFlow()
+
+    private val _isConnectStatus = MutableStateFlow(false)
+    val isConnectStatus: StateFlow<Boolean> = _isConnectStatus.asStateFlow()
+
+    private val _isDateChanged = MutableStateFlow(false)
+    val isDateChanged: StateFlow<Boolean> = _isDateChanged.asStateFlow()
+
+
     private val _firstRun = MutableStateFlow(SING_OF_FIRST_RUN)
     val firstRun: StateFlow<Boolean> = _firstRun.asStateFlow()
 
@@ -81,6 +94,8 @@ class AppSettings(
     fun init() {
         getPreferences()
         setFirstLoad(true)
+        setIsBackService(false)
+        setIsRemoteService(false)
     }
 
     fun setAppFirstRun() {
@@ -94,28 +109,44 @@ class AppSettings(
         _firstLoad.value = isStart
     }
 
+    fun setIsBackService(state: Boolean) {
+        _isBackService.value = state
+    }
+
+    fun setIsRemoteService(state: Boolean) {
+        _isRemoteService.value = state
+    }
+
+    fun setIsConnectStatus(state: Boolean) {
+        _isConnectStatus.value = state
+    }
+
+    fun setIsDateChanged(state: Boolean) {
+        _isDateChanged.value = state
+    }
+
     private fun getPreferences() {
-        //CoroutineScope(Dispatchers.Main).launch {
-            _isLoadedPreferences.value = false
+        _isLoadedPreferences.value = false
 
-            _firstRun.value = sPref.getBoolean("firstRun", SING_OF_FIRST_RUN)
-            _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
-            _specificationLine.value =
-                sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
-            _defaultAddIfClick.value = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
-            _deleteIfSwiped.value = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
-            _dateChanged.value = sPref.getBoolean("dateChanged", DATE_CHANGE_WHEN_CONTENT)
-            _showMessageInternetOk.value =
-                sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
-            _startDelayValue.value = sPref.getInt("startDelayValue", TIME_DELAY_START)
-            _queryDelayValue.value = sPref.getInt("queryDelayValue", TIME_DELAY_QUERY)
-            _requestIntervalValue.value = sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS)
-            _operationDelayValue.value = sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION)
-            _createBackgroundRecords.value = sPref.getBoolean("createBackgroundRecords", CREATE_RECORDS_IN_BACKGROUND)
-            _intervalCreateRecords.value = sPref.getInt("intervalCreateRecords", INTERVAL_BACKGROUND_CREATE)
+        _firstRun.value = sPref.getBoolean("firstRun", SING_OF_FIRST_RUN)
+        _defaultHeader.value = sPref.getString("defaultHeader", DEFAULT_HEADER).toString()
+        _specificationLine.value =
+            sPref.getBoolean("specificationLine", DEFAULT_SPECIFICATION_LINE)
+        _defaultAddIfClick.value = sPref.getBoolean("defaultAddIfClick", DEFAULT_ADD_IF_CLICK)
+        _deleteIfSwiped.value = sPref.getBoolean("deleteIfSwiped", DELETE_IF_SWIPED)
+        _dateChanged.value = sPref.getBoolean("dateChanged", DATE_CHANGE_WHEN_CONTENT)
+        _showMessageInternetOk.value =
+            sPref.getBoolean("showMessageInternetOk", SHOW_MESSAGE_INTERNET_OK)
+        _startDelayValue.value = sPref.getInt("startDelayValue", TIME_DELAY_START)
+        _queryDelayValue.value = sPref.getInt("queryDelayValue", TIME_DELAY_QUERY)
+        _requestIntervalValue.value = sPref.getInt("requestIntervalValue", INTERVAL_REQUESTS)
+        _operationDelayValue.value = sPref.getInt("operationDelayValue", TIME_DELAY_OPERATION)
+        _createBackgroundRecords.value =
+            sPref.getBoolean("createBackgroundRecords", CREATE_RECORDS_IN_BACKGROUND)
+        _intervalCreateRecords.value =
+            sPref.getInt("intervalCreateRecords", INTERVAL_BACKGROUND_CREATE)
 
-            _isLoadedPreferences.value = true
-        //}
+        _isLoadedPreferences.value = true
     }
 
     fun savePreferences(

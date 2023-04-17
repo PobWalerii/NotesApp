@@ -5,14 +5,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
+            name="appSettings"
+            type="com.example.notesapp.settings.AppSettings"/>
+        <variable
             name="note"
-            type="com.example.notesapp.data.database.entitys.Notes" />
-        <variable
-            name="defaultHeader"
-            type="String" />
-        <variable
-            name="isSingleLine"
-            type="Boolean" />
+            type="com.example.notesapp.data.localbase.entitys.Notes" />
         <variable
             name="currentId"
             type="Long" />
@@ -39,11 +36,11 @@
                 android:layout_marginStart="@dimen/text_item_margin_edge"
                 android:layout_marginTop="@dimen/text_item_margin_edge"
                 android:layout_marginEnd="@dimen/text_item_margin_edge"
-                android:singleLine="@{isSingleLine ? true : false}"
+                android:singleLine="@{appSettings.specificationLine ? true : false}"
                 android:ellipsize="end"
                 android:textColor="@color/brown"
                 android:textSize="@dimen/item_header_text_size"
-                android:text='@{note.noteName.isEmpty() ? defaultHeader + " #" + note.id : note.noteName}'/>
+                android:text='@{note.noteName.isEmpty() ? appSettings.defaultHeader + " #" + note.id : note.noteName}'/>
 
             <TextView
                 android:id="@+id/textSpecification"
@@ -52,7 +49,7 @@
                 android:layout_marginStart="@dimen/text_item_margin_edge"
                 android:layout_marginTop="@dimen/text_item_margin_vertical"
                 android:layout_marginEnd="@dimen/text_item_margin_edge"
-                android:singleLine="@{isSingleLine ? true : false}"
+                android:singleLine="@{appSettings.specificationLine ? true : false}"
                 android:ellipsize="end"
                 android:textSize="@dimen/item_spicification_text_size"
                 android:text='@{note.noteSpecification.isEmpty() ? ". . ." : note.noteSpecification}'/>

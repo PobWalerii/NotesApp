@@ -2,7 +2,7 @@ package com.example.notesapp.ui.editnotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notesapp.data.database.entitys.Notes
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ class EditViewModel  @Inject constructor(
     private var currentNoteDate: Long = 0L
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
-    val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
+    val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
 
     private val _isLoadedNote = MutableStateFlow(false)
     val isLoadedNote: StateFlow<Boolean> = _isLoadedNote.asStateFlow()

@@ -3,7 +3,6 @@ package com.example.notesapp.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.widget.Toast
 import com.example.notesapp.constants.KeyConstants.CHANNEL_ID
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_ID
 import com.example.notesapp.data.remotebase.apiservice.ApiService
@@ -12,8 +11,6 @@ import com.example.notesapp.services.ServiceNotification.setNotification
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +44,11 @@ class BackService: Service() {
         return START_STICKY
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        appSettings.setIsBackService(true)
+    }
+
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         job?.cancel()
@@ -58,6 +60,7 @@ class BackService: Service() {
         super.onDestroy()
         job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        appSettings.setIsBackService(false)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

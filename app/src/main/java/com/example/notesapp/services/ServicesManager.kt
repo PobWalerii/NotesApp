@@ -6,7 +6,6 @@ import android.os.Build
 import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.constants.KeyConstants.MAX_RETRY_ATTEMPTS
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +14,6 @@ import javax.inject.Singleton
 @Singleton
 class ServicesManager(
     appSettings: AppSettings,
-    connectReceiver: ConnectReceiver,
     private val applicationContext: Context,
 ) {
 
@@ -24,7 +22,9 @@ class ServicesManager(
 
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
     private val createBackgroundRecords: StateFlow<Boolean> = appSettings.createBackgroundRecords
-    private val isConnectStatus: StateFlow<Boolean> = connectReceiver.isConnectStatusFlow
+    private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
+    private val isBackService: StateFlow<Boolean> = appSettings.isBackService
+    private val isRemoteService: StateFlow<Boolean> = appSettings.isRemoteService
 
     private var job1: Job? = null
     private var job2: Job? = null
@@ -32,11 +32,15 @@ class ServicesManager(
 
     private var actBackService: Boolean = false
     private var countActBackService: Int = 0
+    private var actRemoteService: Boolean = false
+    private var countActRemoteService: Int = 0
 
     fun init() {
         job1 = CoroutineScope(Dispatchers.Default).launch {
             createBackgroundRecords.collect { start ->
                 CoroutineScope(Dispatchers.Main).launch {
+                    actRemoteService = start
+                    countActRemoteService = 0
                     if (start) {
                         startRemoteService()
                     } else {
@@ -65,7 +69,6 @@ class ServicesManager(
                     if (isConnect) {
                         startService()
                     } else {
-                        Toast.makeText(applicationContext, "Wont Stop", Toast.LENGTH_LONG).show()
                         stopService()
                     }
                 }
@@ -82,32 +85,48 @@ class ServicesManager(
     }
 
     private fun stopRemoteService() {
-        applicationContext.stopService(remoteServiceIntent)
+        if(isRemoteService.value) {
+            try {
+                applicationContext.stopService(remoteServiceIntent)
+            } catch (_: Exception) {
+                noStartOrStopRemoteService()
+            }
+        }
     }
     private fun startRemoteService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(remoteServiceIntent)
-        } else {
-            applicationContext.startService(remoteServiceIntent)
+        if(!isRemoteService.value) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    applicationContext.startForegroundService(remoteServiceIntent)
+                } else {
+                    applicationContext.startService(remoteServiceIntent)
+                }
+            } catch (_: Exception) {
+                noStartOrStopRemoteService()
+            }
         }
     }
 
     private fun stopService() {
-        try {
-            applicationContext.stopService(serviceIntent)
-        } catch (_: Exception) {
-            noStartOrStopService()
+        if(isBackService.value) {
+            try {
+                applicationContext.stopService(serviceIntent)
+            } catch (_: Exception) {
+                noStartOrStopService()
+            }
         }
     }
     private fun startService() {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(serviceIntent)
-            } else {
-                applicationContext.startService(serviceIntent)
+        if(!isBackService.value) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    applicationContext.startForegroundService(serviceIntent)
+                } else {
+                    applicationContext.startService(serviceIntent)
+                }
+            } catch (_: Exception) {
+                noStartOrStopService()
             }
-        } catch (_: Exception) {
-            noStartOrStopService()
         }
     }
 
@@ -120,13 +139,29 @@ class ServicesManager(
                 stopService()
             }
         } else {
-            Toast.makeText(applicationContext, R.string.service_error, Toast.LENGTH_LONG).show()
+            unexpectedMessage()
         }
     }
 
-    private fun createRemoteServiceIntent() = Intent(applicationContext, remoteServiceClass())
-    private fun createServiceIntent() = Intent(applicationContext, serviceClass())
-    private fun serviceClass() = BackService::class.java
-    private fun remoteServiceClass() = BackRemoteService::class.java
+    private fun noStartOrStopRemoteService() {
+        countActRemoteService ++
+        if(countActRemoteService <= MAX_RETRY_ATTEMPTS) {
+            if (actRemoteService) {
+                startRemoteService()
+            } else {
+                stopRemoteService()
+            }
+        } else {
+            unexpectedMessage()
+        }
+    }
+
+    private fun createRemoteServiceIntent() = Intent(applicationContext, BackRemoteService::class.java)
+    private fun createServiceIntent() = Intent(applicationContext, BackService::class.java)
+
+    private fun unexpectedMessage() {
+        Toast.makeText(applicationContext, R.string.service_error, Toast.LENGTH_LONG).show()
+    }
+
 
 }

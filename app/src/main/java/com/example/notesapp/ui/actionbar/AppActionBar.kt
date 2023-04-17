@@ -8,12 +8,14 @@ import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.example.notesapp.R
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
@@ -31,32 +33,14 @@ class AppActionBar(
     private val context: Context
  ){
 
-    private val isItemMenuPressed = MutableStateFlow("")
-    val isItemMenuPressedFlow: StateFlow<String> = isItemMenuPressed.asStateFlow()
+    private val _isItemMenuPressed = MutableStateFlow("")
+    val isItemMenuPressed: StateFlow<String> = _isItemMenuPressed.asStateFlow()
 
     private var appbarMenu: Menu? = null
     private var actionBar: ActionBar? = null
     private var title = ""
     private var counter: Job? = null
     private lateinit var activity: Activity
-
-    fun init() {
-        CoroutineScope(Dispatchers.Default).launch {
-            notesRepository.counterDelayFlow.collect {
-                startCounter(it)
-            }
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            notesRepository.isLoadFlow.collect {
-                isLoadProcess(it)
-            }
-        }
-    }
-
-    fun closeResources() {
-        //coroutineScope.cancel()
-        counter?.cancel()
-    }
 
     fun initAppbar(
         requeryActivity: Activity,
@@ -111,14 +95,26 @@ class AppActionBar(
             }
         }, lifecycleOwner, Lifecycle.State.RESUMED)
 
+        lifecycleOwner.lifecycleScope.launch {
+            notesRepository.counterDelayFlow.collect {
+                //startCounter(it)
+                startProcess()
+            }
+        }
+        lifecycleOwner.lifecycleScope.launch {
+            notesRepository.isLoadFlow.collect {
+                //isLoadProcess(it)
+                startProcess()
+            }
+        }
     }
 
     private fun itemMenuPressed(item: String) {
         if (item == "home") {
             (activity as MainActivity).onSupportNavigateUp()
         } else {
-            isItemMenuPressed.value = item
-            isItemMenuPressed.value = ""
+            _isItemMenuPressed.value = item
+            _isItemMenuPressed.value = ""
         }
     }
 
@@ -132,9 +128,35 @@ class AppActionBar(
                 else -> 0
             }
         )?.isVisible = isVisible
-        isItemMenuPressed.value = ""
+        _isItemMenuPressed.value = ""
     }
 
+    private fun startProcess() {
+        counter?.cancel()
+        if (notesRepository.isLoadFlow.value) {
+            Toast.makeText(context,"Load",Toast.LENGTH_SHORT).show()
+            setSpannableTitle(context.getString(R.string.text_load))
+        } else if (notesRepository.counterDelayFlow.value) {
+            counter = CoroutineScope(Dispatchers.Main).launch {
+                var count = 1
+                while (true) {
+                    setSpannableTitle(
+                        context.getString(R.string.text_wait) +
+                                if (appSettings.operationDelayValue.value > 1) {
+                                    " $count"
+                                } else ""
+                    )
+                    count++
+                    withContext(Dispatchers.Default) { delay(1000) }
+                }
+            }
+        } else {
+            Toast.makeText(context,"Not Load",Toast.LENGTH_SHORT).show()
+            setSpannableTitle("")
+        }
+    }
+
+    /*
     private fun startCounter(start: Boolean) {
         counter?.cancel()
         if(!notesRepository.isLoadFlow.value) {
@@ -150,21 +172,23 @@ class AppActionBar(
                     }
                 }
             } else {
-                CoroutineScope(Dispatchers.Main).launch {
+                //CoroutineScope(Dispatchers.Main).launch {
                     setSpannableTitle("")
-                }
+                //}
             }
         }
     }
 
     private fun isLoadProcess(isLoad: Boolean) {
-        CoroutineScope(Dispatchers.Main).launch {
+        //CoroutineScope(Dispatchers.Main).launch {
             if (isLoad) {
                 counter?.cancel()
             }
             setSpannableTitle(if (isLoad) context.getString(R.string.text_load) else "")
-        }
+        //}
     }
+
+     */
 
     private fun setSpannableTitle(text: String) {
         val spannableString = SpannableString(title + text)

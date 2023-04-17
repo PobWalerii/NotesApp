@@ -1,10 +1,8 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.receivers.DateManager
 import com.example.notesapp.settings.AppSettings
-import com.example.notesapp.ui.actionbar.AppActionBar
-import com.example.notesapp.ui.listnotes.NotesListAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,14 +12,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object UIModule {
+object DateChangedModule {
+
     @Singleton
     @Provides
-    fun provideMyActionBar(
-        noteRepository: NotesRepository,
+    fun provideDateManager(
         appSettings: AppSettings,
-        @ApplicationContext applicationContext: Context
-    ): AppActionBar {
-        return AppActionBar(noteRepository, appSettings, applicationContext)
+        @ApplicationContext applicationContext: Context,
+    ): DateManager {
+        return DateManager(appSettings, applicationContext)
     }
 }

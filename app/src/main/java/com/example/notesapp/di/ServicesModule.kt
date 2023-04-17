@@ -1,7 +1,6 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.services.ServicesManager
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
@@ -19,10 +18,9 @@ object ServicesModule {
     @Provides
     fun provideRemoteServiceManager(
         appSettings: AppSettings,
-        connectReceiver: ConnectReceiver,
         @ApplicationContext applicationContext: Context,
     ): ServicesManager {
-        return ServicesManager(appSettings, connectReceiver, applicationContext) //, backService, backRemoteService)
+        return ServicesManager(appSettings, applicationContext)
     }
 
 }
