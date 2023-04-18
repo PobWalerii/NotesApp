@@ -24,4 +24,5 @@ object KeyConstants {
     const val NOTIFICATION_IDD = 22222
 
     const val MAX_RETRY_ATTEMPTS = 3
+    const val MIN_DELAY_FOR_REMOTE = 500L
 }

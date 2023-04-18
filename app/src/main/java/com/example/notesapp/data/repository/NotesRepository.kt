@@ -47,7 +47,8 @@ class NotesRepository @Inject constructor(
 
     val listNotesFlow: Flow<List<Notes>> = notesDao.loadDataBase()
 
-    private var idInsertOrEdit: Long = 0
+    private val _idInsertOrEdit = MutableStateFlow(-1L)
+    val idInsertOrEdit: StateFlow<Long> = _idInsertOrEdit.asStateFlow()
 
     fun init() {
         observeConnectStatus()
@@ -143,7 +144,7 @@ class NotesRepository @Inject constructor(
                 if(isConnectStatus.value) {
                     counterDelay.value = true
                     val resultId: Long = apiService.addNote(toRemote(note))
-                    idInsertOrEdit = resultId
+                    _idInsertOrEdit.value = resultId
                     if(fixed) {
                         isNoteEdited.value = true
                     }
@@ -161,12 +162,12 @@ class NotesRepository @Inject constructor(
     }
 
     fun getInsertOrEditId(): Long {
-        val current = idInsertOrEdit
-        idInsertOrEdit = 0
+        val current = idInsertOrEdit.value
+        _idInsertOrEdit.value = -1L
         return current
     }
     fun setInsertOrEditId(current: Long) {
-        idInsertOrEdit = current
+        _idInsertOrEdit.value = current
     }
 
     fun deleteNote(note: Notes) {

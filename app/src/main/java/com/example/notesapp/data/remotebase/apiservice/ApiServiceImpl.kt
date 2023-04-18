@@ -2,6 +2,7 @@ package com.example.notesapp.data.remotebase.apiservice
 
 import android.content.Context
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.MIN_DELAY_FOR_REMOTE
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
@@ -53,7 +54,7 @@ class ApiServiceImpl @Inject constructor(
             setStartData()
         }
         withContext(Dispatchers.IO) {
-            delay((delayValue.coerceAtLeast(1)) * 1000L)
+            delay((delayValue*1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
         }
         if (isConnectStatus.value) {
             return NoteResponse(timeLoadBase, listNotes)
@@ -64,7 +65,7 @@ class ApiServiceImpl @Inject constructor(
 
     override suspend fun deleteNote(note: RemoteNotes) {
         withContext(Dispatchers.IO) {
-            delay((operationDelayValue.value.coerceAtLeast(1)) * 1000L)
+            delay((operationDelayValue.value * 1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
             if (isConnectStatus.value) {
                 remoteDao.deleteNote(note)
             } else {
@@ -74,7 +75,7 @@ class ApiServiceImpl @Inject constructor(
     }
 
     override suspend fun addNote(note: RemoteNotes): Long = runBlocking {
-        delay((operationDelayValue.value.coerceAtLeast(1)) * 1000L)
+        delay((operationDelayValue.value * 1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
         if (isConnectStatus.value) {
             remoteDao.insertNote(note)
         } else {

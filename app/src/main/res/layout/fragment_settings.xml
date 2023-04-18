@@ -58,15 +58,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/settings_margin"
-                android:textSize="@dimen/settings_text_size"
-                android:text="@string/text11"
-                android:checked="@{firstRun}"/>
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -200,6 +191,12 @@
                     tools:ignore="Autofill,LabelFor" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/blue"
+                android:layout_marginBottom="@dimen/settings_margin"/>
+
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch1"
                 android:layout_width="match_parent"
@@ -217,6 +214,12 @@
                 android:textSize="@dimen/settings_text_size"
                 android:text="@string/text6"
                 android:checked="@{defaultAddIfClick}"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/blue"
+                android:layout_marginBottom="@dimen/settings_margin"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch3"
@@ -236,6 +239,12 @@
                 android:text="@string/text8"
                 android:checked="@{dateChanged}"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/blue"
+                android:layout_marginBottom="@dimen/settings_margin"/>
+
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch5"
                 android:layout_width="match_parent"
@@ -244,6 +253,12 @@
                 android:textSize="@dimen/settings_text_size"
                 android:text="@string/text9"
                 android:checked="@{showMessageInternetOk}"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/blue"
+                android:layout_marginBottom="@dimen/settings_margin"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch7"
@@ -281,7 +296,23 @@
                     android:enabled="@{createBackgroundRecords}"
                     android:text="@{intervalCreateRecords.toString()}"
                     tools:ignore="Autofill,LabelFor" />
+
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/blue"
+                android:layout_marginBottom="@dimen/settings_margin"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/settings_margin"
+                android:textSize="@dimen/settings_text_size"
+                android:text="@string/text11"
+                android:checked="@{firstRun}"/>
 
         </LinearLayout>
 

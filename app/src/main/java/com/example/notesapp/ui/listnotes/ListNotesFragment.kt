@@ -52,7 +52,7 @@ class ListNotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        appSettings.showView = binding.recycler
+        setViewForSnack()
         setupActionBar()
         setupRecycler()
         loadData()
@@ -154,10 +154,6 @@ class ListNotesFragment : Fragment() {
         )
     }
 
-    private fun startSettingsFragment() {
-        findNavController().navigate(ListNotesFragmentDirections.actionListNotesFragmentToSettingsFragment())
-    }
-
     private fun setupButtonAddListener() {
         binding.floatingActionButton.setOnClickListener {
             if ( appSettings.defaultAddIfClick.value ) {
@@ -198,6 +194,14 @@ class ListNotesFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun setViewForSnack() {
+        appSettings.showView = binding.recycler
+    }
+
+    private fun startSettingsFragment() {
+        findNavController().navigate(ListNotesFragmentDirections.actionListNotesFragmentToSettingsFragment())
     }
 
     private fun observeDateChanged() {

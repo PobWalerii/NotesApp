@@ -16,6 +16,7 @@ import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,6 +45,7 @@ class EditNotesFragment : Fragment() {
         loadData()
         setListenersDataChanged()
         setupActionBar()
+        observeEditNote()
     }
 
     private fun loadData() {
@@ -72,7 +74,7 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        actionBar.setButtonVisible("save",viewModel.isChangedNote(
+        actionBar.setButtonVisible("save", viewModel.isChangedNote(
             binding.titleNoteText.text.toString(),
             binding.textNoteText.text.toString()
         ))
@@ -135,20 +137,13 @@ class EditNotesFragment : Fragment() {
 
     private fun observeEditNote() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isNoteEditedFlow.collect {
-                if(it) {
+            combine(viewModel.isNoteEditedFlow, viewModel.idInsertOrEdit) { isEdit, idEdit ->
+                isEdit && idEdit == args.idNote
+            }.collect {
+                if (it) {
                     (activity as MainActivity).onSupportNavigateUp()
                 }
             }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        observeEditNote()
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(100)
-            definitionOfChange()
         }
     }
 

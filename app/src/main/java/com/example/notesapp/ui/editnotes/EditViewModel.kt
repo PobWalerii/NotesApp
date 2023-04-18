@@ -28,6 +28,7 @@ class EditViewModel  @Inject constructor(
 
     val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
+    val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
 
     private val _isLoadedNote = MutableStateFlow(false)
     val isLoadedNote: StateFlow<Boolean> = _isLoadedNote.asStateFlow()
@@ -59,7 +60,7 @@ class EditViewModel  @Inject constructor(
             currentId,
             title,
             content,
-            if ((appSettings.dateChanged.value && content!=currentNoteSpecification) || currentId==0L) {
+            if ((appSettings.dateChanged.value && content != currentNoteSpecification) || currentId == 0L) {
                 Date().time
             } else {
                 currentNoteDate
