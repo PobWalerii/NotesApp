@@ -4,7 +4,6 @@ import android.content.Context
 import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
-import com.example.notesapp.ui.listnotes.NotesListAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

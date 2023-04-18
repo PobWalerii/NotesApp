@@ -6,6 +6,8 @@ import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.localbase.dao.NotesDao
 import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.mapers.NotesMaper.fromRemote
+import com.example.notesapp.data.mapers.NotesMaper.toRemote
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -27,14 +29,15 @@ class NotesRepository @Inject constructor(
     private var fixedTimeRemoteDate: Long = 1
 
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
+
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
     private val isNoteEdited = MutableStateFlow(false)
     val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
 
-    private val serviceError = MutableStateFlow("")
-    private val serviceErrorFlow: StateFlow<String> = serviceError.asStateFlow()
+    private val _serviceError = MutableStateFlow("")
+    private val serviceError: StateFlow<String> = _serviceError.asStateFlow()
 
     private val isLoad = MutableStateFlow(false)
     val isLoadFlow: StateFlow<Boolean> = isLoad.asStateFlow()
@@ -47,12 +50,8 @@ class NotesRepository @Inject constructor(
     private var idInsertOrEdit: Long = 0
 
     fun init() {
-        //CoroutineScope(Dispatchers.Main).launch {
-            //delay(1000)
-            observeErrorMessages()
-            observeConnectStatus()
-        //}
-        Toast.makeText(applicationContext,"NotesRepository init ok", Toast.LENGTH_SHORT).show()
+        observeConnectStatus()
+        observeErrorMessages()
     }
 
     suspend fun getNoteById(noteId: Long): Notes? =
@@ -67,11 +66,11 @@ class NotesRepository @Inject constructor(
 
     private fun observeErrorMessages() {
         message = CoroutineScope(Dispatchers.Default).launch {
-            serviceErrorFlow.collect { message ->
+            serviceError.collect { message ->
                 CoroutineScope(Dispatchers.Main).launch {
                     if (message.isNotEmpty()) {
                         Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-                        serviceError.value = ""
+                        _serviceError.value = ""
                     }
                 }
             }
@@ -82,9 +81,7 @@ class NotesRepository @Inject constructor(
         connect = CoroutineScope(Dispatchers.Main).launch {
             isConnectStatus.collect { isConnect ->
                 if( isConnect ) {
-                    Toast.makeText(applicationContext,"Ecть коннект",Toast.LENGTH_SHORT).show()
                     if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
-                        Toast.makeText(applicationContext,"Хотим читать",Toast.LENGTH_SHORT).show()
                         loadRemoteData()
                     }
                 } else {
@@ -97,38 +94,35 @@ class NotesRepository @Inject constructor(
     fun clearResources() {
         connect?.cancel()
         message?.cancel()
-        job?.cancel()
-        serviceError.value = ""
-        Toast.makeText(applicationContext,"NotesRepository close ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadRemoteData() {
         job = CoroutineScope(Dispatchers.Default).launch {
             try {
-                //CoroutineScope(Dispatchers.Main).launch {
-                //withContext(Dispatchers.Main) {
-                    isLoad.value = true
-                //}
-                //}
+                isLoad.value = true
                 apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase
-                    val list: List<Notes> = this.fullList
+                    val list: List<Notes> = this.fullList.map {
+                        fromRemote(it)
+                    }
                     notesDao.updateDatabase(list)
                 }
                 if( firstLoad.value ) {
                     actionAfterStart()
                 }
             } catch (e: Exception) {
-                if (e is CancellationException) {
-                    serviceError.value =
-                        if (firstRun.value || firstLoad.value) {
-                            applicationContext.getString(R.string.interrupted_start_load)
-                        } else {
-                            applicationContext.getString(R.string.interrupted_update_load)
-                        }
-                } else {
-                    serviceError.value = e.message.toString()
-                }
+                _serviceError.value =
+                    if (e is CancellationException) {
+                        applicationContext.getString(
+                            if(firstRun.value || firstLoad.value) {
+                                R.string.interrupted_start_load
+                            } else {
+                                R.string.interrupted_update_load
+                            }
+                        )
+                    } else {
+                        e.message.toString()
+                    }
             } finally {
                 isLoad.value = false
             }
@@ -136,31 +130,28 @@ class NotesRepository @Inject constructor(
     }
 
     private fun actionAfterStart() {
-        CoroutineScope(Dispatchers.Main).launch {
-            if (firstRun.value) {
-                appSettings.setAppFirstRun()
-            }
-            appSettings.setFirstLoad()
-            fixedTimeRemoteDate = fixedTimeLoadedDate
+        if (firstRun.value) {
+            appSettings.setAppFirstRun()
         }
+        appSettings.setFirstLoad()
+        fixedTimeRemoteDate = fixedTimeLoadedDate
     }
 
     fun addNote(note: Notes, fixed: Boolean) {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 if(isConnectStatus.value) {
                     counterDelay.value = true
-                    val resultId: Long = apiService.addNote(note)
+                    val resultId: Long = apiService.addNote(toRemote(note))
                     idInsertOrEdit = resultId
                     if(fixed) {
                         isNoteEdited.value = true
                     }
-                    //delay(10)
                 } else {
-                    serviceError.value = applicationContext.getString(R.string.operation_not_possible)
+                    _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
             } catch (e: Exception) {
-                serviceError.value = e.message.toString()
+                _serviceError.value = e.message.toString()
             } finally {
                 counterDelay.value = false
                 delay(10)
@@ -179,18 +170,17 @@ class NotesRepository @Inject constructor(
     }
 
     fun deleteNote(note: Notes) {
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 if(isConnectStatus.value) {
                     counterDelay.value = true
-                    apiService.deleteNote(note)
+                    apiService.deleteNote(toRemote(note))
                     isNoteEdited.value = true
-                    //delay(10)
                 } else {
-                    serviceError.value = applicationContext.getString(R.string.operation_not_possible)
+                    _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }
             } catch (e: Exception) {
-                serviceError.value = e.message.toString()
+                _serviceError.value = e.message.toString()
             } finally {
                 counterDelay.value = false
                 delay(10)

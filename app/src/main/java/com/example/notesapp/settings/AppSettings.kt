@@ -95,12 +95,10 @@ class AppSettings(
         getPreferences()
         setIsBackService(false)
         setIsRemoteService(false)
-        Toast.makeText(applicationContext,"AppSettings init ok", Toast.LENGTH_SHORT).show()
     }
 
     fun close() {
         setFirstLoad(true)
-        Toast.makeText(applicationContext,"AppSettings close ok", Toast.LENGTH_SHORT).show()
     }
 
     fun setAppFirstRun() {

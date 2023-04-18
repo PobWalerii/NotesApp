@@ -10,9 +10,6 @@ import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.settings.AppSettings
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Singleton
@@ -39,11 +36,9 @@ class ConnectReceiver(
             networkCallback
         )
         setConnectStatus(connectivityManager.activeNetwork != null)
-        Toast.makeText(applicationContext,"ConnectReceiver init ok", Toast.LENGTH_SHORT).show()
     }
     fun close() {
         connectivityManager.unregisterNetworkCallback(networkCallback)
-        Toast.makeText(applicationContext,"ConnectReceiver close ok", Toast.LENGTH_SHORT).show()
     }
 
     private fun setConnectStatus(status: Boolean) {

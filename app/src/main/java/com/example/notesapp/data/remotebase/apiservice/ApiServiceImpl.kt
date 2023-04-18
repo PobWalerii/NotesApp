@@ -4,9 +4,10 @@ import android.content.Context
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
-import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 import javax.inject.Inject
@@ -17,13 +18,13 @@ class ApiServiceImpl @Inject constructor(
     private val applicationContext: Context
 ): ApiService {
 
-    private var listNotes: List<Notes> = emptyList()
-
+    private var listNotes: List<RemoteNotes> = emptyList()
     private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
     private val startDelayValue: StateFlow<Int> = appSettings.startDelayValue
     private val queryDelayValue: StateFlow<Int> = appSettings.queryDelayValue
     private val operationDelayValue: StateFlow<Int> = appSettings.operationDelayValue
+    private val listNotesFlow: Flow<List<RemoteNotes>> = remoteDao.loadDataBase()
 
     private var timeLoadBase: Long = 0L
 
@@ -35,22 +36,24 @@ class ApiServiceImpl @Inject constructor(
 
     private fun observeDataChange() {
         CoroutineScope(Dispatchers.IO).launch {
-            remoteDao.loadDataBaseFlow().collect {
-                listNotes = it
+            listNotesFlow.collect {
                 timeLoadBase = Date().time
+                listNotes = it
             }
         }
     }
 
     override suspend fun getAllNote(): NoteResponse {
-        setStartData()
         val delayValue = if (firstLoad.value) {
             startDelayValue.value
         } else {
             queryDelayValue.value
-        }*1000L
+        }
+        if (appSettings.firstRun.value) {
+            setStartData()
+        }
         withContext(Dispatchers.IO) {
-            delay(delayValue)
+            delay((delayValue.coerceAtLeast(1)) * 1000L)
         }
         if (isConnectStatus.value) {
             return NoteResponse(timeLoadBase, listNotes)
@@ -59,59 +62,35 @@ class ApiServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteNote(note: Notes) {
+    override suspend fun deleteNote(note: RemoteNotes) {
         withContext(Dispatchers.IO) {
-            delay(operationDelayValue.value * 1000L)
-            //delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)
-        }
-        if (isConnectStatus.value) {
-            remoteDao.deleteNote(note)
-        } else {
-            throw Exception(applicationContext.getString(R.string.operation_failed))
+            delay((operationDelayValue.value.coerceAtLeast(1)) * 1000L)
+            if (isConnectStatus.value) {
+                remoteDao.deleteNote(note)
+            } else {
+                throw Exception(applicationContext.getString(R.string.operation_failed))
+            }
         }
     }
 
-    override suspend fun addNote(note: Notes): Long {
-        withContext(Dispatchers.IO) {
-            delay(operationDelayValue.value * 1000L)
-        //delay(if(operationDelayValue.value == 0) 10 else operationDelayValue.value * 1000L)
-        }
+    override suspend fun addNote(note: RemoteNotes): Long = runBlocking {
+        delay((operationDelayValue.value.coerceAtLeast(1)) * 1000L)
         if (isConnectStatus.value) {
-            return remoteDao.insertNote(note)
+            remoteDao.insertNote(note)
         } else {
             throw Exception(applicationContext.getString(R.string.operation_failed))
         }
     }
 
     private suspend fun setStartData() {
-        CoroutineScope(Dispatchers.Main).launch {
-            if (appSettings.firstRun.value) {
-                val startList: List<Notes> =
-                    listOf(
-                        Notes(
-                            1,
-                            "Colors",
-                            "Colors greatly influence our lives today.",
-                            1100000000000
-                        ),
-                        Notes(
-                            2,
-                            "Find Woman",
-                            "Scientists Find Woman Who Sees 99 Million More Colors than Others.",
-                            1300000000000
-                        ),
-                        Notes(
-                            3,
-                            "Mental activity",
-                            "Colors influence our moods and every type of mental activity.",
-                            1600000000000
-                        )
-                    )
-                //CoroutineScope(Dispatchers.IO).launch {
-                    remoteDao.startDatabase(startList)
-                //}
-            }
-        }
+        val startList: List<RemoteNotes> =
+            listOf(
+                RemoteNotes(1,"Colors","Colors greatly influence our lives today.",1100000000000),
+                RemoteNotes(2,"Find Woman","Scientists Find Woman Who Sees 99 Million More Colors than Others.",1300000000000),
+                RemoteNotes(3,"Mental activity","Colors influence our moods and every type of mental activity.",1600000000000)
+            )
+        remoteDao.startDatabase(startList)
     }
+
 
 }

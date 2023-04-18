@@ -49,10 +49,8 @@ class SettingsFragment : Fragment() {
     private fun observeSettingsLoaded() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadedPreferences.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (it) {
-                        showSettings()
-                    }
+                if (it) {
+                    showSettings()
                 }
             }
         }

@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.IBinder
 import com.example.notesapp.constants.KeyConstants.CHANNEL_IDD
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_IDD
-import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
+import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -33,7 +33,7 @@ class BackRemoteService: Service() {
         job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
                 delay(appSettings.intervalCreateRecords.value * 1000L)
-                addRecord()
+                withContext(Dispatchers.IO) { addRecord() }
             }
         }
         return START_STICKY
@@ -60,7 +60,7 @@ class BackRemoteService: Service() {
 
     private suspend fun addRecord() {
         remoteDao.insertNote(
-            Notes(
+            RemoteNotes(
                 0,
                 "Remote",
                 "Remote " + Date().time.toString(),

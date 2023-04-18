@@ -8,7 +8,6 @@ import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
@@ -21,9 +20,7 @@ import com.example.notesapp.data.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.main.MainActivity
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Singleton
 
 @Singleton
@@ -96,14 +93,7 @@ class AppActionBar(
         }, lifecycleOwner, Lifecycle.State.RESUMED)
 
         lifecycleOwner.lifecycleScope.launch {
-            notesRepository.counterDelayFlow.collect {
-                //startCounter(it)
-                startProcess()
-            }
-        }
-        lifecycleOwner.lifecycleScope.launch {
-            notesRepository.isLoadFlow.collect {
-                //isLoadProcess(it)
+            merge(notesRepository.counterDelayFlow, notesRepository.isLoadFlow).collect {
                 startProcess()
             }
         }
@@ -134,7 +124,6 @@ class AppActionBar(
     private fun startProcess() {
         counter?.cancel()
         if (notesRepository.isLoadFlow.value) {
-            Toast.makeText(context,"Load",Toast.LENGTH_SHORT).show()
             setSpannableTitle(context.getString(R.string.text_load))
         } else if (notesRepository.counterDelayFlow.value) {
             counter = CoroutineScope(Dispatchers.Main).launch {
@@ -151,44 +140,9 @@ class AppActionBar(
                 }
             }
         } else {
-            Toast.makeText(context,"Not Load",Toast.LENGTH_SHORT).show()
             setSpannableTitle("")
         }
     }
-
-    /*
-    private fun startCounter(start: Boolean) {
-        counter?.cancel()
-        if(!notesRepository.isLoadFlow.value) {
-            if (start) {
-                if (appSettings.operationDelayValue.value > 1) {
-                    var count = 1
-                    counter = CoroutineScope(Dispatchers.Main).launch {
-                        while (start) {
-                            setSpannableTitle(context.getString(R.string.text_wait) + " $count")
-                            count++
-                            withContext(Dispatchers.Default) { delay(1000) }
-                        }
-                    }
-                }
-            } else {
-                //CoroutineScope(Dispatchers.Main).launch {
-                    setSpannableTitle("")
-                //}
-            }
-        }
-    }
-
-    private fun isLoadProcess(isLoad: Boolean) {
-        //CoroutineScope(Dispatchers.Main).launch {
-            if (isLoad) {
-                counter?.cancel()
-            }
-            setSpannableTitle(if (isLoad) context.getString(R.string.text_load) else "")
-        //}
-    }
-
-     */
 
     private fun setSpannableTitle(text: String) {
         val spannableString = SpannableString(title + text)

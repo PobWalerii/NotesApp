@@ -17,8 +17,6 @@ import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -68,15 +66,13 @@ class ListNotesFragment : Fragment() {
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.listNotesFlow.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    binding.visibleInfoText = it.isEmpty()
-                    adapter.setList(it)
-                    viewModel.getCurrentId().apply {
-                        if(this != 0L) {
-                            val position = adapter.setCurrentId(this)
-                            if (position != -1) {
-                                recyclerView.layoutManager?.scrollToPosition(position)
-                            }
+                binding.visibleInfoText = it.isEmpty()
+                adapter.setList(it)
+                viewModel.getCurrentId().apply {
+                    if (this != 0L) {
+                        val position = adapter.setCurrentId(this)
+                        if (position != -1) {
+                            recyclerView.layoutManager?.scrollToPosition(position)
                         }
                     }
                 }
@@ -87,15 +83,13 @@ class ListNotesFragment : Fragment() {
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoadFlow.collect {
-                CoroutineScope(Dispatchers.Main).launch {
-                    binding.isLoad = it
-                    binding.firstRun = viewModel.firstRun.value
-                    if (!it) {
-                        val behavior =
-                            (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
-                                .behavior as HideBottomViewOnScrollBehavior
-                        behavior.slideUp(binding.floatingActionButton)
-                    }
+                binding.isLoad = it
+                binding.firstRun = viewModel.firstRun.value
+                if (!it) {
+                    val behavior =
+                        (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
+                            .behavior as HideBottomViewOnScrollBehavior
+                    behavior.slideUp(binding.floatingActionButton)
                 }
             }
         }
@@ -104,9 +98,7 @@ class ListNotesFragment : Fragment() {
     private fun observeConnectStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isConnectStatus.collect { isConnect ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    reactToConnectionStatusChange(isConnect)
-                }
+                reactToConnectionStatusChange(isConnect)
             }
         }
     }

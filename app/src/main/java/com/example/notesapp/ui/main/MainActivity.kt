@@ -2,7 +2,6 @@ package com.example.notesapp.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.navigation.findNavController
 import com.example.notesapp.R
 import com.example.notesapp.data.repository.NotesRepository
@@ -31,16 +30,11 @@ class MainActivity : AppCompatActivity() {
         startSplash(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Toast.makeText(applicationContext,"Вход", Toast.LENGTH_SHORT).show()
         appSettings.init()
         connectReceiver.init()
         dateManager.init()
         servicesManager.init()
         notesRepository.init()
-
-
-
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -54,8 +48,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Toast.makeText(applicationContext,"Выход",Toast.LENGTH_SHORT).show()
-
         notesRepository.clearResources()
         servicesManager.stopAllServices()
         dateManager.close()
