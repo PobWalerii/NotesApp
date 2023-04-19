@@ -2,7 +2,6 @@ package com.example.notesapp.ui.listnotes
 
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
