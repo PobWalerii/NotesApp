@@ -14,25 +14,23 @@ class NotesViewModel @Inject constructor(
     private val notesRepository: NotesRepository,
 ): ViewModel() {
 
-    val isLoadFlow: StateFlow<Boolean> = notesRepository.isLoadFlow
+    val isLoad: StateFlow<Boolean> = notesRepository.isLoad
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val firstRun: StateFlow<Boolean> = notesRepository.firstRun
-    val listNotesFlow: Flow<List<Notes>> = notesRepository.listNotesFlow
-
+    val listNotes: Flow<List<Notes>> = notesRepository.listNotes
+    val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
     fun deleteNote(note: Notes) {
         notesRepository.deleteNote(note)
     }
 
     fun addNote() {
         notesRepository.addNote(
-            Notes(0, "", "", Date().time),
-            false
+            Notes(0, "", "", Date().time)
         )
     }
 
-    fun getCurrentId() = notesRepository.getInsertOrEditId()
-    fun setCurrentId(current: Long) {
-        notesRepository.setInsertOrEditId(current)
+    fun setCurrentIdToNull() {
+        notesRepository.setInsertOrEditId()
     }
 
 }

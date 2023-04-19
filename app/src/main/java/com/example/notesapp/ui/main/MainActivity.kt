@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         appSettings.init()
         connectReceiver.init()
-        dateManager.init()
         servicesManager.init()
         notesRepository.init()
     }
@@ -41,8 +40,14 @@ class MainActivity : AppCompatActivity() {
         return findNavController(R.id.fragmentContainerView).navigateUp() || super.onSupportNavigateUp()
     }
 
+    override fun onResume() {
+        super.onResume()
+        dateManager.init()
+    }
+
     override fun onStop() {
         super.onStop()
+        dateManager.close()
         startSplash(this)
     }
 
@@ -50,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         notesRepository.clearResources()
         servicesManager.stopAllServices()
-        dateManager.close()
         connectReceiver.close()
         appSettings.close()
     }

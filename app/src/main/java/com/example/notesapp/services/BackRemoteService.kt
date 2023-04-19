@@ -59,14 +59,16 @@ class BackRemoteService: Service() {
     }
 
     private suspend fun addRecord() {
-        remoteDao.insertNote(
-            RemoteNotes(
-                0,
-                "Remote",
-                "Remote " + Date().time.toString(),
-                Date().time
+        try {
+            remoteDao.insertNote(
+                RemoteNotes(
+                    0,
+                    "Remote",
+                    "Remote " + Date().time.toString(),
+                    Date().time
+                )
             )
-        )
+        } catch (_: Exception) {}
     }
 
     override fun onBind(intent: Intent?): IBinder? {

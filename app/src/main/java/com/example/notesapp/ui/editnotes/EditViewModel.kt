@@ -25,8 +25,10 @@ class EditViewModel  @Inject constructor(
     var currentNoteName: String = ""
     var currentNoteSpecification: String = ""
     private var currentNoteDate: Long = 0L
+    var flagActSave: Boolean = false
 
-    val isNoteEditedFlow: StateFlow<Boolean> = notesRepository.isNoteEditedFlow
+    val isNoteEdited: StateFlow<Boolean> = notesRepository.isNoteEdited
+    val isNoteDeleted: StateFlow<Boolean> = notesRepository.isNoteDeleted
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
 
@@ -35,6 +37,7 @@ class EditViewModel  @Inject constructor(
 
     init {
         appSettings.showView = null
+        flagActSave = false
     }
 
     fun getNoteById(idNote: Long) {
@@ -66,7 +69,8 @@ class EditViewModel  @Inject constructor(
                 currentNoteDate
             }
         )
-        notesRepository.addNote(note, true)
+        notesRepository.addNote(note)
+        flagActSave = true
     }
 
     fun deleteNote() {

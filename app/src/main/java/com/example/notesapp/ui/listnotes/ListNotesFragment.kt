@@ -2,6 +2,7 @@ package com.example.notesapp.ui.listnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -17,7 +18,7 @@ import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -65,15 +66,18 @@ class ListNotesFragment : Fragment() {
 
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.listNotesFlow.collect {
-                binding.visibleInfoText = it.isEmpty()
-                adapter.setList(it)
-                viewModel.getCurrentId().apply {
-                    if (this != 0L) {
-                        val position = adapter.setCurrentId(this)
+            viewModel.listNotes.collect {
+                withContext(Dispatchers.Main) {
+                    val current = viewModel.idInsertOrEdit.value
+                    binding.visibleInfoText = it.isEmpty()
+                    adapter.setList(it)
+                    delay(200)
+                    if (current != 0L) {
+                        val position = adapter.setCurrentId(current)
                         if (position != -1) {
                             recyclerView.layoutManager?.scrollToPosition(position)
                         }
+                        viewModel.setCurrentIdToNull()
                     }
                 }
             }
@@ -82,7 +86,7 @@ class ListNotesFragment : Fragment() {
 
     private fun observeLoadStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoadFlow.collect {
+            viewModel.isLoad.collect {
                 binding.isLoad = it
                 binding.firstRun = viewModel.firstRun.value
                 if (!it) {
@@ -134,7 +138,6 @@ class ListNotesFragment : Fragment() {
     private fun deleteNote(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
-        viewModel.setCurrentId(note.id)
 
         showConfirmationDialog(
             R.string.title_delete,
@@ -169,7 +172,6 @@ class ListNotesFragment : Fragment() {
     private fun setupItemClickListener() {
         adapter.setOnItemClickListener(object : NotesListAdapter.OnItemClickListener {
             override fun onItemClick(currentId: Long) {
-                viewModel.setCurrentId(currentId)
                 findNavController().navigate(
                     ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
                 )

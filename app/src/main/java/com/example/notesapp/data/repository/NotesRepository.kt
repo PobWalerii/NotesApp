@@ -33,21 +33,24 @@ class NotesRepository @Inject constructor(
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
-    private val isNoteEdited = MutableStateFlow(false)
-    val isNoteEditedFlow: StateFlow<Boolean> = isNoteEdited.asStateFlow()
-
     private val _serviceError = MutableStateFlow("")
     private val serviceError: StateFlow<String> = _serviceError.asStateFlow()
 
-    private val isLoad = MutableStateFlow(false)
-    val isLoadFlow: StateFlow<Boolean> = isLoad.asStateFlow()
+    private val _isLoad = MutableStateFlow(false)
+    val isLoad: StateFlow<Boolean> = _isLoad.asStateFlow()
 
-    private val counterDelay = MutableStateFlow(false)
-    val counterDelayFlow: StateFlow<Boolean> = counterDelay.asStateFlow()
+    private val _counterDelay = MutableStateFlow(false)
+    val counterDelay: StateFlow<Boolean> = _counterDelay.asStateFlow()
 
-    val listNotesFlow: Flow<List<Notes>> = notesDao.loadDataBase()
+    val listNotes: Flow<List<Notes>> = notesDao.loadDataBase()
 
-    private val _idInsertOrEdit = MutableStateFlow(-1L)
+    private val _isNoteEdited = MutableStateFlow(false)
+    val isNoteEdited: StateFlow<Boolean> = _isNoteEdited.asStateFlow()
+
+    private val _isNoteDeleted = MutableStateFlow(false)
+    val isNoteDeleted: StateFlow<Boolean> = _isNoteDeleted.asStateFlow()
+
+    private val _idInsertOrEdit = MutableStateFlow(0L)
     val idInsertOrEdit: StateFlow<Long> = _idInsertOrEdit.asStateFlow()
 
     fun init() {
@@ -100,13 +103,17 @@ class NotesRepository @Inject constructor(
     private fun loadRemoteData() {
         job = CoroutineScope(Dispatchers.Default).launch {
             try {
-                isLoad.value = true
+                _isLoad.value = true
                 apiService.getAllNote().apply {
                     fixedTimeLoadedDate = this.timeBase
                     val list: List<Notes> = this.fullList.map {
                         fromRemote(it)
                     }
-                    notesDao.updateDatabase(list)
+                    try {
+                        notesDao.updateDatabase(list)
+                    } catch (e: Exception) {
+                        _serviceError.value = e.message.toString()
+                    }
                 }
                 if( firstLoad.value ) {
                     actionAfterStart()
@@ -125,7 +132,7 @@ class NotesRepository @Inject constructor(
                         e.message.toString()
                     }
             } finally {
-                isLoad.value = false
+                _isLoad.value = false
             }
         }
     }
@@ -138,15 +145,24 @@ class NotesRepository @Inject constructor(
         fixedTimeRemoteDate = fixedTimeLoadedDate
     }
 
-    fun addNote(note: Notes, fixed: Boolean) {
+    fun addNote(note: Notes) {
+        modifyNote(note, true)
+    }
+    fun deleteNote(note: Notes) {
+        modifyNote(note, false)
+    }
+
+    private fun modifyNote(note: Notes, type: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 if(isConnectStatus.value) {
-                    counterDelay.value = true
-                    val resultId: Long = apiService.addNote(toRemote(note))
+                    _counterDelay.value = true
+                    val resultId: Long = apiService.modifyNote(toRemote(note), type)
                     _idInsertOrEdit.value = resultId
-                    if(fixed) {
-                        isNoteEdited.value = true
+                    if( type ) {
+                        _isNoteEdited.value = true
+                    } else {
+                        _isNoteDeleted.value = true
                     }
                 } else {
                     _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
@@ -154,40 +170,16 @@ class NotesRepository @Inject constructor(
             } catch (e: Exception) {
                 _serviceError.value = e.message.toString()
             } finally {
-                counterDelay.value = false
+                _counterDelay.value = false
                 delay(10)
-                isNoteEdited.value = false
+                _isNoteEdited.value = false
+                _isNoteDeleted.value = false
             }
         }
     }
 
-    fun getInsertOrEditId(): Long {
-        val current = idInsertOrEdit.value
-        _idInsertOrEdit.value = -1L
-        return current
-    }
-    fun setInsertOrEditId(current: Long) {
-        _idInsertOrEdit.value = current
-    }
-
-    fun deleteNote(note: Notes) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                if(isConnectStatus.value) {
-                    counterDelay.value = true
-                    apiService.deleteNote(toRemote(note))
-                    isNoteEdited.value = true
-                } else {
-                    _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
-                }
-            } catch (e: Exception) {
-                _serviceError.value = e.message.toString()
-            } finally {
-                counterDelay.value = false
-                delay(10)
-                isNoteEdited.value = false
-            }
-        }
+    fun setInsertOrEditId() {
+        _idInsertOrEdit.value = 0L
     }
 
 }

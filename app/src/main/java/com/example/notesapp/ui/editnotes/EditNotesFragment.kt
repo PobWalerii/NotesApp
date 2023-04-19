@@ -2,6 +2,7 @@ package com.example.notesapp.ui.editnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -137,8 +138,12 @@ class EditNotesFragment : Fragment() {
 
     private fun observeEditNote() {
         viewLifecycleOwner.lifecycleScope.launch {
-            combine(viewModel.isNoteEditedFlow, viewModel.idInsertOrEdit) { isEdit, idEdit ->
-                isEdit && idEdit == args.idNote
+            combine(
+                viewModel.isNoteEdited,
+                viewModel.idInsertOrEdit,
+                viewModel.isNoteDeleted
+            ) { isEdit, idEdit, isDelete ->
+                ((isEdit || isDelete) && idEdit == args.idNote) || (viewModel.flagActSave && args.idNote == 0L && isEdit)
             }.collect {
                 if (it) {
                     (activity as MainActivity).onSupportNavigateUp()

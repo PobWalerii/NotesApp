@@ -25,13 +25,16 @@ import javax.inject.Singleton
 
 @Singleton
 class AppActionBar(
-    private val notesRepository: NotesRepository,
+    notesRepository: NotesRepository,
     private val appSettings: AppSettings,
     private val context: Context
  ){
 
     private val _isItemMenuPressed = MutableStateFlow("")
     val isItemMenuPressed: StateFlow<String> = _isItemMenuPressed.asStateFlow()
+
+    private val isLoad: StateFlow<Boolean> = notesRepository.isLoad
+    private val counterDelay: StateFlow<Boolean> = notesRepository.counterDelay
 
     private var appbarMenu: Menu? = null
     private var actionBar: ActionBar? = null
@@ -93,7 +96,7 @@ class AppActionBar(
         }, lifecycleOwner, Lifecycle.State.RESUMED)
 
         lifecycleOwner.lifecycleScope.launch {
-            merge(notesRepository.counterDelayFlow, notesRepository.isLoadFlow).collect {
+            merge(counterDelay, isLoad).collect {
                 startProcess()
             }
         }
@@ -123,9 +126,9 @@ class AppActionBar(
 
     private fun startProcess() {
         counter?.cancel()
-        if (notesRepository.isLoadFlow.value) {
+        if (isLoad.value) {
             setSpannableTitle(context.getString(R.string.text_load))
-        } else if (notesRepository.counterDelayFlow.value) {
+        } else if (counterDelay.value) {
             counter = CoroutineScope(Dispatchers.Main).launch {
                 var count = 1
                 while (true) {

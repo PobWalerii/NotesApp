@@ -19,14 +19,13 @@ class ApiServiceImpl @Inject constructor(
     private val applicationContext: Context
 ): ApiService {
 
-    private var listNotes: List<RemoteNotes> = emptyList()
     private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
     private val startDelayValue: StateFlow<Int> = appSettings.startDelayValue
     private val queryDelayValue: StateFlow<Int> = appSettings.queryDelayValue
     private val operationDelayValue: StateFlow<Int> = appSettings.operationDelayValue
     private val listNotesFlow: Flow<List<RemoteNotes>> = remoteDao.loadDataBase()
-
+    private var listNotes: List<RemoteNotes> = emptyList()
     private var timeLoadBase: Long = 0L
 
     init {
@@ -63,21 +62,19 @@ class ApiServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteNote(note: RemoteNotes) {
-        withContext(Dispatchers.IO) {
-            delay((operationDelayValue.value * 1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
-            if (isConnectStatus.value) {
-                remoteDao.deleteNote(note)
-            } else {
-                throw Exception(applicationContext.getString(R.string.operation_failed))
-            }
-        }
-    }
-
-    override suspend fun addNote(note: RemoteNotes): Long = runBlocking {
+    override suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long = runBlocking {
         delay((operationDelayValue.value * 1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
         if (isConnectStatus.value) {
-            remoteDao.insertNote(note)
+            try {
+                if(type) {
+                    remoteDao.insertNote(note)
+                } else {
+                    remoteDao.deleteNote(note)
+                    note.id
+                }
+            } catch (e: Exception){
+                throw Exception(e.message)
+            }
         } else {
             throw Exception(applicationContext.getString(R.string.operation_failed))
         }
@@ -90,7 +87,9 @@ class ApiServiceImpl @Inject constructor(
                 RemoteNotes(2,"Find Woman","Scientists Find Woman Who Sees 99 Million More Colors than Others.",1300000000000),
                 RemoteNotes(3,"Mental activity","Colors influence our moods and every type of mental activity.",1600000000000)
             )
-        remoteDao.startDatabase(startList)
+        try {
+            remoteDao.startDatabase(startList)
+        } catch (_: Exception) {}
     }
 
 
