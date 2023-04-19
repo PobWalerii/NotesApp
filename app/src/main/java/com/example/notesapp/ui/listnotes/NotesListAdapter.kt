@@ -64,10 +64,9 @@ class NotesListAdapter(
 
     fun getItemFromPosition(position: Int): Notes = listNotes[position]
 
-    fun setCurrentId(curId: Long): Int {
+    fun setCurrentId(curId: Long) {
         currentId = curId
         notifyDataSetChanged()
-        return listNotes.indexOfFirst { it.id == currentId }
     }
 
     fun setList(list: List<Notes>) {

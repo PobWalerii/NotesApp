@@ -10,14 +10,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
+import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
+import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -67,17 +71,34 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.listNotes.collect {
                 withContext(Dispatchers.Main) {
-                    val current = viewModel.idInsertOrEdit.value
                     binding.visibleInfoText = it.isEmpty()
+
+                    val current = viewModel.idInsertOrEdit.value
+                    if(current != 0L) {
+                        if (it[0].id == current) {
+                            adapter.setCurrentId(current)
+                            recyclerView.layoutManager?.scrollToPosition(0)
+                            viewModel.setCurrentIdToNull()
+                        }
+                    }
+
                     adapter.setList(it)
-                    delay(200)
-                    if (current != 0L) {
-                        val position = adapter.setCurrentId(current)
+                    //delay(1000)
+
+                       /*
+                        var position = it.indexOfFirst { it.id == current }
                         if (position != -1) {
                             recyclerView.layoutManager?.scrollToPosition(position)
+                        } else {
+                            delay(1000)
+                            position = it.indexOfFirst { it.id == current }
+                            recyclerView.layoutManager?.scrollToPosition(position)
                         }
-                        viewModel.setCurrentIdToNull()
-                    }
+
+                        */
+
+                        //viewModel.setCurrentIdToNull()
+                   // }
                 }
             }
         }

@@ -38,7 +38,7 @@ class AppSettings(
     private val _isRemoteService = MutableStateFlow(false)
     val isRemoteService: StateFlow<Boolean> = _isRemoteService.asStateFlow()
 
-    private val _isConnectStatus = MutableStateFlow(false)
+    private val _isConnectStatus = MutableStateFlow(true)
     val isConnectStatus: StateFlow<Boolean> = _isConnectStatus.asStateFlow()
 
     private val _isDateChanged = MutableStateFlow(false)
