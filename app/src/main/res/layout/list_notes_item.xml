@@ -54,7 +54,7 @@
                 android:textSize="@dimen/item_spicification_text_size"
                 android:text='@{note.noteSpecification.isEmpty() ? ". . ." : note.noteSpecification}'/>
 
-           <TextView
+            <TextView
                 android:id="@+id/textDateChange"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -62,9 +62,10 @@
                 android:layout_marginTop="@dimen/text_item_margin_vertical"
                 android:layout_marginEnd="@dimen/text_item_margin_edge"
                 android:layout_marginBottom="@dimen/text_item_margin_edge"
+                android:textIsSelectable="true"
                 android:textSize="@dimen/item_spicification_text_size"
                 android:textStyle="italic"
-                app:dateToString="@{note.noteDate}"/>
+                app:dateToString="@{note.noteDate}" />
 
         </LinearLayout>
 

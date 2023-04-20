@@ -16,7 +16,6 @@ import com.example.notesapp.utils.HideKeyboard.hideKeyboardFromView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -142,10 +141,8 @@ class SettingsFragment : Fragment() {
         binding.intervalCreate.addTextChangedListener(textWatcher)
     }
 
-    private fun definitionOfChange() {
-        CoroutineScope(Dispatchers.Main).launch {
-            actionBar.setButtonVisible("save", getIsChange())
-        }
+    internal fun definitionOfChange() {
+        actionBar.setButtonVisible("save", getIsChange())
     }
 
     private fun getIsChange(): Boolean =
@@ -194,10 +191,7 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(100)
-            definitionOfChange()
-        }
+        definitionOfChange()
     }
 
     override fun onDestroyView() {

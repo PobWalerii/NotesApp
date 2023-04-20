@@ -41,7 +41,7 @@ class ConnectReceiver(
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
-    private fun setConnectStatus(status: Boolean) {
+    internal fun setConnectStatus(status: Boolean) {
         appSettings.setIsConnectStatus(status)
         showStatus(status)
     }
@@ -55,7 +55,7 @@ class ConnectReceiver(
                     .show()
             }
         } else {
-            val showView: View? = appSettings.showView
+            val showView = appSettings.showViewForSnack
             if (!appSettings.firstLoad.value && showView != null) {
                 showSnack(showView)
             } else {

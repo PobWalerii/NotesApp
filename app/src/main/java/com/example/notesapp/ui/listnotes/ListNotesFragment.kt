@@ -10,18 +10,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
-import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
-import com.example.notesapp.ui.main.MainActivity
 import com.example.notesapp.utils.ConfirmationDialog.showConfirmationDialog
 import com.example.notesapp.utils.MessageNotPossible.showMessageNotPossible
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,7 +35,7 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private val viewModel by viewModels<NotesViewModel>()
+    internal val viewModel by viewModels<NotesViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,37 +66,19 @@ class ListNotesFragment : Fragment() {
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.listNotes.collect {
-                withContext(Dispatchers.Main) {
-                    binding.visibleInfoText = it.isEmpty()
-
-                    val current = viewModel.idInsertOrEdit.value
-                    if(current != 0L) {
-                        if (it[0].id == current) {
-                            adapter.setCurrentId(current)
-                            recyclerView.layoutManager?.scrollToPosition(0)
-                            viewModel.setCurrentIdToNull()
-                        }
-                    }
-
-                    adapter.setList(it)
-                    //delay(1000)
-
-                       /*
-                        var position = it.indexOfFirst { it.id == current }
-                        if (position != -1) {
-                            recyclerView.layoutManager?.scrollToPosition(position)
-                        } else {
-                            delay(1000)
-                            position = it.indexOfFirst { it.id == current }
-                            recyclerView.layoutManager?.scrollToPosition(position)
-                        }
-
-                        */
-
-                        //viewModel.setCurrentIdToNull()
-                   // }
-                }
+                binding.visibleInfoText = it.isEmpty()
+                checkIfScrollingIsNecessary(it[0].id)
+                adapter.setList(it)
             }
+        }
+    }
+
+    private fun checkIfScrollingIsNecessary(firstItemId: Long) {
+        val current = viewModel.idInsertOrEdit.value
+        if (current != 0L && firstItemId == current) {
+            adapter.setCurrentId(current)
+            recyclerView.layoutManager?.scrollToPosition(0)
+            viewModel.setCurrentIdTo(0L)
         }
     }
 
@@ -109,12 +87,8 @@ class ListNotesFragment : Fragment() {
             viewModel.isLoad.collect {
                 binding.isLoad = it
                 binding.firstRun = viewModel.firstRun.value
-                if (!it) {
-                    val behavior =
-                        (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
-                            .behavior as HideBottomViewOnScrollBehavior
-                    behavior.slideUp(binding.floatingActionButton)
-                }
+                showActionButton(it)
+
             }
         }
     }
@@ -141,24 +115,13 @@ class ListNotesFragment : Fragment() {
     private fun setupRecycler() {
         recyclerView = binding.recycler
         recyclerView.adapter = adapter
-        itemTouchHelper =
-            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-                override fun onMove(
-                    recycler: RecyclerView,
-                    holder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder,
-                ) = false
-
-                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
-                    deleteNote(holder.adapterPosition)
-                }
-            })
+        setupTouchHelper()
     }
 
-    private fun deleteNote(position: Int) {
+    internal fun deleteNote(position: Int) {
         val note = adapter.getItemFromPosition(position)
         adapter.setCurrentId(note.id)
-
+        viewModel.setCurrentIdTo(note.id)
         showConfirmationDialog(
             R.string.title_delete,
             R.string.text_delete,
@@ -192,6 +155,7 @@ class ListNotesFragment : Fragment() {
     private fun setupItemClickListener() {
         adapter.setOnItemClickListener(object : NotesListAdapter.OnItemClickListener {
             override fun onItemClick(currentId: Long) {
+                viewModel.setCurrentIdTo(currentId)
                 findNavController().navigate(
                     ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
                 )
@@ -219,7 +183,31 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setViewForSnack() {
-        appSettings.showView = binding.recycler
+        appSettings.showViewForSnack = binding.recycler
+    }
+
+    private fun showActionButton(isLoad: Boolean) {
+        if (!isLoad) {
+            val behavior =
+                (binding.floatingActionButton.layoutParams as CoordinatorLayout.LayoutParams)
+                    .behavior as HideBottomViewOnScrollBehavior
+            behavior.slideUp(binding.floatingActionButton)
+        }
+    }
+
+    private fun setupTouchHelper() {
+        itemTouchHelper =
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recycler: RecyclerView,
+                    holder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder,
+                ) = false
+
+                override fun onSwiped(holder: RecyclerView.ViewHolder, dir: Int) {
+                    deleteNote(holder.adapterPosition)
+                }
+            })
     }
 
     private fun startSettingsFragment() {

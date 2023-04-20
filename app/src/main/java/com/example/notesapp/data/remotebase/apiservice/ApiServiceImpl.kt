@@ -66,7 +66,7 @@ class ApiServiceImpl @Inject constructor(
         delay((operationDelayValue.value * 1000L).coerceAtLeast(MIN_DELAY_FOR_REMOTE))
         if (isConnectStatus.value) {
             try {
-                if(type) {
+                if (type) {
                     remoteDao.insertNote(note)
                 } else {
                     remoteDao.deleteNote(note)

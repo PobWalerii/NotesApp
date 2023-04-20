@@ -74,10 +74,12 @@ class EditNotesFragment : Fragment() {
     }
 
     private fun definitionOfChange() {
-        actionBar.setButtonVisible("save", viewModel.isChangedNote(
-            binding.titleNoteText.text.toString(),
-            binding.textNoteText.text.toString()
-        ))
+        actionBar.setButtonVisible(
+            "save", viewModel.isChangedNote(
+                binding.titleNoteText.text.toString(),
+                binding.textNoteText.text.toString()
+            )
+        )
     }
 
     private fun setupActionBar() {
@@ -140,9 +142,10 @@ class EditNotesFragment : Fragment() {
             combine(
                 viewModel.isNoteEdited,
                 viewModel.idInsertOrEdit,
-                viewModel.isNoteDeleted
-            ) { isEdit, idEdit, isDelete ->
-                ((isEdit || isDelete) && idEdit == args.idNote) || (viewModel.flagActSave && args.idNote == 0L && isEdit)
+                viewModel.isNoteDeleted,
+                viewModel.isLoad
+            ) { isEdit, idEdit, isDelete, isLoad ->
+                ((isEdit || isDelete) && idEdit == args.idNote) || (viewModel.flagActSave && args.idNote == 0L && isEdit) || (!isLoad && idEdit == args.idNote && viewModel.statusLoadInit)
             }.collect {
                 if (it) {
                     (activity as MainActivity).onSupportNavigateUp()
@@ -159,6 +162,11 @@ class EditNotesFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         hideKeyboardFromView(requireContext(),requireView())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        definitionOfChange()
     }
 
 }

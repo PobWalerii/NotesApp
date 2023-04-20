@@ -89,7 +89,7 @@ class AppSettings(
     private val _isLoadedPreferences = MutableStateFlow(false)
     val isLoadedPreferences: StateFlow<Boolean> = _isLoadedPreferences.asStateFlow()
 
-    var showView: View? = null
+    var showViewForSnack: View? = null
 
     fun init() {
         getPreferences()

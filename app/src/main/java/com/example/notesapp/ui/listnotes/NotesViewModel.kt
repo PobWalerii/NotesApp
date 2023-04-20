@@ -19,8 +19,7 @@ class NotesViewModel @Inject constructor(
     val firstRun: StateFlow<Boolean> = notesRepository.firstRun
     val listNotes: Flow<List<Notes>> = notesRepository.listNotes
     val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
-    val isNoteDeleted: StateFlow<Boolean> = notesRepository.isNoteDeleted
-    val isNoteEdited: StateFlow<Boolean> = notesRepository.isNoteEdited
+
     fun deleteNote(note: Notes) {
         notesRepository.deleteNote(note)
     }
@@ -31,8 +30,8 @@ class NotesViewModel @Inject constructor(
         )
     }
 
-    fun setCurrentIdToNull() {
-        notesRepository.setInsertOrEditId()
+    fun setCurrentIdTo(id: Long) {
+        notesRepository.setInsertOrEditId(id)
     }
 
 }

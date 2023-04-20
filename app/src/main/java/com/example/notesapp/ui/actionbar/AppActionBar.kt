@@ -43,7 +43,7 @@ class AppActionBar(
     private lateinit var activity: Activity
 
     fun initAppbar(
-        requeryActivity: Activity,
+        myActivity: Activity,
         titleId: Int,
         lifecycleOwner: LifecycleOwner,
         isHomeKey: Boolean = true,
@@ -52,7 +52,7 @@ class AppActionBar(
         isSettings: Boolean = false,
         toDefault: Boolean = false,
     ) {
-        activity = requeryActivity
+        activity = myActivity
 
         actionBar = (activity as MainActivity).supportActionBar
         title = context.getString(titleId)
@@ -102,7 +102,7 @@ class AppActionBar(
         }
     }
 
-    private fun itemMenuPressed(item: String) {
+    internal fun itemMenuPressed(item: String) {
         if (item == "home") {
             (activity as MainActivity).onSupportNavigateUp()
         } else {
@@ -112,16 +112,19 @@ class AppActionBar(
     }
 
     fun setButtonVisible(item: String, isVisible: Boolean) {
-        appbarMenu?.findItem(
-            when (item) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val menuItemId = when (item) {
                 "save" -> R.id.save
                 "delete" -> R.id.delete
                 "settings" -> R.id.settings
                 "todefault" -> R.id.todefault
-                else -> 0
+                else -> null
             }
-        )?.isVisible = isVisible
-        _isItemMenuPressed.value = ""
+            menuItemId?.let { id ->
+                appbarMenu?.findItem(id)?.isVisible = isVisible
+            }
+            _isItemMenuPressed.value = ""
+        }
     }
 
     private fun startProcess() {

@@ -28,7 +28,7 @@ class SettingsViewModel @Inject constructor(
     var isLoadedPreferences: StateFlow<Boolean> = appSettings.isLoadedPreferences
 
     init {
-        appSettings.showView = null
+        appSettings.showViewForSnack = null
     }
 
     fun setDefaultPreferences() {

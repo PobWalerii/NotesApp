@@ -29,14 +29,16 @@ class EditViewModel  @Inject constructor(
 
     val isNoteEdited: StateFlow<Boolean> = notesRepository.isNoteEdited
     val isNoteDeleted: StateFlow<Boolean> = notesRepository.isNoteDeleted
-    val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
+    val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
-
+    val isLoad: StateFlow<Boolean> = notesRepository.isLoad
+    var statusLoadInit: Boolean = false
     private val _isLoadedNote = MutableStateFlow(false)
     val isLoadedNote: StateFlow<Boolean> = _isLoadedNote.asStateFlow()
 
     init {
-        appSettings.showView = null
+        statusLoadInit = isLoad.value
+        appSettings.showViewForSnack = null
         flagActSave = false
     }
 

@@ -2,7 +2,6 @@
 <resources>
     <dimen name="progress_size">90dp</dimen>
     <dimen name="progress_margin">10dp</dimen>
-    <dimen name="progress_horizontal_margin_top">-3dp</dimen>
     <dimen name="list_padding_top">2dp</dimen>
     <dimen name="list_padding_bottom">80dp</dimen>
 

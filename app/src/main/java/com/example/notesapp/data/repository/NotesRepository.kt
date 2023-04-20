@@ -8,6 +8,7 @@ import com.example.notesapp.data.localbase.dao.NotesDao
 import com.example.notesapp.data.localbase.entitys.Notes
 import com.example.notesapp.data.mapers.NotesMaper.fromRemote
 import com.example.notesapp.data.mapers.NotesMaper.toRemote
+import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -105,15 +106,7 @@ class NotesRepository @Inject constructor(
             try {
                 _isLoad.value = true
                 apiService.getAllNote().apply {
-                    fixedTimeLoadedDate = this.timeBase
-                    val list: List<Notes> = this.fullList.map {
-                        fromRemote(it)
-                    }
-                    try {
-                        notesDao.updateDatabase(list)
-                    } catch (e: Exception) {
-                        _serviceError.value = e.message.toString()
-                    }
+                    processRemoteDatabaseResponse(this)
                 }
                 if( firstLoad.value ) {
                     actionAfterStart()
@@ -134,6 +127,17 @@ class NotesRepository @Inject constructor(
             } finally {
                 _isLoad.value = false
             }
+        }
+    }
+
+    private suspend fun processRemoteDatabaseResponse(response: NoteResponse) {
+        fixedTimeLoadedDate = response.timeBase
+        val list: List<Notes> =
+            response.fullList.map { fromRemote(it) }
+        try {
+            notesDao.updateDatabase(list)
+        } catch (e: Exception) {
+            _serviceError.value = e.message.toString()
         }
     }
 
@@ -178,8 +182,8 @@ class NotesRepository @Inject constructor(
         }
     }
 
-    fun setInsertOrEditId() {
-        _idInsertOrEdit.value = 0L
+    fun setInsertOrEditId(id: Long) {
+        _idInsertOrEdit.value = id
     }
 
 }
