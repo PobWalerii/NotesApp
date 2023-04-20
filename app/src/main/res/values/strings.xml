@@ -17,8 +17,6 @@
     <string name="restoring_settings">Restoring settings</string>
     <string name="text_restoring">Are you sure you want to restore the default settings?</string>
 
-    
-
     <string name="settings_is_saved">Settings Saved</string>
     <string name="settings_to_default">Restored the Starting values of the Settings</string>
 
@@ -31,9 +29,8 @@
     <string name="operation_not_possible">Operation Is Not Possible if There Is No Internet Connection</string>
     <string name="interrupted_start_load">Initial Loading of Information Interrupted</string>
     <string name="interrupted_update_load">Database Update Interrupted</string>
-    <string name="operation_failed">The Operation Failed. Please Try Again if necessary.</string>
-    <string name="data_error">Error Reading Data from a Remote source</string>
     <string name="service_error">Unexpected Issue with background Service Management</string>
+    <string name="please_wait_update">Please wait for the current record to update.</string>
 
     <string name="text1">Заголовок повідомлення за замовчуванням:</string>
     <string name="text2">Затримка запиту до віддаленої бази у секундах при запуску додатку:</string>

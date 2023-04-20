@@ -16,7 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.example.notesapp.R
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.main.MainActivity
 import kotlinx.coroutines.*

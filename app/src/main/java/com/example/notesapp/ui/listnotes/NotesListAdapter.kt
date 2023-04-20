@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
-import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.databinding.ListNotesItemBinding
 import com.example.notesapp.settings.AppSettings
 

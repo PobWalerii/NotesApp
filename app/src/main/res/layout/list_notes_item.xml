@@ -9,7 +9,7 @@
             type="com.example.notesapp.settings.AppSettings"/>
         <variable
             name="note"
-            type="com.example.notesapp.data.localbase.entitys.Notes" />
+            type="com.example.notesapp.data.localbase.database.entitys.Notes" />
         <variable
             name="currentId"
             type="Long" />

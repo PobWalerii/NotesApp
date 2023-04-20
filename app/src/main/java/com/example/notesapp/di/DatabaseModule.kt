@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.localbase.AppDatabase
-import com.example.notesapp.data.localbase.dao.NotesDao
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.database.base.AppDatabase
+import com.example.notesapp.data.localbase.database.dao.NotesDao
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides

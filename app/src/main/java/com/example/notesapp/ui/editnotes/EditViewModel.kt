@@ -2,8 +2,8 @@ package com.example.notesapp.ui.editnotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notesapp.data.localbase.entitys.Notes
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.database.entitys.Notes
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

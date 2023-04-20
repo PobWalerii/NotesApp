@@ -7,6 +7,7 @@ import com.example.notesapp.constants.KeyConstants.CHANNEL_IDD
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_IDD
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
+import com.example.notesapp.data.remotebase.remoteapi.RemoteApi
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -21,7 +22,7 @@ class BackRemoteService: Service() {
     @Inject
     lateinit var appSettings: AppSettings
     @Inject
-    lateinit var remoteDao: RemoteDao
+    lateinit var remoteApi: RemoteApi
 
     private var job: Job? = null
 
@@ -60,13 +61,14 @@ class BackRemoteService: Service() {
 
     private suspend fun addRecord() {
         try {
-            remoteDao.insertNote(
+            remoteApi.modifyNote(
                 RemoteNotes(
                     0,
                     "Remote",
                     "Remote " + Date().time.toString(),
                     Date().time
-                )
+                ),
+                true
             )
         } catch (_: Exception) {}
     }

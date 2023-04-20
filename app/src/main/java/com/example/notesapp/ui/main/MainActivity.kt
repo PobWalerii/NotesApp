@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.findNavController
 import com.example.notesapp.R
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.receivers.ConnectReceiver
 import com.example.notesapp.receivers.DateManager
 import com.example.notesapp.services.ServicesManager

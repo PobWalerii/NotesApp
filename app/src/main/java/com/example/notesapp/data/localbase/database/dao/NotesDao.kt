@@ -1,7 +1,7 @@
-package com.example.notesapp.data.localbase.dao
+package com.example.notesapp.data.localbase.database.dao
 
 import androidx.room.*
-import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.localbase.database.entitys.Notes
 import kotlinx.coroutines.flow.Flow
 
 @Dao

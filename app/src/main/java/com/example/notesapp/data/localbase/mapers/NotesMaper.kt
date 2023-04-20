@@ -1,6 +1,6 @@
-package com.example.notesapp.data.mapers
+package com.example.notesapp.data.localbase.mapers
 
-import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 
 object NotesMaper {

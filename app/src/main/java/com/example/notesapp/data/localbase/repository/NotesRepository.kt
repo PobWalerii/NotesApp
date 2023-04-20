@@ -1,13 +1,13 @@
-package com.example.notesapp.data.repository
+package com.example.notesapp.data.localbase.repository
 
 import android.content.Context
 import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.localbase.dao.NotesDao
-import com.example.notesapp.data.localbase.entitys.Notes
-import com.example.notesapp.data.mapers.NotesMaper.fromRemote
-import com.example.notesapp.data.mapers.NotesMaper.toRemote
+import com.example.notesapp.data.localbase.database.dao.NotesDao
+import com.example.notesapp.data.localbase.database.entitys.Notes
+import com.example.notesapp.data.localbase.mapers.NotesMaper.fromRemote
+import com.example.notesapp.data.localbase.mapers.NotesMaper.toRemote
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
@@ -105,7 +105,7 @@ class NotesRepository @Inject constructor(
         job = CoroutineScope(Dispatchers.Default).launch {
             try {
                 _isLoad.value = true
-                apiService.getAllNote().apply {
+                apiService.getAllNote(firstLoad.value, firstRun.value).apply {
                     processRemoteDatabaseResponse(this)
                 }
                 if( firstLoad.value ) {

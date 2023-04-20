@@ -6,7 +6,8 @@ import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.remotebase.apiservice.ApiServiceImpl
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
-import com.example.notesapp.data.remotebase.database.RemoteDatabase
+import com.example.notesapp.data.remotebase.database.base.RemoteDatabase
+import com.example.notesapp.data.remotebase.remoteapi.RemoteApi
 import com.example.notesapp.settings.AppSettings
 import dagger.Module
 import dagger.Provides
@@ -36,12 +37,21 @@ object ApiModule {
 
     @Singleton
     @Provides
-    fun provideApiService(
+    fun provideRemoteApi(
         remoteDao: RemoteDao,
-        appSettings: AppSettings,
-        @ApplicationContext applicationContext: Context
-    ): ApiService {
-        return ApiServiceImpl(remoteDao, appSettings, applicationContext)
+        appSettings: AppSettings
+    ): RemoteApi {
+        return RemoteApi(remoteDao, appSettings)
     }
+
+    @Singleton
+    @Provides
+    fun provideApiService(
+        remoteApi: RemoteApi,
+    ): ApiService {
+        return ApiServiceImpl(remoteApi)
+    }
+
+
 
 }

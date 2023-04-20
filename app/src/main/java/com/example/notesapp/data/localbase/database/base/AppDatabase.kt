@@ -1,9 +1,9 @@
-package com.example.notesapp.data.localbase
+package com.example.notesapp.data.localbase.database.base
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.notesapp.data.localbase.dao.NotesDao
-import com.example.notesapp.data.localbase.entitys.Notes
+import com.example.notesapp.data.localbase.database.dao.NotesDao
+import com.example.notesapp.data.localbase.database.entitys.Notes
 
 @Database(entities = [Notes::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

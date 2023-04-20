@@ -1,4 +1,4 @@
-package com.example.notesapp.data.remotebase.database
+package com.example.notesapp.data.remotebase.database.base
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

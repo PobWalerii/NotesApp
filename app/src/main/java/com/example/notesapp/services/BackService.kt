@@ -6,7 +6,7 @@ import android.os.IBinder
 import com.example.notesapp.constants.KeyConstants.CHANNEL_ID
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_ID
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.services.ServiceNotification.setNotification
 import com.example.notesapp.settings.AppSettings
 import dagger.hilt.android.AndroidEntryPoint

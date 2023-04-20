@@ -2,6 +2,7 @@ package com.example.notesapp.ui.listnotes
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -35,7 +36,7 @@ class ListNotesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    internal val viewModel by viewModels<NotesViewModel>()
+    private val viewModel by viewModels<NotesViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,12 +156,20 @@ class ListNotesFragment : Fragment() {
     private fun setupItemClickListener() {
         adapter.setOnItemClickListener(object : NotesListAdapter.OnItemClickListener {
             override fun onItemClick(currentId: Long) {
-                viewModel.setCurrentIdTo(currentId)
-                findNavController().navigate(
-                    ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
-                )
+                startEditNote(currentId)
             }
         })
+    }
+
+    private fun startEditNote(currentId: Long) {
+        if(viewModel.isLoad.value && viewModel.idInsertOrEdit.value == currentId) {
+            Toast.makeText(context,R.string.please_wait_update,Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.setCurrentIdTo(currentId)
+            findNavController().navigate(
+                ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
+            )
+        }
     }
 
     private fun setupActionBar() {

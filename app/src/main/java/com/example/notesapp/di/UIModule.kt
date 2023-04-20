@@ -1,7 +1,7 @@
 package com.example.notesapp.di
 
 import android.content.Context
-import com.example.notesapp.data.repository.NotesRepository
+import com.example.notesapp.data.localbase.repository.NotesRepository
 import com.example.notesapp.settings.AppSettings
 import com.example.notesapp.ui.actionbar.AppActionBar
 import dagger.Module
