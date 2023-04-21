@@ -23,11 +23,12 @@ class NotesRepository @Inject constructor(
     private val applicationContext: Context,
 ) {
 
-    private var job: Job? = null
     private var connect: Job? = null
     private var message: Job? = null
     private var fixedTimeLoadedDate: Long = 0
-    private var fixedTimeRemoteDate: Long = 1
+
+    private val _fixedTimeRemoteDate = MutableStateFlow(0L)
+    private val fixedTimeRemoteDate: StateFlow<Long> = _fixedTimeRemoteDate.asStateFlow()
 
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
 
@@ -63,10 +64,7 @@ class NotesRepository @Inject constructor(
         notesDao.getNoteById(noteId).firstOrNull()
 
     fun setRemoteBaseTime(timeRemote: Long) {
-        if(fixedTimeLoadedDate != timeRemote) {
-            fixedTimeRemoteDate = timeRemote
-            loadRemoteData()
-        }
+        _fixedTimeRemoteDate.value = timeRemote
     }
 
     private fun observeErrorMessages() {
@@ -83,15 +81,14 @@ class NotesRepository @Inject constructor(
     }
 
     private fun observeConnectStatus() {
-        connect = CoroutineScope(Dispatchers.IO).launch {
-            isConnectStatus.collect { isConnect ->
-                if( isConnect ) {
-                    if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
-                        loadRemoteData()
-                    }
-                } else {
-                    job?.cancel()
-                }
+        connect = CoroutineScope(Dispatchers.Default).launch {
+            combine(
+                isConnectStatus,
+                fixedTimeRemoteDate
+            ) { isConnect, remoteDate ->
+                isConnect && (firstLoad.value || fixedTimeLoadedDate != remoteDate)
+            }.collect {
+                loadRemoteData()
             }
         }
     }
@@ -102,50 +99,38 @@ class NotesRepository @Inject constructor(
     }
 
     private fun loadRemoteData() {
-        job = CoroutineScope(Dispatchers.IO).launch {
+        try {
+            _isLoad.value = true
+            val response = apiService.getAllNote(firstLoad.value, firstRun.value)
+            updateDatabase(response)
+            updateStartSettings()
+        } catch (e: Exception) {
+            _serviceError.value = e.message.toString()
+        } finally {
+            _isLoad.value = false
+        }
+    }
+
+    private fun updateDatabase(response: NoteResponse) {
+        CoroutineScope(Dispatchers.IO).launch {
+            fixedTimeLoadedDate = response.timeBase
+            val list: List<Notes> =
+                response.fullList.map { fromRemote(it) }
             try {
-                _isLoad.value = true
-                val response = apiService.getAllNote(firstLoad.value, firstRun.value)
-                processRemoteDatabaseResponse(response)
-                if( firstLoad.value ) {
-                    actionAfterStart()
-                }
+                notesDao.updateDatabase(list)
             } catch (e: Exception) {
-                _serviceError.value =
-                    if (e is CancellationException) {
-                        applicationContext.getString(
-                            if(firstRun.value || firstLoad.value) {
-                                R.string.interrupted_start_load
-                            } else {
-                                R.string.interrupted_update_load
-                            }
-                        )
-                    } else {
-                        e.message.toString()
-                    }
-            } finally {
-                _isLoad.value = false
+                _serviceError.value = e.message.toString()
             }
         }
     }
 
-    private suspend fun processRemoteDatabaseResponse(response: NoteResponse) {
-        fixedTimeLoadedDate = response.timeBase
-        val list: List<Notes> =
-            response.fullList.map { fromRemote(it) }
-        try {
-            notesDao.updateDatabase(list)
-        } catch (e: Exception) {
-            _serviceError.value = e.message.toString()
+    private fun updateStartSettings() {
+        if (firstLoad.value) {
+            if (firstRun.value) {
+                appSettings.setAppFirstRun()
+            }
+            appSettings.setFirstLoad()
         }
-    }
-
-    private fun actionAfterStart() {
-        if (firstRun.value) {
-            appSettings.setAppFirstRun()
-        }
-        appSettings.setFirstLoad()
-        fixedTimeRemoteDate = fixedTimeLoadedDate
     }
 
     fun addNote(note: Notes) {

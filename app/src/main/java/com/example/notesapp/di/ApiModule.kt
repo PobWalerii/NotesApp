@@ -49,8 +49,9 @@ object ApiModule {
     fun provideApiService(
         remoteApi: RemoteApi,
         appSettings: AppSettings,
+        @ApplicationContext applicationContext: Context,
     ): ApiService {
-        return ApiServiceImpl(remoteApi, appSettings)
+        return ApiServiceImpl(remoteApi, appSettings, applicationContext)
     }
 
 

@@ -51,10 +51,10 @@ class RemoteApi @Inject constructor(
             } else {
                 queryDelayValue.value
             }
-        delay((delayValue*1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
         if (firstRun) {
             setStartData()
         }
+        delay((delayValue*1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
         NoteResponse(timeLoadBase, listNotes)
     }
 
