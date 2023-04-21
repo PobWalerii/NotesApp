@@ -1,29 +1,29 @@
 <resources>
-    <string name="app_name">NotesApp</string>
-    <string name="save">Save</string>
-    <string name="settings">Settings</string>
-    <string name="delete">Delete</string>
-    <string name="todefault">ToDefault</string>
-    <string name="add_note">Add Note</string>
-    <string name="edit_note">Edit Note</string>
-    <string name="text_load">: load data…</string>
-    <string name="text_wait">: wait…</string>
+    <string name="app_name" translatable="false">NotesApp</string>
+    <string name="save" translatable="false">Save</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="delete" translatable="false">Delete</string>
+    <string name="todefault" translatable="false">ToDefault</string>
+    <string name="add_note" translatable="false">Add Note</string>
+    <string name="edit_note" translatable="false">Edit Note</string>
+    <string name="text_load" translatable="false">: load data…</string>
+    <string name="text_wait" translatable="false">: wait…</string>
 
     <!--dialog-->
-    <string name="but_yes_txt">Yes</string>
-    <string name="but_no_txt">No</string>
-    <string name="title_delete">Delete</string>
+    <string name="but_yes_txt" translatable="false">Yes</string>
+    <string name="but_no_txt" translatable="false">No</string>
+    <string name="title_delete" translatable="false">Delete</string>
     <string name="text_delete">Are you sure you want to remove the current note from the list?</string>
-    <string name="restoring_settings">Restoring settings</string>
+    <string name="restoring_settings" translatable="false">Restoring settings</string>
     <string name="text_restoring">Are you sure you want to restore the default settings?</string>
 
-    <string name="settings_is_saved">Settings Saved</string>
+    <string name="settings_is_saved" translatable="false">Settings Saved</string>
     <string name="settings_to_default">Restored the Starting values of the Settings</string>
 
-    <string name="note_title_hint">Title</string>
-    <string name="note_text_hint">Content</string>
+    <string name="note_title_hint" translatable="false">Title</string>
+    <string name="note_text_hint" translatable="false">Content</string>
 
-    <string name="empty_list_notes">Notes List Is Empty</string>
+    <string name="empty_list_notes" translatable="false">Notes List Is Empty</string>
     <string name="text_no_internet">There Is No Internet. It Needs a Connection to Work.</string>
     <string name="text_internet_ok">Internet Connection Restored.</string>
     <string name="operation_not_possible">Operation Is Not Possible if There Is No Internet Connection</string>
@@ -32,17 +32,17 @@
     <string name="service_error">Unexpected Issue with background Service Management</string>
     <string name="please_wait_update">Please wait for the current record to update.</string>
 
-    <string name="text1">Заголовок повідомлення за замовчуванням:</string>
-    <string name="text2">Затримка запиту до віддаленої бази у секундах при запуску додатку:</string>
-    <string name="text3">Затримка запиту до віддаленої бази у секундах під час оновлення даних:</string>
-    <string name="text4">Частота запитів у секундах на перевірку змін у віддаленій базі даних:</string>
-    <string name="text5">Відображення тексту повідомлення в один рядок під час перегляду списку</string>
-    <string name="text6">При натисканні на кнопку (+) створюється порожнє повідомлення. В іншому випадку буде здійснено перехід до форми введення нового повідомлення.</string>
-    <string name="text7">Дозволити видалення повідомлення змахуванням при перегляді списку.</string>
-    <string name="text8">Змінювати дату повідомлення при редагуванні тексту повідомлення.</string>
-    <string name="text9">Відображати повідомлення про відновлення підключення до Інтернету.</string>
-    <string name="text10">Час затримки у секундах операцій редагування даних:</string>
-    <string name="text11">Вважати наступний запуск додатку першим.</string>
-    <string name="text12">Створювати нові записи у віддаленій базі даних в фоновому режимі</string>
-    <string name="text13">Періодичність в секундах створення записів у фоновому режимі:</string>
+    <string name="text1">Default message title:</string>
+    <string name="text2">Delay in seconds for the request to the remote database on application startup:</string>
+    <string name="text3">Delay in requesting data from remote database in seconds during data update:</string>
+    <string name="text4">The frequency of requests in seconds to check for changes in the remote database:</string>
+    <string name="text5">Displaying message text in a single line when viewing the list.</string>
+    <string name="text6">When you press the (+) button, an empty message will be created. Otherwise, you will be taken to the form to enter a new message.</string>
+    <string name="text7">Allow deleting messages by swiping while viewing the list.</string>
+    <string name="text8">Change the message date when editing the message text.</string>
+    <string name="text9">Display a message about the Internet connection being restored.</string>
+    <string name="text10">Delay time in seconds for data editing operations:</string>
+    <string name="text11">Consider the next application launch as the first one.</string>
+    <string name="text12">Create new records in the remote database in the background mode.</string>
+    <string name="text13">The frequency in seconds of creating records in the background mode:</string>
 </resources>

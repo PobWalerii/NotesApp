@@ -68,7 +68,9 @@ class ListNotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.listNotes.collect {
                 binding.visibleInfoText = it.isEmpty()
-                checkIfScrollingIsNecessary(it[0].id)
+                if(it.isNotEmpty()) {
+                    checkIfScrollingIsNecessary(it[0].id)
+                }
                 adapter.setList(it)
             }
         }

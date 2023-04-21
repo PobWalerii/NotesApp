@@ -83,7 +83,7 @@ class NotesRepository @Inject constructor(
     }
 
     private fun observeConnectStatus() {
-        connect = CoroutineScope(Dispatchers.Main).launch {
+        connect = CoroutineScope(Dispatchers.IO).launch {
             isConnectStatus.collect { isConnect ->
                 if( isConnect ) {
                     if(firstLoad.value || fixedTimeLoadedDate != fixedTimeRemoteDate) {
@@ -102,12 +102,11 @@ class NotesRepository @Inject constructor(
     }
 
     private fun loadRemoteData() {
-        job = CoroutineScope(Dispatchers.Default).launch {
+        job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 _isLoad.value = true
-                apiService.getAllNote(firstLoad.value, firstRun.value).apply {
-                    processRemoteDatabaseResponse(this)
-                }
+                val response = apiService.getAllNote(firstLoad.value, firstRun.value)
+                processRemoteDatabaseResponse(response)
                 if( firstLoad.value ) {
                     actionAfterStart()
                 }

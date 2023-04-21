@@ -39,7 +39,7 @@ object ApiModule {
     @Provides
     fun provideRemoteApi(
         remoteDao: RemoteDao,
-        appSettings: AppSettings
+        appSettings: AppSettings,
     ): RemoteApi {
         return RemoteApi(remoteDao, appSettings)
     }
@@ -48,8 +48,9 @@ object ApiModule {
     @Provides
     fun provideApiService(
         remoteApi: RemoteApi,
+        appSettings: AppSettings,
     ): ApiService {
-        return ApiServiceImpl(remoteApi)
+        return ApiServiceImpl(remoteApi, appSettings)
     }
 
 
