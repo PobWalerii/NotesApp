@@ -14,11 +14,11 @@ import javax.inject.Singleton
 @Singleton
 class ApiService @Inject constructor(
     private val remoteApi: RemoteApi,
-    private val appSettings: AppSettings,
+    appSettings: AppSettings,
     private val applicationContext: Context
 ) {
 
-    val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
+    private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
     fun getChangeBaseTime() = remoteApi.getChangeBaseTime()
 
     suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = coroutineScope{
