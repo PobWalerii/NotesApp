@@ -1,6 +1,7 @@
 package com.example.notesapp.data.remotebase.apiservice
 
 import android.content.Context
+import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
@@ -19,10 +20,23 @@ class ApiService @Inject constructor(
 ) {
 
     private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
-    fun getChangeBaseTime() = remoteApi.getChangeBaseTime()
+    private var observe: Job? = null
 
-    suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = coroutineScope{
+    fun getChangeBaseTime(): Long {
+        return if (isConnectStatus.value) {
+            try {
+                remoteApi.getChangeBaseTime()
+            } catch (e: Exception) {
+                throw e
+            }
+        } else {
+            0L
+        }
+    }
+
+    suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): Any = runBlocking {
         val resp = async { remoteApi.getAllNote(firstLoad, firstRun) }
+        observe?.cancel()
         observeConnect(resp)
         try {
             resp.await()
@@ -40,9 +54,12 @@ class ApiService @Inject constructor(
     }
 
     private fun observeConnect(job: Job) {
-        CoroutineScope(Dispatchers.Default).launch {
+        observe = CoroutineScope(Dispatchers.Default).launch {
             isConnectStatus.collect {
                 if(!it) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, R.string.terminated_processes, Toast.LENGTH_SHORT).show()
+                    }
                     job.cancelAndJoin()
                 }
             }

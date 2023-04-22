@@ -37,8 +37,12 @@ class BackService: Service() {
                 delay(appSettings.requestIntervalValue.value * 1000L)
                 try {
                     val remoteBaseTime = apiService.getChangeBaseTime()
-                    notesRepository.setRemoteBaseTime(remoteBaseTime)
-                } catch (_: Exception) { }
+                    if(remoteBaseTime != 0L) {
+                        notesRepository.setRemoteBaseTime(remoteBaseTime)
+                    }
+                } catch (e: Exception) {
+                    continue
+                }
             }
         }
         return START_STICKY

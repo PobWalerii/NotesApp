@@ -41,6 +41,20 @@ class RemoteApi @Inject constructor(
         }
     }
 
+    fun processingRequest(
+        key: String,
+        firstLoad: Boolean,
+        firstRun: Boolean,
+        //note: RemoteNotes,
+        //type: Boolean
+    ): Any {
+        when (key) {
+            "load" -> return getAllNote(firstLoad, firstRun)
+            //"edit" -> return modifyNote(note, type)
+        }
+        return true
+    }
+
     fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = runBlocking {
         val delayValue =
             if (firstLoad) {
@@ -65,7 +79,7 @@ class RemoteApi @Inject constructor(
                 note.id
             }
         } catch (e: Exception) {
-            throw Exception(e.message)
+            throw e
         }
     }
 

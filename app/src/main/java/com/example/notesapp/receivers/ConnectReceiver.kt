@@ -42,8 +42,8 @@ class ConnectReceiver(
     }
 
     internal fun setConnectStatus(status: Boolean) {
-        appSettings.setIsConnectStatus(status)
         showStatus(status)
+        appSettings.setIsConnectStatus(status)
     }
 
     private fun showStatus(
@@ -59,7 +59,7 @@ class ConnectReceiver(
             if (!appSettings.firstLoad.value && showView != null) {
                 showSnack(showView)
             } else {
-                Toast.makeText(applicationContext, R.string.text_no_internet, Toast.LENGTH_LONG)
+                Toast.makeText(applicationContext, R.string.text_no_internet, Toast.LENGTH_SHORT)
                     .show()
             }
         }

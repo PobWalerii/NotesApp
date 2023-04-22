@@ -31,6 +31,7 @@
     <string name="interrupted_update_load">Database Update Interrupted</string>
     <string name="service_error">Unexpected Issue with background Service Management</string>
     <string name="please_wait_update">Please wait for the current record to update.</string>
+    <string name="terminated_processes">All active processes are terminated…</string>
 
     <string name="text1">Default message title:</string>
     <string name="text2">Delay in seconds for the request to the remote database on application startup:</string>

@@ -90,6 +90,8 @@ class NotesRepository @Inject constructor(
             }.collect {
                 if (it) {
                     loadRemoteData()
+                } else {
+                    _isLoad.value = false
                 }
             }
         }
@@ -104,7 +106,7 @@ class NotesRepository @Inject constructor(
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 _isLoad.value = true
-                val response = apiService.getAllNote(firstLoad.value, firstRun.value)
+                val response = apiService.getAllNote(firstLoad.value, firstRun.value) as NoteResponse
                 updateDatabase(response)
                 updateStartSettings()
             } catch (e: Exception) {
