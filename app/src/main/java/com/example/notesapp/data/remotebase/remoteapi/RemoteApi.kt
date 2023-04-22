@@ -1,13 +1,10 @@
 package com.example.notesapp.data.remotebase.remoteapi
 
-import android.content.Context
-import android.widget.Toast
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 import com.example.notesapp.settings.AppSettings
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

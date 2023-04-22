@@ -3,11 +3,11 @@ package com.example.notesapp.data.localbase.repository
 import android.content.Context
 import android.widget.Toast
 import com.example.notesapp.R
-import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.localbase.database.dao.NotesDao
 import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.data.localbase.mapers.NotesMaper.fromRemote
 import com.example.notesapp.data.localbase.mapers.NotesMaper.toRemote
+import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
@@ -88,7 +88,9 @@ class NotesRepository @Inject constructor(
             ) { isConnect, remoteDate ->
                 isConnect && (firstLoad.value || fixedTimeLoadedDate != remoteDate)
             }.collect {
-                loadRemoteData()
+                if (it) {
+                    loadRemoteData()
+                }
             }
         }
     }
@@ -99,15 +101,17 @@ class NotesRepository @Inject constructor(
     }
 
     private fun loadRemoteData() {
-        try {
-            _isLoad.value = true
-            val response = apiService.getAllNote(firstLoad.value, firstRun.value)
-            updateDatabase(response)
-            updateStartSettings()
-        } catch (e: Exception) {
-            _serviceError.value = e.message.toString()
-        } finally {
-            _isLoad.value = false
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                _isLoad.value = true
+                val response = apiService.getAllNote(firstLoad.value, firstRun.value)
+                updateDatabase(response)
+                updateStartSettings()
+            } catch (e: Exception) {
+                _serviceError.value = e.message.toString()
+            } finally {
+                _isLoad.value = false
+            }
         }
     }
 

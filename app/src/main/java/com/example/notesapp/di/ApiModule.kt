@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.remotebase.apiservice.ApiService
-import com.example.notesapp.data.remotebase.apiservice.ApiServiceImpl
 import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.base.RemoteDatabase
 import com.example.notesapp.data.remotebase.remoteapi.RemoteApi
@@ -51,7 +50,7 @@ object ApiModule {
         appSettings: AppSettings,
         @ApplicationContext applicationContext: Context,
     ): ApiService {
-        return ApiServiceImpl(remoteApi, appSettings, applicationContext)
+        return ApiService(remoteApi, appSettings, applicationContext)
     }
 
 
