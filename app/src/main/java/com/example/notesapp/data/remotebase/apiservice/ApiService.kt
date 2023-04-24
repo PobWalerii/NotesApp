@@ -1,7 +1,7 @@
 package com.example.notesapp.data.remotebase.apiservice
 
 import android.content.Context
-import android.widget.Toast
+import com.example.notesapp.R
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 import com.example.notesapp.data.remotebase.remoteapi.RemoteApi
@@ -21,19 +21,15 @@ class ApiService @Inject constructor(
 ) {
 
     private val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
-    //private var observe: Job? = null
 
-    suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = withContext(Dispatchers.IO) {
+    suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse =
         getRequest("load", firstLoad, firstRun) as NoteResponse
-    }
 
-    suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long = withContext(Dispatchers.IO) {
+    suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long =
         getRequest("edit", note = note, type = type) as Long
-    }
 
-    suspend fun getChangeBaseTime(): Long = withContext(Dispatchers.IO) {
+    suspend fun getChangeBaseTime(): Long =
         getRequest("date") as Long
-    }
 
     private suspend fun getRequest(
         key: String,
@@ -42,57 +38,49 @@ class ApiService @Inject constructor(
         note: Any = false,
         type: Boolean = false
     ): Any = supervisorScope {
-        val resp = async {
-            remoteApi.processingRequest(
-                key,
-                firstLoad,
-                firstRun,
-                note,
-                type
-            )
-        }
-        val observe = isConnectStatus.onEach {
-            if(!it) {
-                withContext(Dispatchers.Main) {
-                    showMessage(key, firstLoad, firstRun)
-                }
-                resp.cancelAndJoin()
-            }
-        }.launchIn(this)
-        val result = resp.await()
-        observe.cancel()
-        result
+       try {
+           val resp = async {
+               remoteApi.processingRequest(
+                   key,
+                   firstLoad,
+                   firstRun,
+                   note,
+                   type
+               )
+           }
+
+           val observe = isConnectStatus.onEach {
+               if (!it) {
+                   resp.cancelAndJoin()
+               }
+           }.launchIn(this)
+
+           val result = resp.await()
+           observe.cancel()
+           result
+       } catch (e: Exception) {
+           throw CancellationException(messageException(key, firstLoad, firstRun))
+       }
     }
 
-    private fun showMessage(
+    private fun messageException(
         key: String,
-        firstLoad: Boolean = false,
-        firstRun: Boolean = false,
-    ) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val message = when (key) {
-                "load" -> "zzzzzzz"
-                "edit" -> "yyyyyyy"
-                else -> ""
-            }
-            if(message.isNotEmpty()) {
-                Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+        firstLoad: Boolean,
+        firstRun: Boolean): String {
 
-    /*
-    throw Exception(
-        applicationContext.getString(
-            if (firstRun || firstLoad) {
-                R.string.interrupted_start_load
-            } else {
-                R.string.interrupted_update_load
+        return applicationContext.getString(
+            when (key) {
+                "load" -> {
+                    if (firstRun || firstLoad) {
+                        R.string.interrupted_start_load
+                    } else {
+                        R.string.interrupted_update_load
+                    }
+                }
+                "edit" -> R.string.data_changes_not_known
+                else -> R.string.unknown_error
             }
         )
-    )
-
-     */
-
+    }
 
 }

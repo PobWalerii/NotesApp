@@ -11,7 +11,7 @@
     <string name="interrupted_update_load">Оновлення бази даних перервано</string>
     <string name="service_error">Неочікувана проблема з управлінням фоновим сервісом</string>
     <string name="please_wait_update">Будь ласка, зачекайте, поки оновиться поточний запис.</string>
-    <string name="terminated_processes">Закриваються всі активні процеси…</string>
+    <string name="data_changes_not_known">З\'єднання перервано. Не відомий стан виконаних змін даних.</string>
 
     <string name="text1">Заголовок повідомлення за замовчуванням:</string>
     <string name="text2">Затримка запиту до віддаленої бази в секундах при запуску додатку:</string>

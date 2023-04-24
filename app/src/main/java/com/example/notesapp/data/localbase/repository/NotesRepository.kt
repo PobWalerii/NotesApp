@@ -109,6 +109,8 @@ class NotesRepository @Inject constructor(
                 val response = apiService.getAllNote(firstLoad.value, firstRun.value)
                 updateDatabase(response)
                 updateStartSettings()
+            } catch (e: CancellationException) {
+                _serviceError.value = e.message.toString()
             } catch (e: Exception) {
                 _serviceError.value = e.message.toString()
             } finally {
@@ -158,7 +160,6 @@ class NotesRepository @Inject constructor(
                     } else {
                         _isNoteDeleted.value = true
                     }
-                    _serviceError.value ="Доставлено $resultId"
                 } else {
                     _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }

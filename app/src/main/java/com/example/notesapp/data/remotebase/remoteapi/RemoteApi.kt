@@ -73,14 +73,37 @@ class RemoteApi @Inject constructor(
     }
 
     suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long = coroutineScope {
-        delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
-        if (type) {
-            remoteDao.insertNote(note)
-        } else {
-            remoteDao.deleteNote(note)
-            note.id
+        //try {
+            delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
+            val result =
+                if (type) {
+                    insertNote(note)
+                } else {
+                    deleteNote(note)
+                }
+        /*
+        } catch (e: CancellationException) {
+            if (type) {
+                insertNote(note)
+            } else {
+                deleteNote(note)
+            }
+            throw e
         }
+
+         */
+        result
     }
+
+    fun insertNote(note: RemoteNotes): Long  = runBlocking {
+        remoteDao.insertNote(note)
+    }
+
+    private fun deleteNote(note: RemoteNotes): Long = runBlocking{
+        remoteDao.deleteNote(note)
+        note.id
+    }
+
 
     private suspend fun setStartData() {
         val startList: List<RemoteNotes> =
