@@ -91,7 +91,7 @@ class NotesRepository @Inject constructor(
                 if (it) {
                     loadRemoteData()
                 } else {
-                    _isLoad.value = false
+                    //_isLoad.value = false
                 }
             }
         }
@@ -106,7 +106,7 @@ class NotesRepository @Inject constructor(
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 _isLoad.value = true
-                val response = apiService.getAllNote(firstLoad.value, firstRun.value) as NoteResponse
+                val response = apiService.getAllNote(firstLoad.value, firstRun.value)
                 updateDatabase(response)
                 updateStartSettings()
             } catch (e: Exception) {
@@ -147,7 +147,7 @@ class NotesRepository @Inject constructor(
     }
 
     private fun modifyNote(note: Notes, type: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 if(isConnectStatus.value) {
                     _counterDelay.value = true
@@ -158,6 +158,7 @@ class NotesRepository @Inject constructor(
                     } else {
                         _isNoteDeleted.value = true
                     }
+                    _serviceError.value ="Доставлено $resultId"
                 } else {
                     _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
                 }

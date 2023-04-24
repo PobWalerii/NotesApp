@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.IBinder
 import com.example.notesapp.constants.KeyConstants.CHANNEL_IDD
 import com.example.notesapp.constants.KeyConstants.NOTIFICATION_IDD
-import com.example.notesapp.data.remotebase.database.dao.RemoteDao
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 import com.example.notesapp.data.remotebase.remoteapi.RemoteApi
 import com.example.notesapp.settings.AppSettings
@@ -34,7 +33,11 @@ class BackRemoteService: Service() {
         job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
                 delay(appSettings.intervalCreateRecords.value * 1000L)
-                withContext(Dispatchers.IO) { addRecord() }
+                try {
+                    addRecord()
+                } catch (e: Exception) {
+                    continue
+                }
             }
         }
         return START_STICKY
@@ -60,17 +63,15 @@ class BackRemoteService: Service() {
     }
 
     private suspend fun addRecord() {
-        try {
-            remoteApi.modifyNote(
-                RemoteNotes(
-                    0,
-                    "Remote",
-                    "Remote " + Date().time.toString(),
-                    Date().time
-                ),
-                true
-            )
-        } catch (_: Exception) {}
+        remoteApi.modifyNote(
+            RemoteNotes(
+                0,
+                "Remote",
+                "Remote " + Date().time.toString(),
+                Date().time
+            ),
+            type = true
+        )
     }
 
     override fun onBind(intent: Intent?): IBinder? {

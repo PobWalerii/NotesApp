@@ -30,8 +30,6 @@ class RemoteApi @Inject constructor(
         observeDataChange()
     }
 
-    fun getChangeBaseTime() = timeLoadBase
-
     private fun observeDataChange() {
         CoroutineScope(Dispatchers.IO).launch {
             listNotesFlow.collect {
@@ -41,21 +39,26 @@ class RemoteApi @Inject constructor(
         }
     }
 
-    fun processingRequest(
+    suspend fun processingRequest(
         key: String,
         firstLoad: Boolean,
         firstRun: Boolean,
-        //note: RemoteNotes,
-        //type: Boolean
+        note: Any,
+        type: Boolean
     ): Any {
-        when (key) {
-            "load" -> return getAllNote(firstLoad, firstRun)
-            //"edit" -> return modifyNote(note, type)
+        try {
+            return when (key) {
+                "load" -> getAllNote(firstLoad, firstRun)
+                "edit" -> modifyNote(note as RemoteNotes, type)
+                "date" -> timeLoadBase
+                else -> throw Exception("$key?")
+            }
+        } catch (e: Exception) {
+            throw Exception("Server Error")
         }
-        return true
     }
 
-    fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = runBlocking {
+    private suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = coroutineScope {
         val delayValue =
             if (firstLoad) {
                 startDelayValue.value
@@ -65,21 +68,17 @@ class RemoteApi @Inject constructor(
         if (firstRun) {
             setStartData()
         }
-        delay((delayValue*1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
+        delay((delayValue * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
         NoteResponse(timeLoadBase, listNotes)
     }
 
-    fun modifyNote(note: RemoteNotes, type: Boolean): Long = runBlocking {
+    suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long = coroutineScope {
         delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
-        try {
-            if (type) {
-                remoteDao.insertNote(note)
-            } else {
-                remoteDao.deleteNote(note)
-                note.id
-            }
-        } catch (e: Exception) {
-            throw e
+        if (type) {
+            remoteDao.insertNote(note)
+        } else {
+            remoteDao.deleteNote(note)
+            note.id
         }
     }
 
@@ -90,9 +89,7 @@ class RemoteApi @Inject constructor(
                 RemoteNotes(2,"Find Woman","Scientists Find Woman Who Sees 99 Million More Colors than Others.",1300000000000),
                 RemoteNotes(3,"Mental activity","Colors influence our moods and every type of mental activity.",1600000000000)
             )
-        try {
-            remoteDao.startDatabase(startList)
-        } catch (_: Exception) {}
+        remoteDao.startDatabase(startList)
     }
 
 }
