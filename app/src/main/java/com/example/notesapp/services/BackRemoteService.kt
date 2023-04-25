@@ -63,14 +63,13 @@ class BackRemoteService: Service() {
     }
 
     private suspend fun addRecord() {
-        remoteApi.modifyNote(
+        remoteApi.insertNote(
             RemoteNotes(
                 0,
                 "Remote",
                 "Remote " + Date().time.toString(),
                 Date().time
-            ),
-            type = true
+            )
         )
     }
 

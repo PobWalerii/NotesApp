@@ -8,6 +8,7 @@ import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,7 +50,10 @@ class RemoteApi @Inject constructor(
         try {
             return when (key) {
                 "load" -> getAllNote(firstLoad, firstRun)
-                "edit" -> modifyNote(note as RemoteNotes, type)
+                "edit" -> {
+                    modifyNote(note as RemoteNotes, type)
+                    //getResultEdit()
+                }
                 "date" -> timeLoadBase
                 else -> throw Exception("$key?")
             }
@@ -58,50 +62,59 @@ class RemoteApi @Inject constructor(
         }
     }
 
-    private suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse = coroutineScope {
-        val delayValue =
-            if (firstLoad) {
-                startDelayValue.value
-            } else {
-                queryDelayValue.value
+    private suspend fun getAllNote(firstLoad: Boolean, firstRun: Boolean): NoteResponse =
+        coroutineScope {
+            val delayValue =
+                if (firstLoad) {
+                    startDelayValue.value
+                } else {
+                    queryDelayValue.value
+                }
+            if (firstRun) {
+                setStartData()
             }
-        if (firstRun) {
-            setStartData()
+            delay((delayValue * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
+            NoteResponse(timeLoadBase, listNotes)
         }
-        delay((delayValue * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
-        NoteResponse(timeLoadBase, listNotes)
+
+
+
+
+
+
+    private suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long {
+        val result: Long
+        try {
+            delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
+        } catch (_: Exception) {
+        } finally {
+            result = makeEdit(note, type)
+        }
+        return result
     }
 
-    suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long = coroutineScope {
-        //try {
-            delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
-            val result =
-                if (type) {
-                    insertNote(note)
-                } else {
-                    deleteNote(note)
-                }
-        /*
-        } catch (e: CancellationException) {
-            if (type) {
+    private fun makeEdit(note: RemoteNotes, type: Boolean): Long {
+        //= runBlocking {
+        var result: Long = 0
+        CoroutineScope(Dispatchers.IO).launch {
+            val id =if (type) {
                 insertNote(note)
             } else {
                 deleteNote(note)
             }
-            throw e
+            result = id
         }
-
-         */
-        result
+        return result
     }
 
-    fun insertNote(note: RemoteNotes): Long  = runBlocking {
-        remoteDao.insertNote(note)
+
+    suspend fun insertNote(note: RemoteNotes): Long {
+        return remoteDao.insertNote(note)
     }
 
-    private fun deleteNote(note: RemoteNotes): Long = runBlocking{
+    private suspend fun deleteNote(note: RemoteNotes): Long {
         remoteDao.deleteNote(note)
-        note.id
+        return note.id
     }
 
 
