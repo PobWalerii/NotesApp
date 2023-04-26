@@ -2,9 +2,9 @@ Hilt, Flow, StateFlow, Room, Navigation, Service, BroadcastReceiver, Connectivit
 
 Работаем с объектами, имеющими такие поля:
 
-noteName: String - наименование
-noteSpecification: String - содержание
-noteDate: Long - время создания
+noteName: String - наименование/n
+noteSpecification: String - содержание/n
+noteDate: Long - время создания записи/n
 
 Две базы данных: local и remote (имитация удаленной базы), обслуживаются соответственно NotesRepository и RemoteApi.
 Локальная база только для чтения. Все изменения данных направляются в удаленную базу. Затем обновленные данные поступают в базу приложения (локальную).
