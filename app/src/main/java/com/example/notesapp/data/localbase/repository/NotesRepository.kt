@@ -5,8 +5,8 @@ import android.widget.Toast
 import com.example.notesapp.R
 import com.example.notesapp.data.localbase.database.dao.NotesDao
 import com.example.notesapp.data.localbase.database.entitys.Notes
-import com.example.notesapp.data.localbase.mapers.NotesMaper.fromRemote
-import com.example.notesapp.data.localbase.mapers.NotesMaper.toRemote
+import com.example.notesapp.data.localbase.mapers.NotesMapper.fromRemote
+import com.example.notesapp.data.localbase.mapers.NotesMapper.toRemote
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
 import com.example.notesapp.settings.AppSettings
@@ -31,7 +31,6 @@ class NotesRepository @Inject constructor(
     private val fixedTimeRemoteDate: StateFlow<Long> = _fixedTimeRemoteDate.asStateFlow()
 
     val isConnectStatus: StateFlow<Boolean> = appSettings.isConnectStatus
-
     val firstRun: StateFlow<Boolean> = appSettings.firstRun
     private val firstLoad: StateFlow<Boolean> = appSettings.firstLoad
 
@@ -54,6 +53,9 @@ class NotesRepository @Inject constructor(
 
     private val _idInsertOrEdit = MutableStateFlow(0L)
     val idInsertOrEdit: StateFlow<Long> = _idInsertOrEdit.asStateFlow()
+
+    private val _crashOnEdit = MutableStateFlow(false)
+    val crashOnEdit: StateFlow<Boolean> = _crashOnEdit.asStateFlow()
 
     fun init() {
         observeConnectStatus()
@@ -90,8 +92,6 @@ class NotesRepository @Inject constructor(
             }.collect {
                 if (it) {
                     loadRemoteData()
-                } else {
-                    //_isLoad.value = false
                 }
             }
         }
@@ -153,7 +153,9 @@ class NotesRepository @Inject constructor(
             try {
                 if(isConnectStatus.value) {
                     _counterDelay.value = true
+
                     val resultId: Long = apiService.modifyNote(toRemote(note), type)
+
                     _idInsertOrEdit.value = resultId
                     if( type ) {
                         _isNoteEdited.value = true
@@ -165,17 +167,21 @@ class NotesRepository @Inject constructor(
                 }
             } catch (e: Exception) {
                 _serviceError.value = e.message.toString()
+                _crashOnEdit.value = true
             } finally {
                 _counterDelay.value = false
-                delay(10)
-                _isNoteEdited.value = false
-                _isNoteDeleted.value = false
             }
         }
     }
 
     fun setInsertOrEditId(id: Long) {
         _idInsertOrEdit.value = id
+    }
+
+    fun resetOperatingParameters() {
+        _isNoteEdited.value = false
+        _isNoteDeleted.value = false
+        _crashOnEdit.value = false
     }
 
 }

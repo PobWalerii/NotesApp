@@ -154,7 +154,6 @@ class AppSettings(
 
     fun savePreferences(
         firstRun: Boolean,
-
         defaultHeader: String,
         specificationLine: Boolean,
         defaultAddIfClick: Boolean,

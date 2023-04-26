@@ -22,5 +22,4 @@ object ServicesModule {
     ): ServicesManager {
         return ServicesManager(appSettings, applicationContext)
     }
-
 }

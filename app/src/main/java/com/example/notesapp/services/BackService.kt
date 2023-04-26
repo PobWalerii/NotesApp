@@ -19,11 +19,11 @@ import javax.inject.Singleton
 class BackService: Service() {
 
     @Inject
+    lateinit var appSettings: AppSettings
+    @Inject
     lateinit var notesRepository: NotesRepository
     @Inject
     lateinit var apiService: ApiService
-    @Inject
-    lateinit var appSettings: AppSettings
 
     private var job: Job? = null
 
@@ -34,7 +34,7 @@ class BackService: Service() {
 
         job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
-                delay(appSettings.requestIntervalValue.value * 1000L)
+                delay(appSettings.requestIntervalValue.value*1000L)
                 try {
                     val remoteBaseTime = apiService.getChangeBaseTime()
                     if(remoteBaseTime != 0L) {

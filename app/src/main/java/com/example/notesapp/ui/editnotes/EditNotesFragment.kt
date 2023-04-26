@@ -143,9 +143,13 @@ class EditNotesFragment : Fragment() {
                 viewModel.isNoteEdited,
                 viewModel.idInsertOrEdit,
                 viewModel.isNoteDeleted,
-                viewModel.isLoad
-            ) { isEdit, idEdit, isDelete, isLoad ->
-                ((isEdit || isDelete) && idEdit == args.idNote) || (viewModel.flagActSave && args.idNote == 0L && isEdit) || (!isLoad && idEdit == args.idNote && viewModel.statusLoadInit)
+                viewModel.isLoad,
+                viewModel.crashOnEdit
+            ) { isEdit, idEdit, isDelete, isLoad, isCrash ->
+                ((isEdit || isDelete) && idEdit == args.idNote) ||
+                (viewModel.flagActSave && args.idNote == 0L && isEdit) ||
+                (!isLoad && idEdit == args.idNote && viewModel.statusLoadInit) ||
+                isCrash
             }.collect {
                 if (it) {
                     (activity as MainActivity).onSupportNavigateUp()

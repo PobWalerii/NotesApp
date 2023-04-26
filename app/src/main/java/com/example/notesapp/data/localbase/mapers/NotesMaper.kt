@@ -3,7 +3,7 @@ package com.example.notesapp.data.localbase.mapers
 import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.data.remotebase.database.model.RemoteNotes
 
-object NotesMaper {
+object NotesMapper {
 
     fun fromRemote(remoteNotes: RemoteNotes): Notes {
         return Notes(

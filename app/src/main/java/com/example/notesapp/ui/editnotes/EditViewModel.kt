@@ -32,6 +32,8 @@ class EditViewModel  @Inject constructor(
     val isConnectStatus: StateFlow<Boolean> = notesRepository.isConnectStatus
     val idInsertOrEdit: StateFlow<Long> = notesRepository.idInsertOrEdit
     val isLoad: StateFlow<Boolean> = notesRepository.isLoad
+    val crashOnEdit: StateFlow<Boolean> = notesRepository.crashOnEdit
+
     var statusLoadInit: Boolean = false
     private val _isLoadedNote = MutableStateFlow(false)
     val isLoadedNote: StateFlow<Boolean> = _isLoadedNote.asStateFlow()
@@ -40,6 +42,7 @@ class EditViewModel  @Inject constructor(
         statusLoadInit = isLoad.value
         appSettings.showViewForSnack = null
         flagActSave = false
+        notesRepository.resetOperatingParameters()
     }
 
     fun getNoteById(idNote: Long) {

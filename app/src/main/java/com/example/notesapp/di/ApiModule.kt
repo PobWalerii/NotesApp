@@ -50,7 +50,7 @@ object ApiModule {
         appSettings: AppSettings,
         @ApplicationContext applicationContext: Context,
     ): ApiService {
-        return ApiService(remoteApi, appSettings, applicationContext)
+        return ApiService(remoteApi,appSettings, applicationContext)
     }
 
 

@@ -50,10 +50,7 @@ class RemoteApi @Inject constructor(
         try {
             return when (key) {
                 "load" -> getAllNote(firstLoad, firstRun)
-                "edit" -> {
-                    modifyNote(note as RemoteNotes, type)
-                    //getResultEdit()
-                }
+                "edit" -> modifyNote(note as RemoteNotes, type)
                 "date" -> timeLoadBase
                 else -> throw Exception("$key?")
             }
@@ -77,36 +74,30 @@ class RemoteApi @Inject constructor(
             NoteResponse(timeLoadBase, listNotes)
         }
 
-
-
-
-
-
     private suspend fun modifyNote(note: RemoteNotes, type: Boolean): Long {
         val result: Long
         try {
             delay((operationDelayValue.value * 1000L).coerceAtLeast(KeyConstants.MIN_DELAY_FOR_REMOTE))
         } catch (_: Exception) {
         } finally {
-            result = makeEdit(note, type)
+            result = makeEditAsync(note, type).await()
         }
         return result
     }
 
-    private fun makeEdit(note: RemoteNotes, type: Boolean): Long {
-        //= runBlocking {
-        var result: Long = 0
+    private fun makeEditAsync(note: RemoteNotes, type: Boolean): Deferred<Long> {
+        val result = CompletableDeferred<Long>()
         CoroutineScope(Dispatchers.IO).launch {
-            val id =if (type) {
-                insertNote(note)
-            } else {
-                deleteNote(note)
-            }
-            result = id
+            val id =
+                if (type) {
+                    insertNote(note)
+                } else {
+                    deleteNote(note)
+                }
+            result.complete(id)
         }
         return result
     }
-
 
     suspend fun insertNote(note: RemoteNotes): Long {
         return remoteDao.insertNote(note)
@@ -116,7 +107,6 @@ class RemoteApi @Inject constructor(
         remoteDao.deleteNote(note)
         return note.id
     }
-
 
     private suspend fun setStartData() {
         val startList: List<RemoteNotes> =

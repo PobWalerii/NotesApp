@@ -38,6 +38,7 @@ class ApiService @Inject constructor(
         note: Any = false,
         type: Boolean = false
     ): Any = supervisorScope {
+
        try {
            val resp = async {
                remoteApi.processingRequest(
@@ -57,7 +58,9 @@ class ApiService @Inject constructor(
 
            val result = resp.await()
            observe.cancel()
+
            result
+
        } catch (e: Exception) {
            throw CancellationException(messageException(key, firstLoad, firstRun))
        }

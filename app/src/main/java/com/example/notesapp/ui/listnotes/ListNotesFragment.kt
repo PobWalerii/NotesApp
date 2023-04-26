@@ -163,7 +163,7 @@ class ListNotesFragment : Fragment() {
         })
     }
 
-    private fun startEditNote(currentId: Long) {
+    internal fun startEditNote(currentId: Long) {
         if(viewModel.isLoad.value && viewModel.idInsertOrEdit.value == currentId) {
             Toast.makeText(context,R.string.please_wait_update,Toast.LENGTH_SHORT).show()
         } else {
