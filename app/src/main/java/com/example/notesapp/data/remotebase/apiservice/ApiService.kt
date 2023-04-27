@@ -39,7 +39,7 @@ class ApiService @Inject constructor(
         type: Boolean = false
     ): Any = supervisorScope {
 
-       try {
+        try {
            val resp = async {
                remoteApi.processingRequest(
                    key,
