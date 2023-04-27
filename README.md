@@ -1,12 +1,6 @@
 Hilt, Flow, StateFlow, Room, Navigation, Service, BroadcastReceiver, ConnectivityManager, DataBinding, MVVM, Fragments, Coroutines
 
-Работаем с объектами, имеющими такие поля:
-
-noteName: String - наименование
-
-noteSpecification: String - содержание
-
-noteDate: Long - время создания записи
+Работаем с объектами, имеющими такие поля: наименование, содержание, время создания записи
 
 Две базы данных: local и remote (имитация удаленной базы), обслуживаются соответственно NotesRepository и RemoteApi.
 Локальная база только для чтения. Все изменения данных направляются в удаленную базу. Затем обновленные данные поступают в базу приложения (локальную).
