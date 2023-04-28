@@ -3,12 +3,14 @@ package com.example.notesapp.data.localbase.repository
 import android.content.Context
 import android.widget.Toast
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.localbase.database.dao.NotesDao
 import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.data.localbase.mapers.NotesMapper.fromRemote
 import com.example.notesapp.data.localbase.mapers.NotesMapper.toRemote
 import com.example.notesapp.data.remotebase.apiservice.ApiService
 import com.example.notesapp.data.remotebase.database.model.NoteResponse
+import com.example.notesapp.eventregister.EventRegister
 import com.example.notesapp.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -20,6 +22,7 @@ class NotesRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val apiService: ApiService,
     private val appSettings: AppSettings,
+    private val register: EventRegister,
     private val applicationContext: Context,
 ) {
 
@@ -159,8 +162,12 @@ class NotesRepository @Inject constructor(
                     _idInsertOrEdit.value = resultId
                     if( type ) {
                         _isNoteEdited.value = true
+                        if (note.id == 0L) {
+                            register.registerEvent(KeyConstants.AF_EVENT_NEW, resultId)
+                        }
                     } else {
                         _isNoteDeleted.value = true
+                        register.registerEvent(KeyConstants.AF_EVENT_DELETE, resultId)
                     }
                 } else {
                     _serviceError.value = applicationContext.getString(R.string.operation_not_possible)

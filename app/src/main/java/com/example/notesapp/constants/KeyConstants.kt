@@ -25,4 +25,9 @@ object KeyConstants {
 
     const val MAX_RETRY_ATTEMPTS = 3
     const val MIN_DELAY_FOR_REMOTE = 500L
+
+    const val AF_DEV_KEY = "jCum3K5NFNe9aqByMTV2oe"
+    const val AF_EVENT_CLICK = "item_click"
+    const val AF_EVENT_NEW = "item_new"
+    const val AF_EVENT_DELETE = "item_delete"
 }
