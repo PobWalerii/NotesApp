@@ -3,7 +3,6 @@ package com.example.notesapp.data.localbase.repository
 import android.content.Context
 import android.widget.Toast
 import com.example.notesapp.R
-import com.example.notesapp.constants.KeyConstants
 import com.example.notesapp.data.localbase.database.dao.NotesDao
 import com.example.notesapp.data.localbase.database.entitys.Notes
 import com.example.notesapp.data.localbase.mapers.NotesMapper.fromRemote
@@ -162,12 +161,12 @@ class NotesRepository @Inject constructor(
                     _idInsertOrEdit.value = resultId
                     if( type ) {
                         _isNoteEdited.value = true
-                        if (note.id == 0L) {
-                            register.registerEvent(KeyConstants.AF_EVENT_NEW, resultId)
-                        }
+                        //if (note.id == 0L) {
+                        //    register.registerEvent(KeyConstants.AF_EVENT_NEW, resultId)
+                        //}
                     } else {
                         _isNoteDeleted.value = true
-                        register.registerEvent(KeyConstants.AF_EVENT_DELETE, resultId)
+                        //register.registerEvent(KeyConstants.AF_EVENT_DELETE, resultId)
                     }
                 } else {
                     _serviceError.value = applicationContext.getString(R.string.operation_not_possible)
