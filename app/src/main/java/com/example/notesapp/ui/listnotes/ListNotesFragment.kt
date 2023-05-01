@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.R
+import com.example.notesapp.constants.KeyConstants.AF_EVENT_CLICK
 import com.example.notesapp.databinding.FragmentListNotesBinding
 import com.example.notesapp.eventregister.EventRegister
 import com.example.notesapp.settings.AppSettings
@@ -171,7 +172,7 @@ class ListNotesFragment : Fragment() {
             Toast.makeText(context,R.string.please_wait_update,Toast.LENGTH_SHORT).show()
         } else {
             viewModel.setCurrentIdTo(currentId)
-            //register.registerEvent(AF_EVENT_CLICK, currentId)
+            register.registerEvent(AF_EVENT_CLICK, currentId)
             findNavController().navigate(
                 ListNotesFragmentDirections.actionListNotesFragmentToEditNotesFragment(currentId)
             )

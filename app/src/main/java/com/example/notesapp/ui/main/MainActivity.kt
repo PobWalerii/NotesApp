@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         appSettings.init()
-        connectReceiver.init()
         servicesManager.init()
         notesRepository.init()
     }
@@ -42,6 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        connectReceiver.init()
         dateManager.init()
     }
 
